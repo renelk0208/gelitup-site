@@ -318,7 +318,13 @@ function BookingPanel({ seminar, onClose }) {
                     <span className="font-semibold block">Add the seminar kit{qty > 1 ? ` (×${qty})` : ''}</span>
                     <span className="text-sm text-black/60">All the products used in the seminar, shipped before the date. 15% off.</span>
                   </span>
-                  {kitVariant && <span className="text-right shrink-0"><span className="font-semibold block">{money(kitVariant.price)}</span>{kitVariant.compareAt > kitVariant.price && <span className="text-xs line-through text-black/40">{money(kitVariant.compareAt)}</span>}</span>}
+                  {kitVariant && (
+                    <span className="text-right shrink-0">
+                      {kitVariant.compareAt > kitVariant.price && <span className="block text-base font-bold text-black/70 line-through decoration-2" style={{ textDecorationColor: BRAND }}>{money(kitVariant.compareAt)}</span>}
+                      <span className="block text-lg font-extrabold" style={{ color: BRAND }}>{money(kitVariant.price)}</span>
+                      {kitVariant.compareAt > kitVariant.price && <span className="mt-1 inline-block rounded-full px-2 py-0.5 text-xs font-bold text-white" style={{ background: BRAND }}>You save {money(kitVariant.compareAt - kitVariant.price)}</span>}
+                    </span>
+                  )}
                 </label>
                 {withKit && (
                   <div className="mt-4 grid gap-3">
