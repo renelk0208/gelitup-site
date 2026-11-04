@@ -169,6 +169,7 @@ function BookingPanel({ seminar, onClose }) {
   const [qty, setQty] = useState(1)
   const [withKit, setWithKit] = useState(false)
   const [choice, setChoice] = useState([])
+  const [agreed, setAgreed] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -276,9 +277,23 @@ function BookingPanel({ seminar, onClose }) {
               <p className="text-sm text-black/60">Total{withKit ? ' (shipping added at checkout)' : ''}</p>
               <p className="text-2xl font-bold">{money(total)}</p>
             </div>
-            <Button type="button" onClick={checkout} disabled={withKit && (!kitVariant || !kitVariant.available)} className="w-full mt-4">Continue to secure payment →</Button>
+            <div className="mt-5 rounded-xl bg-black/[0.03] p-4 text-xs text-black/70">
+              <p className="font-semibold text-sm text-black">Booking terms</p>
+              <ul className="mt-2 space-y-1.5 list-disc pl-4">
+                <li><strong>Cancellation & refund:</strong> you can cancel free of charge, with a full refund of the seminar seat, up to 24 hours before the start — in My seminars at gelitup.com/seminars.</li>
+                <li><strong>Less than 24 hours before the start</strong> the seat can no longer be cancelled or refunded, including if you do not attend.</li>
+                <li>Your access code is personal and works on one device at a time. It may not be shared, and the seminar may not be recorded or redistributed.</li>
+                <li>The recording is available to attendees for 30 days after the seminar.</li>
+                {withKit && <li>The seminar kit is a physical product and follows the shop's normal shipping and returns policy; it is not refunded when a seat is cancelled.</li>}
+              </ul>
+              <label className="mt-3 flex items-start gap-2 text-sm text-black cursor-pointer">
+                <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5" />
+                <span>I have read and agree to the booking terms</span>
+              </label>
+            </div>
+            <Button type="button" onClick={checkout} disabled={!agreed || (withKit && (!kitVariant || !kitVariant.available))} className="w-full mt-4">Continue to secure payment →</Button>
+            {!agreed && <p className="text-xs text-black/50 mt-2 text-center">Please tick the box to agree to the booking terms.</p>}
             <p className="text-xs text-black/50 mt-3 text-center">Payment is processed securely by Shopify. Your access code is emailed straight after payment.</p>
-            <p className="text-xs text-black/50 mt-1 text-center">Free cancellation with a full refund of the seminar seat up to 24 hours before the start, from My seminars. Within 24 hours the seat cannot be refunded.</p>
           </>
         )}
       </div>
