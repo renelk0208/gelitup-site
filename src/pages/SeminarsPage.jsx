@@ -663,7 +663,7 @@ function PrivateRequest({ session }) {
     if (error) { setState('error'); return }
     if (EMAIL_WEBHOOK_URL) {
       const rows = [['Name', record.name], ['Email', record.email], ['Phone', record.phone], ['Country', record.country], ['Time zone', tz], ['People', record.attendees], ['Kit', record.wants_kit ? 'Yes' : 'No'], ['Topic', record.topic], ['Preferred', slots.map((s) => `${s.date} ${s.time}`).join(' / ')], ['Notes', record.notes]]
-      fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: EMAIL_ANON_KEY, Authorization: `Bearer ${EMAIL_ANON_KEY}` }, body: JSON.stringify({ to: 'info@gelitup.com', subject: seminar ? `Private 1-to-1 request — ${seminar.title} — ${record.name}` : `Private seminar request — ${record.name}`, html: `<h2>Private seminar request</h2><table>${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666">${escapeHtml(k)}</td><td><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}</table>`, from: 'GEL.IT.UP Seminars <info@gelitup.com>', replyTo: record.email }) }).catch(() => {})
+      fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: EMAIL_ANON_KEY, Authorization: `Bearer ${EMAIL_ANON_KEY}` }, body: JSON.stringify({ to: 'seminars@gelitup.com', subject: seminar ? `Private 1-to-1 request — ${seminar.title} — ${record.name}` : `Private seminar request — ${record.name}`, html: `<h2>Private seminar request</h2><table>${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666">${escapeHtml(k)}</td><td><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}</table>`, from: 'GEL.IT.UP Seminars <info@gelitup.com>', replyTo: record.email }) }).catch(() => {})
     }
     setState('done')
   }
@@ -701,7 +701,7 @@ function PrivateRequest({ session }) {
           {!seminar && <label className="block"><span className="text-sm font-medium">Number of people</span><input type="number" min={1} max={100} value={form.attendees} onChange={set('attendees')} className={`${inputCls} mt-1`} /></label>}
           <label className="flex items-center gap-2 mt-6"><input type="checkbox" checked={form.wants_kit} onChange={set('wants_kit')} /> <span className="text-sm">I'd like the seminar kit (products) too</span></label>
           <label className="block md:col-span-2"><span className="text-sm font-medium">Anything else?</span><textarea rows={2} value={form.notes} onChange={set('notes')} className={`${inputCls} mt-1`} /></label>
-          {state === 'error' && <p className="text-sm text-red-600 md:col-span-2">Sorry, the request could not be sent. Please try again or email info@gelitup.com.</p>}
+          {state === 'error' && <p className="text-sm text-red-600 md:col-span-2">Sorry, the request could not be sent. Please try again or email seminars@gelitup.com.</p>}
           <div className="md:col-span-2"><Button type="submit" disabled={state === 'sending'} className="w-full">{state === 'sending' ? 'Sending…' : 'Send request'}</Button></div>
         </form>
       )}
