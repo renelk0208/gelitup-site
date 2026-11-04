@@ -37,13 +37,42 @@ const writeToken = (t) => { try { t ? localStorage.setItem(TOKEN_KEY, t) : local
 
 const escapeHtml = (v) => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;').replaceAll('"', '&quot;')
 
+// All seminar times are shown on the 24-hour clock in EET (Greece / Bulgaria / Romania time).
+const EET_ZONE = 'Europe/Athens'
+const viewerZone = () => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone || EET_ZONE } catch { return EET_ZONE } }
+function zoneLabel(iso, tz = EET_ZONE) {
+  try { return new Intl.DateTimeFormat('en-GB', { timeZone: tz, timeZoneName: 'short' }).formatToParts(new Date(iso)).find((x) => x.type === 'timeZoneName')?.value || 'EET' } catch { return 'EET' }
+}
+const fmtDate = (iso, tz = EET_ZONE) => new Date(iso).toLocaleDateString('en-GB', { timeZone: tz, weekday: 'short', day: 'numeric', month: 'long', year: 'numeric' })
+const fmtTime = (iso, tz = EET_ZONE) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: tz, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+// "Mon 16 November 2026 · 18:00 EET"
+const whenEET = (iso) => (iso ? `${fmtDate(iso)} · ${fmtTime(iso)} ${zoneLabel(iso)}` : '')
+// Adds the viewer's own time when it differs, e.g. "(17:00 your time)".
 function formatWhen(iso, withZone = true) {
   if (!iso) return ''
-  const d = new Date(iso)
-  const local = d.toLocaleString(undefined, { weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' })
-  if (!withZone) return local
-  const athens = d.toLocaleTimeString('en-GB', { timeZone: 'Europe/Athens', hour: '2-digit', minute: '2-digit' })
-  return `${local} (your time) · ${athens} Greece / Bulgaria time`
+  const main = whenEET(iso)
+  if (!withZone) return main
+  const tz = viewerZone()
+  const local = fmtTime(iso, tz)
+  return local !== fmtTime(iso) ? `${main} (${local} your time)` : main
+}
+
+// 24-hour time picker (hours 00–23, minutes in 15-minute steps) — same on every device.
+function Time24({ value, onChange, className = '' }) {
+  const [h, m] = (value || '').split(':')
+  const set = (nh, nm) => onChange(nh === '' ? '' : `${nh}:${nm || '00'}`)
+  return (
+    <span className={`inline-flex items-center gap-1 ${className}`}>
+      <select aria-label="Hour" value={h || ''} onChange={(e) => set(e.target.value, m)} className={`${inputCls} !w-auto`}>
+        <option value="">hh</option>
+        {Array.from({ length: 24 }, (_, i) => String(i).padStart(2, '0')).map((x) => <option key={x} value={x}>{x}</option>)}
+      </select>
+      <span className="font-bold">:</span>
+      <select aria-label="Minutes" value={m || (h ? '00' : '')} onChange={(e) => set(h || '00', e.target.value)} className={`${inputCls} !w-auto`}>
+        {['00', '15', '30', '45'].map((x) => <option key={x} value={x}>{x}</option>)}
+      </select>
+    </span>
+  )
 }
 
 // Time-zone helpers for private sessions: customers give times in their own zone.
@@ -67,7 +96,7 @@ function wallTimeToIso(date, time, tz) {
 }
 function whenIn(iso, tz) {
   if (!iso) return ''
-  try { return new Date(iso).toLocaleString('en-GB', { timeZone: tz || 'Europe/Athens', weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) } catch { return iso }
+  try { return `${fmtDate(iso, tz || EET_ZONE)} · ${fmtTime(iso, tz || EET_ZONE)}` } catch { return iso }
 }
 // Branded frame for seminar emails: logo, pink rule, soft footer.
 function brandEmail(inner, footerNote = '') {
@@ -726,7 +755,7 @@ function PrivateRequest({ session }) {
 
   const submit = async (e) => {
     e.preventDefault(); setState('sending')
-    const slots = form.slots.filter((s) => s.date)
+    const slots = form.slots.filter((s) => s.date).map((s) => ({ ...s, tz: EET_ZONE }))
     const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : undefined
     const record = { id, name: form.name, email: form.email.trim().toLowerCase(), phone: form.phone, country: form.country, timezone: tz, preferred_slots: slots, topic: seminar ? `Private 1-to-1: ${seminar.title} (€${Number(seminar.private_price).toFixed(0)}, ${hours} h)${form.topic ? ` — ${form.topic}` : ''}` : form.topic, attendees: seminar ? 1 : Number(form.attendees) || 1, wants_kit: form.wants_kit, notes: form.notes, seminar_id: seminar?.id || null }
     const { error } = await supabase.from('seminar_private_requests').insert(record)
@@ -735,9 +764,9 @@ function PrivateRequest({ session }) {
       const rows = [['Name', record.name], ['Email', record.email], ['Phone', record.phone], ['Country', record.country], ['Time zone', tz], ['People', record.attendees], ['Kit', record.wants_kit ? 'Yes' : 'No'], ['Topic', record.topic], ['Notes', record.notes]]
       const replyUrl = id ? `${SEMINAR_SITE_URL}/seminars/admin/private/${id}` : `${SEMINAR_SITE_URL}/seminars/admin`
       const slotRows = slots.map((sl, i) => {
-        const iso = sl.time ? wallTimeToIso(sl.date, sl.time, tz) : null
-        const label = iso ? `${whenIn(iso, tz)} (their time) · <strong>${escapeHtml(whenIn(iso, 'Europe/Athens'))} Greece time</strong>` : `${escapeHtml(sl.date)} (no time given)`
-        return `<tr><td style="padding:8px 12px 8px 0">${iso ? escapeHtml(whenIn(iso, tz)) + ' (their time)<br/><strong>' + escapeHtml(whenIn(iso, 'Europe/Athens')) + ' Greece time</strong>' : label}</td><td style="padding:8px 0"><a href="${replyUrl}?slot=${i}" style="background:${BRAND};color:#fff;padding:9px 14px;border-radius:8px;text-decoration:none;font-weight:bold;white-space:nowrap">✓ Agree this time</a></td></tr>`
+        const iso = sl.time ? wallTimeToIso(sl.date, sl.time, sl.tz || tz) : null
+        const theirs = iso && tz && fmtTime(iso, tz) !== fmtTime(iso) ? `<br/><span style="color:#666">${escapeHtml(fmtTime(iso, tz))} their time (${escapeHtml(tz)})</span>` : ''
+        return `<tr><td style="padding:8px 12px 8px 0">${iso ? `<strong>${escapeHtml(whenEET(iso))}</strong>${theirs}` : `${escapeHtml(sl.date)} (no time given)`}</td><td style="padding:8px 0"><a href="${replyUrl}?slot=${i}" style="background:${BRAND};color:#fff;padding:9px 14px;border-radius:8px;text-decoration:none;font-weight:bold;white-space:nowrap">✓ Agree this time</a></td></tr>`
       }).join('')
       const html = brandEmail(`<div>
         <h2 style="margin:0 0 4px">${seminar ? 'Private 1-to-1 request' : 'Private seminar request'}</h2>
@@ -776,11 +805,17 @@ function PrivateRequest({ session }) {
           <label className="block"><span className="text-sm font-medium">Country</span><input value={form.country} onChange={set('country')} className={`${inputCls} mt-1`} /></label>
           <label className="block md:col-span-2"><span className="text-sm font-medium">{seminar ? 'Anything you would like to focus on?' : 'What would you like to learn? *'}</span><textarea required={!seminar} rows={3} value={form.topic} onChange={set('topic')} className={`${inputCls} mt-1`} placeholder={seminar ? 'Optional' : 'e.g. Builder gel structure and apex, almond shape'} /></label>
           <div className="md:col-span-2">
-            <p className="text-sm font-medium">Preferred dates &amp; times <span className="text-black/50 font-normal">(your time zone: {tz || 'local'})</span></p>
+            <p className="text-sm font-medium">Preferred dates &amp; times — <span style={{ color: BRAND }}>in EET (Greece / Bulgaria / Romania time), 24-hour clock</span></p>
+            {tz && fmtTime(new Date().toISOString(), tz) !== fmtTime(new Date().toISOString()) && <p className="text-xs text-black/50">Your own time zone is {tz} — we show your local time next to each choice.</p>}
             <p className="mt-1 rounded-lg bg-[#D43790]/5 px-3 py-2 text-xs text-black/70"><strong>Need the products?</strong> If you'd like the seminar kit, choose dates that leave enough time for it to reach you — delivery time depends on your country. We'll also check this when we confirm your date.</p>
             <div className="mt-1 grid gap-2">
               {form.slots.map((s, i) => (
-                <div key={i} className="flex gap-2"><input type="date" required={i === 0} value={s.date} onChange={setSlot(i, 'date')} className={inputCls} /><input type="time" value={s.time} onChange={setSlot(i, 'time')} className={inputCls} /></div>
+                <div key={i} className="flex flex-wrap items-center gap-2">
+                  <input type="date" required={i === 0} value={s.date} onChange={setSlot(i, 'date')} className={`${inputCls} !w-auto`} />
+                  <Time24 value={s.time} onChange={(v) => setForm((f) => ({ ...f, slots: f.slots.map((x, j) => (j === i ? { ...x, time: v } : x)) }))} />
+                  <span className="text-sm font-semibold">EET</span>
+                  {s.date && s.time && fmtTime(wallTimeToIso(s.date, s.time, EET_ZONE), tz) !== s.time && <span className="text-xs text-black/50">= {fmtTime(wallTimeToIso(s.date, s.time, EET_ZONE), tz)} your time</span>}
+                </div>
               ))}
             </div>
           </div>
@@ -1014,7 +1049,7 @@ function AdminPage() {
               <p className="text-black/70 mt-1">{r.topic}</p>
               <p className="text-black/50 mt-1">{(r.preferred_slots || []).map((s) => `${s.date} ${s.time || ''}`).join(' / ')} ({r.timezone}) · {r.attendees} people · kit: {r.wants_kit ? 'yes' : 'no'}{r.country ? ` · ${r.country}` : ''}</p>
               {r.notes && <p className="text-black/60 mt-1 italic">{r.notes}</p>}
-              {r.confirmed_start && <p className="mt-1 font-semibold">Agreed: {whenIn(r.confirmed_start, 'Europe/Athens')} Greece time{r.paid_at ? ` · PAID ${r.order_ref || ''}` : ' · awaiting payment'}</p>}
+              {r.confirmed_start && <p className="mt-1 font-semibold">Agreed: {whenEET(r.confirmed_start)}{r.paid_at ? ` · PAID ${r.order_ref || ''}` : ' · awaiting payment'}</p>}
               <div className="mt-2 flex flex-wrap gap-3"><Link to={`/seminars/admin/private/${r.id}`} className="font-semibold underline" style={{ color: BRAND }}>Open &amp; reply →</Link>{['contacted', 'confirmed', 'paid', 'declined'].map((st) => <button key={st} onClick={() => setRequestStatus(r, st)} className="underline">{st}</button>)}</div>
             </div>
           ))}
@@ -1034,7 +1069,7 @@ function privateReplyEmail({ req, seminar, startIso, comment, decline, payUrl })
   if (decline) {
     return { subject: `Your private session request — ${title}`, html: brandEmail(`<p>Hi ${escapeHtml(req.name || 'there')},</p><p>Thank you for your request for a private session${seminar ? ` of <strong>${escapeHtml(title)}</strong>` : ''}.</p>${commentHtml}<p>Just reply to this email and we'll find a solution together.</p><p>Warm regards,<br/>GEL.IT.UP Seminars</p>`) }
   }
-  const tzLine = tz === 'Europe/Athens' ? '' : `<br/><span style="color:#666">${escapeHtml(whenIn(startIso, 'Europe/Athens'))} Greece time</span>`
+  const tzLine = fmtTime(startIso, tz) !== fmtTime(startIso) ? `<br/><span style="color:#666">${escapeHtml(whenIn(startIso, tz))} your time</span>` : ''
   return {
     subject: `Your private session is reserved — ${title}`,
     html: brandEmail(`
@@ -1042,7 +1077,7 @@ function privateReplyEmail({ req, seminar, startIso, comment, decline, payUrl })
       <h1 style="font-size:22px;margin:4px 0 12px">${escapeHtml(title)}</h1>
       <p>Hi ${escapeHtml(req.name || 'there')},</p>
       <p>Good news — ${seminar?.trainer_name ? escapeHtml(seminar.trainer_name) : 'our trainer'} is available. We have reserved this time for you:</p>
-      <p style="font-size:18px;background:#f6f6f6;border-radius:8px;padding:14px;text-align:center"><strong>${escapeHtml(whenIn(startIso, tz))}</strong> (your time)${tzLine}${hours ? `<br/><span style="color:#666">${hours} hours, live online, 1-to-1</span>` : ''}</p>
+      <p style="font-size:18px;background:#f6f6f6;border-radius:8px;padding:14px;text-align:center"><strong>${escapeHtml(whenEET(startIso))}</strong>${tzLine}${hours ? `<br/><span style="color:#666">${hours} hours, live online, 1-to-1</span>` : ''}</p>
       ${commentHtml}
       <p style="text-align:center;margin:24px 0 10px"><a href="${payUrl}" style="display:inline-block;margin:4px;background:${BRAND};color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:bold">Pay${seminar?.private_price != null ? ` €${Number(seminar.private_price).toFixed(0)}` : ''} to book your session</a>${seminar?.kit_url ? `<a href="${seminar.kit_url}" style="display:inline-block;margin:4px;background:#ffffff;color:${BRAND};border:2px solid ${BRAND};padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold">Shop the seminar kit</a>` : ''}</p>
       ${seminar?.kit_url ? `<p style="text-align:center;font-size:13px;color:#555;margin:0 0 20px">${req.wants_kit ? 'You asked about the products — ' : ''}the kit has every product used in the session, 15% off the products bought separately. Delivery time depends on your country, so please order it soon to have it in time for your session.</p>` : ''}
@@ -1078,7 +1113,10 @@ function PrivateReply() {
         setSeminar(sm || null)
       }
       const picked = r && slot != null ? (r.preferred_slots || [])[Number(slot)] : null
-      if (picked) setWhen({ date: picked.date || '', time: picked.time || '' })
+      if (picked) {
+        const pIso = picked.time ? wallTimeToIso(picked.date, picked.time, picked.tz || r.timezone || EET_ZONE) : null
+        setWhen(pIso ? { date: new Date(pIso).toLocaleDateString('en-CA', { timeZone: EET_ZONE }), time: fmtTime(pIso) } : { date: picked.date || '', time: '' })
+      }
       if (r?.reply_comment) setComment(r.reply_comment)
     })()
   }, [id, slot])
@@ -1089,7 +1127,7 @@ function PrivateReply() {
   if (req === false) return <Shell><p className="text-center">Request not found. <Link className="underline" to="/seminars/admin">Back to seminar admin</Link></p></Shell>
 
   const tz = req.timezone || 'Europe/Athens'
-  const startIso = when.date && when.time ? wallTimeToIso(when.date, when.time, tz) : null
+  const startIso = when.date && when.time ? wallTimeToIso(when.date, when.time, EET_ZONE) : null
   const payUrl = seminar?.private_variant_id ? privatePayUrl(seminar.private_variant_id, req.email, req.id) : ''
   const decline = mode === 'decline'
   const ready = decline ? Boolean(comment.trim()) : Boolean(startIso && payUrl)
@@ -1129,21 +1167,21 @@ function PrivateReply() {
           <p className="text-sm font-medium">Their preferred times — pick one, or type another below</p>
           <div className="mt-2 grid gap-2">
             {(req.preferred_slots || []).map((sl, i) => {
-              const iso = sl.time ? wallTimeToIso(sl.date, sl.time, tz) : null
-              const on = when.date === sl.date && when.time === (sl.time || '')
+              const iso = sl.time ? wallTimeToIso(sl.date, sl.time, sl.tz || tz) : null
+              const on = iso ? startIso === iso : (when.date === sl.date && !when.time)
               return (
                 <label key={i} className={`flex items-center gap-3 border rounded-xl px-3 py-2 text-sm cursor-pointer ${on ? 'border-[#D43790] bg-[#D43790]/5' : ''}`}>
-                  <input type="radio" name="slot" checked={on} onChange={() => setWhen({ date: sl.date, time: sl.time || '' })} />
-                  <span>{iso ? <>{whenIn(iso, tz)} <span className="text-black/50">(their time)</span> · <strong>{whenIn(iso, 'Europe/Athens')} Greece</strong></> : <>{sl.date} <span className="text-black/50">(no time given — add one below)</span></>}</span>
+                  <input type="radio" name="slot" checked={on} onChange={() => setWhen({ date: iso ? new Date(iso).toLocaleDateString('en-CA', { timeZone: EET_ZONE }) : sl.date, time: iso ? fmtTime(iso) : '' })} />
+                  <span>{iso ? <><strong>{whenEET(iso)}</strong>{fmtTime(iso, tz) !== fmtTime(iso) && <span className="text-black/50"> · {fmtTime(iso, tz)} their time</span>}</> : <>{sl.date} <span className="text-black/50">(no time given — add one below)</span></>}</span>
                 </label>
               )
             })}
           </div>
           <div className="mt-3 flex flex-wrap items-end gap-2">
             <label className="block"><span className="text-xs text-black/60">Date</span><input type="date" value={when.date} onChange={(e) => setWhen((w) => ({ ...w, date: e.target.value }))} className={inputCls} /></label>
-            <label className="block"><span className="text-xs text-black/60">Time ({tz}, the client's time zone)</span><input type="time" value={when.time} onChange={(e) => setWhen((w) => ({ ...w, time: e.target.value }))} className={inputCls} /></label>
+            <label className="block"><span className="text-xs text-black/60">Time — EET, 24-hour</span><Time24 value={when.time} onChange={(v) => setWhen((w) => ({ ...w, time: v }))} className="mt-0.5" /></label>
           </div>
-          {startIso && <p className="mt-2 text-sm">= <strong>{whenIn(startIso, 'Europe/Athens')}</strong> Greece time</p>}
+          {startIso && <p className="mt-2 text-sm">Agreed time: <strong>{whenEET(startIso)}</strong>{fmtTime(startIso, tz) !== fmtTime(startIso) ? ` · ${fmtTime(startIso, tz)} for the client (${tz})` : ''}</p>}
           {!payUrl && <p className="mt-2 text-sm text-red-600">This seminar has no private-session product linked yet, so a payment link can't be added.</p>}
         </div>
       )}
