@@ -291,9 +291,11 @@ function BookingPanel({ seminar, onClose }) {
         // Shopify's .js feed lists at most 250 variants. For bigger kits, add the missing
         // combinations from /seminars/kit-variants/<handle>.json; price and stock follow a
         // listed variant with the same last option (e.g. the forms choice).
-        if (kitP?.variants?.length && (kitP.options || []).reduce((n, o) => n * (o.values?.length || 1), 1) > kitP.variants.length) {
+        let optionImages = null
+        if (kitP?.variants?.length) {
           try {
             const extra = await fetch(`/seminars/kit-variants/${handle(row.kit_url)}.json`).then((r) => (r.ok ? r.json() : null))
+            optionImages = extra?.optionImages || null
             const have = new Set(kitP.variants.map((x) => x.options.join('|')))
             const last = (opts) => opts[opts.length - 1]
             for (const ev of extra?.variants || []) {
@@ -308,6 +310,7 @@ function BookingPanel({ seminar, onClose }) {
           seat: v ? { id: v.id, price: v.price / 100, available: v.available } : null,
           kit: kitP ? {
             options: (kitP.options || []).map((o) => ({ name: o.name, values: o.values })),
+            images: optionImages,
             variants: (kitP.variants || []).map((x) => ({ id: x.id, options: x.options, price: x.price / 100, compareAt: x.compare_at_price ? x.compare_at_price / 100 : null, available: x.available })),
           } : null,
           checkoutBase: `${SHOP_URL}/cart/`,
@@ -393,9 +396,23 @@ function BookingPanel({ seminar, onClose }) {
                   <div className="mt-4 grid gap-3">
                     {data.kit.options.map((o, i) => (
                       <label key={o.name} className="block"><span className="text-sm font-medium">{o.name}</span>
-                        <select value={choice[i] || ''} onChange={(e) => setChoice((c) => c.map((v, j) => (j === i ? e.target.value : v)))} className={`${inputCls} mt-1`}>
-                          {o.values.map((v) => <option key={v} value={v}>{v}</option>)}
-                        </select>
+                        {data.kit.images?.[o.name] ? (
+                          <span className="mt-1 grid grid-cols-4 sm:grid-cols-5 gap-2">
+                            {o.values.map((v) => {
+                              const on = choice[i] === v
+                              return (
+                                <button type="button" key={v} onClick={() => setChoice((c) => c.map((x, j) => (j === i ? v : x)))} className="rounded-lg p-1 text-center border-2 transition" style={{ borderColor: on ? BRAND : 'transparent', background: on ? '#fdf2f8' : 'transparent' }} aria-pressed={on}>
+                                  {data.kit.images[o.name][v] ? <img src={data.kit.images[o.name][v]} alt={v} loading="lazy" className="w-full aspect-square object-cover rounded-md bg-black/5" /> : <span className="block w-full aspect-square rounded-md bg-black/5" />}
+                                  <span className="block text-[11px] leading-tight mt-1">{v}</span>
+                                </button>
+                              )
+                            })}
+                          </span>
+                        ) : (
+                          <select value={choice[i] || ''} onChange={(e) => setChoice((c) => c.map((v, j) => (j === i ? e.target.value : v)))} className={`${inputCls} mt-1`}>
+                            {o.values.map((v) => <option key={v} value={v}>{v}</option>)}
+                          </select>
+                        )}
                       </label>
                     ))}
                     {((kitVariant && !kitVariant.available) || !kitVariant) && <p className="text-sm text-red-600">This combination is currently unavailable — please choose another.</p>}
