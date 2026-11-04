@@ -205,6 +205,7 @@ function BookingPanel({ seminar, onClose }) {
           <button type="button" onClick={onClose} aria-label="Close" className="text-2xl leading-none text-black/40 hover:text-black">×</button>
         </div>
 
+        {seminar.description && <p className="mt-4 text-sm text-black/70 whitespace-pre-line max-h-48 overflow-y-auto pr-1">{seminar.description}</p>}
         {!data && !error && <p className="mt-6 text-black/40 text-sm">Loading…</p>}
         {error && <p className="mt-6 text-sm text-black/70">{error}</p>}
         {data && !seatOk && <p className="mt-6 text-sm text-black/70">{data.soldOut ? 'This seminar is sold out.' : 'Booking is not open yet for this seminar. Please check back soon.'}</p>}
@@ -271,7 +272,7 @@ function SeminarsHome({ session }) {
       if (!hasSupabaseConfig) { setSeminars([]); return }
       const since = new Date(Date.now() - 2 * 86400000).toISOString()
       const { data } = await supabase.from('seminars')
-        .select('id, title, trainer_name, starts_at, duration_minutes, sold_out, image_url, status, kind')
+        .select('id, title, description, trainer_name, starts_at, duration_minutes, sold_out, image_url, status, kind')
         .eq('kind', 'group').eq('status', 'scheduled').gte('starts_at', since).order('starts_at')
       const now = Date.now()
       const rows = (data || []).map((s) => ({ ...s, past: new Date(s.starts_at).getTime() + s.duration_minutes * 60000 < now }))
@@ -304,7 +305,7 @@ function SeminarsHome({ session }) {
 
       <section className="mt-14 grid gap-4 md:grid-cols-3 text-sm">
         {[
-          ['1. Book', 'Choose a date on our shop and add the seminar kit if you want the products.'],
+          ['1. Book', 'Click a seminar, add the seminar kit if you want the products, and pay securely.'],
           ['2. Get your code', 'Your personal access code arrives by email straight after payment.'],
           ['3. Join live', 'Sign in here with your email and code, on your phone, tablet or computer. Nothing to install.'],
         ].map(([t, d]) => (
