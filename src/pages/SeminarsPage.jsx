@@ -22,6 +22,7 @@ const BRAND = '#D43790'
 const TOKEN_KEY = 'gelitup.seminar.token'
 const BOOKING_CUTOFF_HOURS = 12
 const CANCEL_HOURS = 24
+const PRIVATE_CANCEL_HOURS = 48
 const SHOP_URL = 'https://shop.gelitup.com'
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL || ''
 const EMAIL_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
@@ -343,7 +344,7 @@ function SeminarsHome({ session }) {
       if (!hasSupabaseConfig) { setSeminars([]); return }
       const since = new Date(Date.now() - 2 * 86400000).toISOString()
       const { data } = await supabase.from('seminars')
-        .select('id, title, description, trainer_name, starts_at, duration_minutes, sold_out, image_url, status, kind, recording_on_sale, recording_days')
+        .select('id, title, description, trainer_name, starts_at, duration_minutes, sold_out, image_url, status, kind, recording_on_sale, recording_days, private_price, private_minutes')
         .eq('kind', 'group').in('status', ['scheduled', 'ended']).or(`starts_at.gte.${since},recording_on_sale.eq.true`).order('starts_at')
       const now = Date.now()
       const rows = (data || []).map((s) => ({ ...s, past: new Date(s.starts_at).getTime() + s.duration_minutes * 60000 < now, closed: new Date(s.starts_at).getTime() - BOOKING_CUTOFF_HOURS * 3600000 < now }))
@@ -375,7 +376,17 @@ function SeminarsHome({ session }) {
       )}
       {seminars?.length > 0 && (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {seminars.map((s) => <SeminarCard key={s.id} s={s} onBook={setBooking} />)}
+          {seminars.map((s) => (
+            <div key={s.id}>
+              <SeminarCard s={s} onBook={setBooking} />
+              {s.private_price != null && (
+                <Link to={`/seminars/private?seminar=${s.id}`} className="mt-3 flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm hover:bg-black/[0.03]" style={{ borderColor: BRAND }}>
+                  <span><span className="block font-semibold">Private 1-to-1 session</span><span className="block text-black/60">{Math.round((s.private_minutes || 120) / 60 * 10) / 10} hours with {s.trainer_name || 'the trainer'}, at a time that suits you</span></span>
+                  <span className="shrink-0 font-bold" style={{ color: BRAND }}>€{Number(s.private_price).toFixed(0)} · Request →</span>
+                </Link>
+              )}
+            </div>
+          ))}
         </div>
       )}
 
@@ -625,6 +636,15 @@ function Room({ session }) {
 function PrivateRequest({ session }) {
   const [form, setForm] = useState({ name: '', email: '', phone: '', country: '', topic: '', attendees: 1, wants_kit: false, notes: '', slots: [{ date: '', time: '' }, { date: '', time: '' }, { date: '', time: '' }] })
   const [state, setState] = useState('idle')
+  // /seminars/private?seminar=<id> = a private 1-to-1 session of a listed seminar, at its fixed price.
+  const [seminarId] = useState(() => (typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('seminar')))
+  const [seminar, setSeminar] = useState(null)
+  useEffect(() => {
+    if (!seminarId || !hasSupabaseConfig) return
+    supabase.from('seminars').select('id, title, trainer_name, private_price, private_minutes').eq('id', seminarId).maybeSingle()
+      .then(({ data }) => { if (data?.private_price != null) setSeminar(data) })
+  }, [seminarId])
+  const hours = seminar ? Math.round((seminar.private_minutes || 120) / 60 * 10) / 10 : 0
   const tz = useMemo(() => { try { return Intl.DateTimeFormat().resolvedOptions().timeZone } catch { return '' } }, [])
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.type === 'checkbox' ? e.target.checked : e.target.value }))
   const setSlot = (i, k) => (e) => setForm((f) => ({ ...f, slots: f.slots.map((s, j) => (j === i ? { ...s, [k]: e.target.value } : s)) }))
@@ -632,12 +652,12 @@ function PrivateRequest({ session }) {
   const submit = async (e) => {
     e.preventDefault(); setState('sending')
     const slots = form.slots.filter((s) => s.date)
-    const record = { name: form.name, email: form.email.trim().toLowerCase(), phone: form.phone, country: form.country, timezone: tz, preferred_slots: slots, topic: form.topic, attendees: Number(form.attendees) || 1, wants_kit: form.wants_kit, notes: form.notes }
+    const record = { name: form.name, email: form.email.trim().toLowerCase(), phone: form.phone, country: form.country, timezone: tz, preferred_slots: slots, topic: seminar ? `Private 1-to-1: ${seminar.title} (€${Number(seminar.private_price).toFixed(0)}, ${hours} h)${form.topic ? ` — ${form.topic}` : ''}` : form.topic, attendees: seminar ? 1 : Number(form.attendees) || 1, wants_kit: form.wants_kit, notes: form.notes, seminar_id: seminar?.id || null }
     const { error } = await supabase.from('seminar_private_requests').insert(record)
     if (error) { setState('error'); return }
     if (EMAIL_WEBHOOK_URL) {
       const rows = [['Name', record.name], ['Email', record.email], ['Phone', record.phone], ['Country', record.country], ['Time zone', tz], ['People', record.attendees], ['Kit', record.wants_kit ? 'Yes' : 'No'], ['Topic', record.topic], ['Preferred', slots.map((s) => `${s.date} ${s.time}`).join(' / ')], ['Notes', record.notes]]
-      fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: EMAIL_ANON_KEY, Authorization: `Bearer ${EMAIL_ANON_KEY}` }, body: JSON.stringify({ to: 'info@gelitup.com', subject: `Private seminar request — ${record.name}`, html: `<h2>Private seminar request</h2><table>${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666">${escapeHtml(k)}</td><td><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}</table>`, from: 'GEL.IT.UP Seminars <info@gelitup.com>', replyTo: record.email }) }).catch(() => {})
+      fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: EMAIL_ANON_KEY, Authorization: `Bearer ${EMAIL_ANON_KEY}` }, body: JSON.stringify({ to: 'info@gelitup.com', subject: seminar ? `Private 1-to-1 request — ${seminar.title} — ${record.name}` : `Private seminar request — ${record.name}`, html: `<h2>Private seminar request</h2><table>${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666">${escapeHtml(k)}</td><td><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}</table>`, from: 'GEL.IT.UP Seminars <info@gelitup.com>', replyTo: record.email }) }).catch(() => {})
     }
     setState('done')
   }
@@ -645,8 +665,16 @@ function PrivateRequest({ session }) {
   return (
     <Shell>
       <SubNav signedIn={session.signedIn} />
-      <h1 className="text-3xl font-bold text-center">Private seminar</h1>
-      <p className="text-center text-black/60 mt-2 max-w-xl mx-auto">A live session for you, your salon or your academy, at a date and time that suits you. Tell us what you'd like and we'll confirm with the trainer and send you a payment link.</p>
+      <h1 className="text-3xl font-bold text-center">{seminar ? 'Private 1-to-1 session' : 'Private seminar'}</h1>
+      {seminar ? (
+        <div className="text-center mt-2 max-w-xl mx-auto">
+          <p className="text-lg font-semibold">{seminar.title}</p>
+          <p className="text-black/60 mt-1">{hours} hours, live online, just you and {seminar.trainer_name || 'the trainer'} · <strong style={{ color: BRAND }}>€{Number(seminar.private_price).toFixed(0)}</strong> for one person</p>
+          <p className="text-sm text-black/60 mt-3">Send us 2–3 dates and times that suit you. We'll confirm one with the trainer and email you a payment link — your session is booked once it's paid. Free cancellation up to {PRIVATE_CANCEL_HOURS} hours before the start; after that it can't be refunded. <Link to="/seminars/terms" className="underline" style={{ color: BRAND }}>Booking terms</Link></p>
+        </div>
+      ) : (
+        <p className="text-center text-black/60 mt-2 max-w-xl mx-auto">A live session for you, your salon or your academy, at a date and time that suits you. Tell us what you'd like and we'll confirm with the trainer and send you a payment link.</p>
+      )}
       {state === 'done' ? (
         <div className="mt-8 border rounded-2xl p-8 text-center"><p className="text-xl font-bold">Thank you — request received.</p><p className="text-black/60 mt-2">We'll check availability with our trainer and email you within 2 working days.</p></div>
       ) : (
@@ -655,7 +683,7 @@ function PrivateRequest({ session }) {
           <label className="block"><span className="text-sm font-medium">Email *</span><input required type="email" value={form.email} onChange={set('email')} className={`${inputCls} mt-1`} /></label>
           <label className="block"><span className="text-sm font-medium">Phone</span><input value={form.phone} onChange={set('phone')} className={`${inputCls} mt-1`} /></label>
           <label className="block"><span className="text-sm font-medium">Country</span><input value={form.country} onChange={set('country')} className={`${inputCls} mt-1`} /></label>
-          <label className="block md:col-span-2"><span className="text-sm font-medium">What would you like to learn? *</span><textarea required rows={3} value={form.topic} onChange={set('topic')} className={`${inputCls} mt-1`} placeholder="e.g. Builder gel structure and apex, almond shape" /></label>
+          <label className="block md:col-span-2"><span className="text-sm font-medium">{seminar ? 'Anything you would like to focus on?' : 'What would you like to learn? *'}</span><textarea required={!seminar} rows={3} value={form.topic} onChange={set('topic')} className={`${inputCls} mt-1`} placeholder={seminar ? 'Optional' : 'e.g. Builder gel structure and apex, almond shape'} /></label>
           <div className="md:col-span-2">
             <p className="text-sm font-medium">Preferred dates &amp; times <span className="text-black/50 font-normal">(your time zone: {tz || 'local'})</span></p>
             <div className="mt-1 grid gap-2">
@@ -664,7 +692,7 @@ function PrivateRequest({ session }) {
               ))}
             </div>
           </div>
-          <label className="block"><span className="text-sm font-medium">Number of people</span><input type="number" min={1} max={100} value={form.attendees} onChange={set('attendees')} className={`${inputCls} mt-1`} /></label>
+          {!seminar && <label className="block"><span className="text-sm font-medium">Number of people</span><input type="number" min={1} max={100} value={form.attendees} onChange={set('attendees')} className={`${inputCls} mt-1`} /></label>}
           <label className="flex items-center gap-2 mt-6"><input type="checkbox" checked={form.wants_kit} onChange={set('wants_kit')} /> <span className="text-sm">I'd like the seminar kit (products) too</span></label>
           <label className="block md:col-span-2"><span className="text-sm font-medium">Anything else?</span><textarea rows={2} value={form.notes} onChange={set('notes')} className={`${inputCls} mt-1`} /></label>
           {state === 'error' && <p className="text-sm text-red-600 md:col-span-2">Sorry, the request could not be sent. Please try again or email info@gelitup.com.</p>}
@@ -734,7 +762,7 @@ function AdminPage() {
   const save = async (e) => {
     e.preventDefault(); setMsg('Saving…')
     const { vimeo_event, replay_video, id } = editing
-    const FIELDS = ['title', 'trainer_name', 'description', 'duration_minutes', 'replay_days', 'status', 'kind', 'shopify_sku', 'shop_url', 'kit_url', 'image_url', 'sold_out', 'recording_sku', 'recording_shop_url', 'recording_days', 'recording_on_sale']
+    const FIELDS = ['title', 'trainer_name', 'description', 'duration_minutes', 'replay_days', 'status', 'kind', 'shopify_sku', 'shop_url', 'kit_url', 'image_url', 'sold_out', 'recording_sku', 'recording_shop_url', 'recording_days', 'recording_on_sale', 'private_price', 'private_minutes']
     const rest = Object.fromEntries(FIELDS.map((f) => [f, editing[f] === '' ? null : editing[f]]))
     const row = { ...rest, starts_at: new Date(editing.starts_at).toISOString(), shopify_sku: rest.shopify_sku?.trim() || null, duration_minutes: Number(rest.duration_minutes), replay_days: Number(rest.replay_days), recording_days: Number(rest.recording_days) || 30, recording_sku: rest.recording_sku?.trim() || null, updated_at: new Date().toISOString() }
     const q = id ? supabase.from('seminars').update(row).eq('id', id).select().single() : supabase.from('seminars').insert(row).select().single()
@@ -814,6 +842,11 @@ function AdminPage() {
             {F({ label: 'Recording SKU in Shopify', k: 'recording_sku', placeholder: 'e.g. SEM-OMBRE-REC' })}
             {F({ label: 'Access days from purchase', k: 'recording_days', type: 'number', min: 1 })}
             <label className="flex items-center gap-2 mt-6"><input type="checkbox" checked={Boolean(editing.recording_on_sale)} onChange={(e) => setEditing((x) => ({ ...x, recording_on_sale: e.target.checked }))} /><span className="text-sm font-semibold">Recording on sale (shows "Watch the recording" after the seminar)</span></label>
+          </div>
+          <div className="md:col-span-2 rounded-xl bg-black/[0.03] p-4 grid gap-3 md:grid-cols-2">
+            <p className="font-semibold text-sm md:col-span-2">Private 1-to-1 session (leave the price empty to not offer it)</p>
+            {F({ label: 'Private session price (€)', k: 'private_price', type: 'number', min: 0 })}
+            {F({ label: 'Private session length (minutes)', k: 'private_minutes', type: 'number', min: 15 })}
           </div>
           <div className="md:col-span-2"><label className="block"><span className="text-sm font-medium">Description</span><textarea rows={4} value={editing.description || ''} onChange={(e) => setEditing((x) => ({ ...x, description: e.target.value }))} className={`${inputCls} mt-1`} /></label></div>
           <div className="md:col-span-2 rounded-xl bg-black/[0.03] p-4 grid gap-3">
@@ -946,6 +979,13 @@ function TermsPage({ session }) {
           <li>A recording is <strong>digital content</strong>. When you buy it you expressly ask for access to start immediately, and you acknowledge that you lose your right of withdrawal once access has started. Recordings therefore cannot be cancelled or refunded once purchased. The {CANCEL_HOURS}-hour cancellation rule applies only to live seats.</li>
           <li>Recording access codes are personal and non-transferable, work on one device at a time, and may not be shared. Downloading, recording or redistributing the video is not allowed.</li>
           <li>If the recording cannot be played because of a problem on our side, we will fix it or refund you.</li>
+        </ul>
+
+        <H>Private 1-to-1 sessions</H>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>You request a private session with your preferred dates and times. We confirm one date and time with the trainer and send you a payment link; the session is booked once payment is received.</li>
+          <li><strong>Cancellation:</strong> you can cancel free of charge, with a full refund, up to {PRIVATE_CANCEL_HOURS} hours before the confirmed start. Less than {PRIVATE_CANCEL_HOURS} hours before the start, or if you do not attend, the session cannot be refunded. You may ask to move the session once, free of charge, if you tell us at least {PRIVATE_CANCEL_HOURS} hours before the start.</li>
+          <li>When you pay, you expressly ask us to provide the session on the confirmed date, even if this falls within the 14-day withdrawal period, and you acknowledge that you lose your right of withdrawal once the session has been provided. If we have to cancel or move the session, you can choose a new date or a full refund.</li>
         </ul>
 
         <H>5. Certificates and professional use</H>
