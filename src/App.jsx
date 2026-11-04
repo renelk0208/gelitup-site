@@ -7447,7 +7447,7 @@ function MainMenu() {
 
   useEffect(() => { setOpen(false) }, [location.pathname, location.search])
 
-  const menuItems = sortHamburgerMenuItems(navItems.filter((item) => item.to !== '/blog' && item.to !== '/studio-one' && item.to !== '/work-with-us'))
+  const menuItems = sortHamburgerMenuItems(navItems.filter((item) => item.to !== '/blog' && item.to !== '/work-with-us'))
 
   return (
     <div className="relative">
@@ -7510,27 +7510,65 @@ function MainMenu() {
             )
           })}
 
-          <NavLink
-            to="/portal/login?portal=distributor"
-            onClick={() => setOpen(false)}
-            className="mt-1 block rounded-lg border border-fuchsia-500/70 bg-fuchsia-600/10 px-3 py-2 text-sm font-bold uppercase tracking-[0.08em] text-fuchsia-200 transition duration-200 hover:bg-fuchsia-600/20"
-          >
-            Distributor / B2B Login
-          </NavLink>
-          <NavLink
-            to="/portal/login?portal=ambassador"
-            onClick={() => setOpen(false)}
-            className="mt-1 block rounded-lg border border-fuchsia-500/70 px-3 py-2 text-sm font-bold uppercase tracking-[0.08em] text-fuchsia-200 transition duration-200 hover:bg-fuchsia-600/20"
-          >
-            Ambassador Login
-          </NavLink>
-          <NavLink
-            to="/portal/register"
-            onClick={() => setOpen(false)}
-            className="mt-1 block rounded-lg px-3 py-2 text-sm font-bold uppercase tracking-[0.08em] text-white transition duration-200 hover:bg-white/10"
-          >
-            Register — B2B / Distributor
-          </NavLink>
+        </div>
+      )}
+    </div>
+  )
+}
+
+const LOGIN_OPTIONS = [
+  { to: '/portal/login?portal=distributor', label: 'Distributor / B2B', hint: 'Wholesale ordering portal' },
+  { to: '/portal/login?portal=ambassador', label: 'Ambassador', hint: 'Your ambassador profile and codes' },
+  { to: '/seminars/login', label: 'Online seminars', hint: 'Sign in with your seminar access code' },
+]
+
+function LoginMenu() {
+  const [open, setOpen] = useState(false)
+  const location = useLocation()
+  const ref = useRef(null)
+
+  useEffect(() => { setOpen(false) }, [location.pathname, location.search])
+  useEffect(() => {
+    if (!open) return undefined
+    const onDown = (e) => { if (ref.current && !ref.current.contains(e.target)) setOpen(false) }
+    const onKey = (e) => { if (e.key === 'Escape') setOpen(false) }
+    document.addEventListener('mousedown', onDown)
+    document.addEventListener('keydown', onKey)
+    return () => { document.removeEventListener('mousedown', onDown); document.removeEventListener('keydown', onKey) }
+  }, [open])
+
+  return (
+    <div className="relative" ref={ref}>
+      <button
+        type="button"
+        onClick={() => setOpen((v) => !v)}
+        aria-expanded={open}
+        aria-haspopup="menu"
+        className="inline-flex items-center gap-1.5 rounded-lg border border-fuchsia-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white transition duration-300 hover:bg-fuchsia-600/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+      >
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-3.5 w-3.5 shrink-0">
+          <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
+          <path d="M5 19.5c1.2-3.3 4-5 7-5s5.8 1.7 7 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
+        </svg>
+        Login
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`}>
+          <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        </svg>
+      </button>
+      {open && (
+        <div role="menu" className="absolute right-0 top-[calc(100%+0.55rem)] z-50 w-72 rounded-2xl border border-white/15 bg-[#111111] p-2 shadow-[0_18px_48px_rgba(0,0,0,0.38)]">
+          <p className="px-3 pb-1 pt-2 text-[10px] font-bold uppercase tracking-[0.12em] text-white/40">Choose your login</p>
+          {LOGIN_OPTIONS.map((o) => (
+            <NavLink key={o.to} to={o.to} role="menuitem" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 transition duration-200 hover:bg-white/10">
+              <span className="block text-sm font-semibold text-white">{o.label}</span>
+              <span className="block text-xs text-white/50">{o.hint}</span>
+            </NavLink>
+          ))}
+          <div className="mt-1 border-t border-white/10 pt-1">
+            <NavLink to="/portal/register" role="menuitem" onClick={() => setOpen(false)} className="block rounded-lg px-3 py-2.5 text-sm font-semibold text-fuchsia-200 transition duration-200 hover:bg-white/10">
+              New here? Register as B2B / Distributor →
+            </NavLink>
+          </div>
         </div>
       )}
     </div>
@@ -7541,6 +7579,17 @@ function Nav() {
   return (
     <nav className="hidden items-center justify-end gap-2 xl:flex">
       <MainMenu />
+
+      <NavLink
+        to="/seminars"
+        className={({ isActive }) =>
+          `inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.1em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
+            isActive ? 'border-[#D43790] bg-[#D43790] !text-white' : 'border-[#D43790] !text-white hover:bg-[#D43790]/25'
+          }`
+        }
+      >
+        <span aria-hidden="true">▶</span> Seminars
+      </NavLink>
 
       <NavLink
         to="/blog"
@@ -7554,17 +7603,6 @@ function Nav() {
       </NavLink>
 
       <NavLink
-        to="/studio-one"
-        className={({ isActive }) =>
-          `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 ${
-            isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
-          }`
-        }
-      >
-        Studio One
-      </NavLink>
-
-      <NavLink
         to="/work-with-us"
         className={({ isActive }) =>
           `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 ${
@@ -7575,30 +7613,7 @@ function Nav() {
         Work With Us
       </NavLink>
 
-      <NavLink
-        to="/portal/register"
-        className="inline-flex items-center rounded-lg border border-fuchsia-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white transition duration-300 hover:bg-fuchsia-600/25 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
-      >
-        Register
-      </NavLink>
-
-      <NavLink
-        to="/portal/login?portal=distributor"
-        className="inline-flex items-center gap-1.5 rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white shadow-[0_0_12px_rgba(212,55,144,0.28)] transition duration-300 hover:bg-fuchsia-500 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
-      >
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-3.5 w-3.5 shrink-0">
-          <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
-          <path d="M5 19.5c1.2-3.3 4-5 7-5s5.8 1.7 7 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
-        </svg>
-        Distributor / B2B Login
-      </NavLink>
-
-      <NavLink
-        to="/portal/login?portal=ambassador"
-        className="inline-flex items-center rounded-lg border border-fuchsia-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white transition duration-300 hover:bg-fuchsia-600/25 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
-      >
-        Ambassador Login
-      </NavLink>
+      <LoginMenu />
 
       <a
         href="https://shop.gelitup.com/pages/ourproducts"
@@ -7675,6 +7690,14 @@ function MobileNav() {
           </a>
 
           <NavLink
+            to="/seminars"
+            onClick={() => setOpen(false)}
+            className="flex items-center justify-center gap-2 rounded-lg border-2 border-[#D43790] px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.08em] !text-white transition duration-200 hover:bg-[#D43790]/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+          >
+            <span aria-hidden="true">▶</span> Online Seminars
+          </NavLink>
+
+          <NavLink
             to="/portal/login?portal=distributor"
             onClick={() => setOpen(false)}
             className="flex items-center justify-center gap-2 rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-white shadow-[0_0_6px_rgba(212,55,144,0.3)] transition duration-200 hover:bg-fuchsia-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
@@ -7692,6 +7715,14 @@ function MobileNav() {
             className="flex items-center justify-center rounded-lg border border-fuchsia-500 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-white transition duration-200 hover:bg-fuchsia-600/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
           >
             Ambassador Login
+          </NavLink>
+
+          <NavLink
+            to="/seminars/login"
+            onClick={() => setOpen(false)}
+            className="flex items-center justify-center rounded-lg border border-fuchsia-500 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-white transition duration-200 hover:bg-fuchsia-600/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+          >
+            Seminar Login
           </NavLink>
 
           <NavLink
