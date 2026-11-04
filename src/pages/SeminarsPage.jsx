@@ -933,15 +933,17 @@ function TrainerPage() {
   const [rows, setRows] = useState([])
   const [open, setOpen] = useState(null)
   const [now, setNow] = useState(() => Date.now())
+  const [calendar, setCalendar] = useState([])
 
   useEffect(() => {
     ;(async () => {
       if (!hasSupabaseConfig) { setState('signin'); return }
       const { data: sess } = await supabase.auth.getSession()
       if (!sess?.session) { setState('signin'); return }
-      const { data, error } = await supabase.rpc('seminar_trainer_dashboard')
+      const [{ data, error }, { data: cal }] = await Promise.all([supabase.rpc('seminar_trainer_dashboard'), supabase.rpc('seminar_team_calendar')])
       if (error) { setState('signin'); return }
       setRows(Array.isArray(data) ? data : [])
+      setCalendar(Array.isArray(cal) ? cal : [])
       setState('ready')
     })()
     const t = setInterval(() => setNow(Date.now()), 60000)
@@ -1003,6 +1005,8 @@ function TrainerPage() {
 
       {rows.length === 0 && <div className="mt-8 border rounded-2xl p-8 text-center text-black/60">No seminars are linked to this account yet. Ask the seminar team to add your email to your seminar.</div>}
 
+      <TeamCalendar items={calendar} now={now} />
+
       {schedule.length > 0 && (
         <section className="mt-6">
           <h2 className="font-bold text-lg">Coming up</h2>
@@ -1044,6 +1048,49 @@ function TrainerPage() {
         </section>
       )}
     </Shell>
+  )
+}
+
+// Shared calendar for all trainers: shows when the seminar team is busy so nobody
+// double-books. Other trainers' private sessions show only as "busy" — no names,
+// bookings or numbers.
+function TeamCalendar({ items, now, showOwner = false }) {
+  const [days, setDays] = useState(30)
+  const until = now + days * 86400000
+  const list = (items || []).filter((x) => new Date(x.end).getTime() >= now && new Date(x.start).getTime() <= until)
+  const byDay = new Map()
+  for (const x of list) {
+    const k = fmtDate(x.start)
+    if (!byDay.has(k)) byDay.set(k, [])
+    byDay.get(k).push(x)
+  }
+  return (
+    <section className="mt-6">
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h2 className="font-bold text-lg">Team calendar <span className="text-sm font-normal text-black/50">— all trainers, so nothing is double-booked</span></h2>
+        <select value={days} onChange={(e) => setDays(Number(e.target.value))} className={`${inputCls} !w-auto !py-1.5 text-sm`}>
+          <option value={14}>Next 2 weeks</option><option value={30}>Next 30 days</option><option value={90}>Next 3 months</option>
+        </select>
+      </div>
+      {byDay.size === 0 ? <p className="mt-2 text-sm text-black/50">Nothing booked in this period.</p> : (
+        <div className="mt-2 border rounded-2xl divide-y text-sm">
+          {[...byDay.entries()].map(([day, xs]) => (
+            <div key={day} className="flex flex-wrap gap-x-4 gap-y-1 px-4 py-3">
+              <span className="w-44 font-bold">{day}</span>
+              <div className="flex-1 grid gap-1">
+                {xs.map((x, i) => (
+                  <div key={i} className="flex flex-wrap items-center gap-2">
+                    <span className="font-semibold">{fmtTime(x.start)}–{fmtTime(x.end)} {zoneLabel(x.start)}</span>
+                    {!showOwner && <span className="rounded-full px-2 py-0.5 text-[11px] font-bold uppercase" style={x.mine ? { background: BRAND, color: '#fff' } : { background: '#eee', color: '#555' }}>{x.mine ? 'You' : 'Booked'}</span>}
+                    <span className="text-black/70">{x.kind === 'group' ? `Online group${x.title ? ` · ${x.title}` : ''}` : `Private 1-on-1${x.title ? ` · ${x.title}` : ''}`}{showOwner && x.trainer ? ` · ${x.trainer}` : ''}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+    </section>
   )
 }
 
@@ -1359,6 +1406,7 @@ function PrivateReply() {
   const [comment, setComment] = useState('')
   const [mode, setMode] = useState('confirm')
   const [msg, setMsg] = useState('')
+  const [busy, setBusy] = useState([])
 
   useEffect(() => {
     ;(async () => {
@@ -1368,6 +1416,7 @@ function PrivateReply() {
       const { data: ok } = await supabase.rpc('seminar_is_admin')
       if (!ok) { setAuthState('no'); return }
       setAuthState('yes')
+      supabase.rpc('seminar_team_calendar').then(({ data }) => setBusy(Array.isArray(data) ? data : []))
       const { data: r } = await supabase.from('seminar_private_requests').select('*').eq('id', id).maybeSingle()
       setReq(r || false)
       if (r?.seminar_id) {
@@ -1447,6 +1496,11 @@ function PrivateReply() {
             <label className="block"><span className="text-xs text-black/60">Date</span><input type="date" value={when.date} onChange={(e) => setWhen((w) => ({ ...w, date: e.target.value }))} className={inputCls} /></label>
             <label className="block"><span className="text-xs text-black/60">Time — EET, 24-hour</span><Time24 value={when.time} onChange={(v) => setWhen((w) => ({ ...w, time: v }))} className="mt-0.5" /></label>
           </div>
+          {startIso && (() => {
+            const s0 = new Date(startIso).getTime(), s1 = s0 + (seminar?.private_minutes || 120) * 60000
+            const clash = busy.filter((b) => new Date(b.start).getTime() < s1 && new Date(b.end).getTime() > s0)
+            return clash.length ? <p className="mt-2 rounded-lg bg-amber-50 border border-amber-300 px-3 py-2 text-sm text-amber-900"><strong>Heads-up — overlaps with:</strong> {clash.map((c) => `${fmtTime(c.start)}–${fmtTime(c.end)} ${c.kind === 'group' ? 'Online group' : 'Private 1-on-1'}${c.title ? ` (${c.title})` : ''}`).join('; ')}</p> : null
+          })()}
           {startIso && <p className="mt-2 text-sm">Agreed time: <strong>{whenEET(startIso)}</strong>{fmtTime(startIso, tz) !== fmtTime(startIso) ? ` · ${fmtTime(startIso, tz)} for the client (${tz})` : ''}</p>}
           {!payUrl && <p className="mt-2 text-sm text-red-600">This seminar has no private-session product linked yet, so a payment link can't be added.</p>}
         </div>

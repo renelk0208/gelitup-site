@@ -16,6 +16,7 @@ import { SPLIT_STARTER_PACKS, STARTER_PACK_TAG, isChooseSlot, isSplitPackType, i
 import PlannedItemSwap from '../components/PlannedItemSwap.jsx'
 import AmbassadorShipmentsTable from '../components/AmbassadorShipmentsTable.jsx'
 import GiveawayRequestsPanel from '../components/GiveawayRequestsPanel.jsx'
+import SeminarsOverviewPanel from '../components/SeminarsOverviewPanel.jsx'
 import AdminSettingSwitch from '../components/AdminSettingSwitch.jsx'
 import {
   normalizeAdminSkuToken,
@@ -52,7 +53,7 @@ const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
 const MAX_ATTACHMENTS_BYTES = 20 * 1024 * 1024
 const SHIPMENT_EMAIL_LOCK_STORAGE_KEY = 'gelitup.admin.shipmentEmailLock.v1'
 const ADMIN_TAB_STORAGE_KEY = 'gelitup.admin.activeTab.v1'
-const ADMIN_TAB_KEYS = new Set(['registrations', 'orders', 'search', 'admins', 'pricing', 'ambassadors', 'work-with-us', 'guestbook', 'draft-carts', 'studio-one'])
+const ADMIN_TAB_KEYS = new Set(['registrations', 'orders', 'search', 'admins', 'pricing', 'ambassadors', 'work-with-us', 'guestbook', 'draft-carts', 'studio-one', 'seminars'])
 const WORK_WITH_US_TABLE = import.meta.env.VITE_WORK_WITH_US_TABLE || 'work_with_us_applications'
 // Statuses that count as "needs review" (form inserts default to 'new').
 const WORK_WITH_US_PENDING_STATUSES = ['new']
@@ -9419,6 +9420,12 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
           >
             Studio One
           </button>
+          <button
+            onClick={() => setTab('seminars')}
+            className={`w-full rounded-full px-3 py-2 text-center text-[11px] font-semibold leading-tight transition sm:w-auto sm:px-4 sm:py-1.5 sm:text-sm ${tab === 'seminars' ? 'bg-[#D43790] text-white' : 'bg-[#F9D3E6] text-[#9E1F63] hover:brightness-95'}`}
+          >
+            Seminars
+          </button>
         </div>
       </div>
 
@@ -9433,6 +9440,7 @@ export default function AdminDashboard({ onLogout, onPreviewDistributor }) {
         {tab === 'guestbook' && <GuestbookPanel />}
         {tab === 'draft-carts' && <DraftCartsPanel />}
         {tab === 'studio-one' && <StudioOneRequestsPanel />}
+        {tab === 'seminars' && <SeminarsOverviewPanel />}
       </div>
     </section>
   )
