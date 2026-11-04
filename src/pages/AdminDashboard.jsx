@@ -12,6 +12,8 @@ import { matchItem, receivedItems, searchProducts, suggestedCount } from '../lib
 import { REVIEW_EMAIL_LANGUAGES, reviewEmailLang } from '../lib/reviewEmailText.js'
 import { buildAmbassadorReviewRequestEmail } from '../lib/reviewEmail.js'
 import { AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE } from '../lib/ambassadorFollowUpPacks.js'
+import { SPLIT_STARTER_PACKS, STARTER_PACK_TAG, isChooseSlot, isSplitPackType, isStarterPackAuthor, starterPackAuthor } from '../lib/ambassadorPacks.js'
+import PlannedItemSwap from '../components/PlannedItemSwap.jsx'
 import AmbassadorShipmentsTable from '../components/AmbassadorShipmentsTable.jsx'
 import GiveawayRequestsPanel from '../components/GiveawayRequestsPanel.jsx'
 import AdminSettingSwitch from '../components/AdminSettingSwitch.jsx'
@@ -5035,7 +5037,7 @@ async function ensureAmbassadorPortalAccount(row) {
 // Colours", "1 shimmer shade", "any dual form box", "based on current stock")
 // must be turned into the exact products before the tracking email goes out —
 // they can't be kept as written, and need as many picks as the line asks for.
-const GENERIC_PACKING_LINE_RE = /\b(colou?rs?|shades?|any|different|assorted|mixed|of choice|based on current stock|glitters?|cat ?eyes?)\b/i
+const GENERIC_PACKING_LINE_RE = /\b(choose|colou?rs?|shades?|any|different|assorted|mixed|of choice|based on current stock|glitters?|cat ?eyes?)\b/i
 function packingLineNeedsExactProducts(text) {
   const t = String(text || '').trim()
   return GENERIC_PACKING_LINE_RE.test(t)
@@ -6134,13 +6136,54 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   const setAmbassadorType = async (row, type) => {
     const normalized = String(type || '').trim().toLowerCase()
     const value = ['standard_ambassador', 'super_ambassador', 'extreme_ambassador'].includes(normalized) ? normalized : ''
-    const nextComment = ensureTaggedValue(row.admin_comment, 'AMBASSADOR_TYPE', value ? value.toUpperCase() : '')
+    let nextComment = ensureTaggedValue(row.admin_comment, 'AMBASSADOR_TYPE', value ? value.toUpperCase() : '')
+    // First package not sent yet: a Standard / Super pack goes into "Items for
+    // this package" one product per line (each can be swapped); changing the
+    // type replaces those lines.
+    if (!getAmbassadorDashboardMeta(row).shipmentPreviouslySent) nextComment = withStarterPack(nextComment, value)
     setSaving(row.id)
     const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: nextComment }).eq('id', row.id)
     setSaving(null)
     if (err) { alert(err.message); return }
     patchRow(row.id, { admin_comment: nextComment })
     await syncAmbassadorColumns(row.id, { ambassador_type: value || null })
+  }
+  // Is her split starter pack already in the package plan?
+  const starterPackInPlan = (row) => {
+    const type = getAmbassadorType(row)
+    return Boolean(type) && extractTaggedValue(row?.admin_comment, STARTER_PACK_TAG) === type
+  }
+  // The preset pack lines that are NOT in the package plan: Extreme's pack as
+  // written, or a Standard / Super pack not yet put in the plan. First package only.
+  const presetPackItems = (row) => {
+    if (getAmbassadorDashboardMeta(row).shipmentPreviouslySent) return []
+    const type = getAmbassadorType(row)
+    if (isSplitPackType(type)) return starterPackInPlan(row) ? [] : SPLIT_STARTER_PACKS[type]
+    return AMBASSADOR_PACKS_BY_TYPE[type]?.items || []
+  }
+  // admin_comment with the starter-pack lines for this type (old ones removed).
+  const withStarterPack = (comment, type) => {
+    const all = String(comment || '').split('\n').filter((line) => line.trim())
+    const isPackLine = (line) => /^\[PACK_NOTE:[^\]]+\]$/i.test(line.trim())
+    const others = all.filter((line) => !isPackLine(line))
+    const handPicked = all.filter((line) => isPackLine(line) && !isStarterPackAuthor(parsePackNote(line)?.author))
+    const stamp = fmtDate(new Date().toISOString())
+    const author = starterPackAuthor(type)
+    const starter = isSplitPackType(type) ? SPLIT_STARTER_PACKS[type].map((text) => createPackNoteLine({ stamp, author, text })) : []
+    const packLines = [...starter, ...handPicked]
+    let next = [...others, ...packLines].join('\n')
+    next = ensureTaggedValue(next, STARTER_PACK_TAG, starter.length ? String(type).toLowerCase() : '') || ''
+    const itemsText = packLines.map((line) => parsePackNote(line)?.text).filter(Boolean).join(', ')
+    return ensureTaggedValue(next, 'SHIPMENT_OFFICE_REMINDER_ITEMS', encodeReminderNote(itemsText)) || null
+  }
+  // For a Standard / Super ambassador whose pack is not in the plan yet.
+  const addStarterPackToPlan = async (row) => {
+    const nextComment = withStarterPack(row.admin_comment, getAmbassadorType(row))
+    setSaving(row.id)
+    const { error: err } = await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: nextComment }).eq('id', row.id)
+    setSaving(null)
+    if (err) { alert(err.message); return }
+    patchRow(row.id, { admin_comment: nextComment })
   }
   const SHIPPING_METHODS = [
     { key: 'courier', label: 'Courier (tracked)' },
@@ -6177,11 +6220,9 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // package (hand-picked, chosen by the ambassador, or a resend), plus any
   // free-text shipment details.
   const currentPackageItems = (row) => {
-    const pack = AMBASSADOR_PACKS_BY_TYPE[getAmbassadorType(row)] || null
-    const isFollowUp = getAmbassadorDashboardMeta(row).shipmentPreviouslySent
     const details = String(getShipmentDraft(row).shipment_details || '').trim()
     return [
-      ...(isFollowUp ? [] : (pack?.items || [])),
+      ...presetPackItems(row),
       ...packNoteEntries(row).map((entry) => entry.text),
       ...(details ? [details] : []),
     ]
@@ -6651,7 +6692,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // appended into admin_comment; we now keep them out of the editable notes and
   // surface them (plus the new message_log column) in the Messages section.
   const isAmbassadorMsgLine = (line) => String(line).includes('📧')
-  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_METHOD|FACTORY_ACK|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT|SHIPMENT_NEXT_PACKAGE_OPEN|SHIPMENT_OFFICE_REMINDER_SENT_FOR|SHIPMENT_FOLLOW_UP_AUTOFILLED_FOR):[^\]]+\]$/i.test(String(line).trim())
+  const isMetaLine = (line) => /^\[(AMBASSADOR_TYPE|AMBASSADOR_PROGRAMME_PAUSED|PACK_NOTE|SHIPMENT_SENT_AT|SHIPMENT_NEXT_REMINDER_AT|SHIPMENT_REMINDER_NOTE|SHIPMENT_METHOD|FACTORY_ACK|SHIPMENT_OFFICE_REMINDER_AT|SHIPMENT_OFFICE_REMINDER_SENT_AT|SHIPMENT_OFFICE_REMINDER_DISPATCHED_AT|SHIPMENT_OFFICE_REMINDER_NEXT_PACKAGE_AT|SHIPMENT_OFFICE_REMINDER_ITEMS|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SIGNATURE|SHIPMENT_OFFICE_DISPATCH_NOTIFICATION_SENT_AT|SHIPMENT_NEXT_PACKAGE_OPEN|SHIPMENT_OFFICE_REMINDER_SENT_FOR|SHIPMENT_FOLLOW_UP_AUTOFILLED_FOR|STARTER_PACK_SPLIT):[^\]]+\]$/i.test(String(line).trim())
   const packNoteLines = (row) => String(row.admin_comment || '').split('\n').filter((line) => /^\[PACK_NOTE:[^\]]+\]$/i.test(String(line).trim()))
   const parsePackNote = (line) => {
     const encoded = String(line || '').trim().match(/^\[PACK_NOTE:([^\]]+)\]$/i)?.[1]
@@ -6671,9 +6712,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     // in sync with whatever is actually in the items list — default pack
     // contents plus every extra item currently on the list — so that
     // scheduled reminder never goes out blank.
-    const pack = AMBASSADOR_PACKS_BY_TYPE[getAmbassadorType(row)] || null
     const itemsText = [
-      ...(pack?.items || []),
+      ...presetPackItems(row),
       ...lines.map((line) => parsePackNote(line)?.text).filter(Boolean),
     ].join(', ')
     const nextComment = ensureTaggedValue([...preserved, ...lines].join('\n'), 'SHIPMENT_OFFICE_REMINDER_ITEMS', encodeReminderNote(itemsText))
@@ -6754,6 +6794,28 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     if (idx < 0 || idx >= lines.length) return
     lines.splice(idx, 1)
     await savePackNotes(row, lines)
+  }
+  // Swap one planned item for an exact shop product (or pick the product for a
+  // "Choose: …" line). The office is told what changed.
+  const swapPlannedItem = async (row, idx, title) => {
+    const lines = packNoteLines(row)
+    const original = parsePackNote(lines[idx])
+    const text = String(title || '').trim()
+    if (!original || !text) return false
+    if (text === original.text) return true
+    const sentIn = alreadySentLabel(row, text)
+    if (sentIn && !window.confirm(`${text} was already sent to ${row.full_name || 'her'} in package ${sentIn}. Put it in this package anyway?`)) return false
+    lines[idx] = createPackNoteLine({ ...original, text })
+    const ok = await savePackNotes(row, lines)
+    if (ok) {
+      queuePackageNoteNotification({
+        row,
+        texts: [isChooseSlot(original.text) ? text : `${text} (instead of ${original.text})`],
+        author: getAdminDisplayLabel(),
+        stamp: fmtDate(new Date().toISOString()),
+      })
+    }
+    return ok
   }
   const editPackNote = async (row, idx) => {
     const lines = packNoteLines(row)
@@ -6968,7 +7030,6 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   try {
   const currentDraft = getShipmentDraft(row)
   const completedAmbassadorType = getAmbassadorType(row)
-  const completedPack = AMBASSADOR_PACKS_BY_TYPE[completedAmbassadorType] || null
   const completedTypeLabel = completedAmbassadorType === 'super_ambassador'
     ? 'Super Ambassador'
     : completedAmbassadorType === 'extreme_ambassador'
@@ -6982,7 +7043,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // carries forward, not the original starter-kit contents.
   const isFollowUpPackage = getAmbassadorDashboardMeta(row).shipmentPreviouslySent
   let completedItems = [
-    ...(isFollowUpPackage ? [] : (completedPack?.items || [])),
+    ...presetPackItems(row),
     ...packNoteEntries(row).map((entry) => entry.text),
     ...(currentDraft.shipment_details ? [currentDraft.shipment_details] : []),
   ]
@@ -7835,6 +7896,8 @@ const deleteApplication = async (row) => {
               plannedItems={plannedItemsList}
               onAddPlanned={addPlannedItems}
               onRemovePlanned={removePlannedItem}
+              onSwapPlanned={swapPlannedItem}
+              loadProducts={loadShopProducts}
               savingId={saving}
               onEditContents={editShipmentContents}
               onSetType={setAmbassadorType}
@@ -8508,7 +8571,25 @@ const deleteApplication = async (row) => {
                           <p className="text-[10px] font-bold uppercase tracking-wide text-fuchsia-700">
                             {selectedPack ? `${selectedPack.title} contents` : 'Pack contents'}
                           </p>
-                          {selectedPack ? (
+                          {selectedPack && isSplitPackType(ambassadorType) ? (
+                            starterPackInPlan(row) ? (
+                              <p className="mt-1 text-[11px] text-slate-600">Every product is listed separately under "Items for this package" below. Swap any of them, and pick the exact product for each "Choose" line before sending.</p>
+                            ) : (
+                              <>
+                                <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
+                                  {SPLIT_STARTER_PACKS[ambassadorType].map((item, i) => <li key={`${i}-${item}`}>{item}</li>)}
+                                </ul>
+                                <button
+                                  type="button"
+                                  onClick={() => addStarterPackToPlan(row)}
+                                  disabled={saving === row.id}
+                                  className="mt-1.5 rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-60"
+                                >
+                                  Put these in the package, one product per line
+                                </button>
+                              </>
+                            )
+                          ) : selectedPack ? (
                             selectedPack.items.length > 0 ? (
                               <ul className="mt-1 list-disc space-y-0.5 pl-4 text-[11px] text-slate-700">
                                 {selectedPack.items.map((item) => (
@@ -8530,8 +8611,8 @@ const deleteApplication = async (row) => {
                             {packNoteEntries(row).map((entry, idx) => {
                               const swatch = authorSwatch(entry.author)
                               return (
-                                <div key={idx} className="flex items-start justify-between gap-2 rounded border border-fuchsia-100 bg-white px-2 py-1.5 text-[11px] text-slate-700">
-                                  <span className="min-w-0 whitespace-pre-line">
+                                <div key={idx} className={`flex flex-wrap items-start justify-between gap-x-2 gap-y-1 rounded border px-2 py-1.5 text-[11px] text-slate-700 ${isChooseSlot(entry.text) ? 'border-amber-300 bg-amber-50' : 'border-fuchsia-100 bg-white'}`}>
+                                  <span className="min-w-0 flex-1 whitespace-pre-line">
                                     <span className="mb-0.5 flex flex-wrap items-center gap-1.5">
                                       <span className="text-[10px] text-slate-400">{entry.stamp || '—'}</span>
                                       <span
@@ -8546,10 +8627,11 @@ const deleteApplication = async (row) => {
                                       <span className="ml-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">⚠ already sent in {alreadySentLabel(row, entry.text)}</span>
                                     )}
                                   </span>
-                                  <span className="flex shrink-0 gap-1.5">
+                                  <span className="order-2 flex shrink-0 gap-1.5">
                                     <button type="button" title="Edit" onClick={() => editPackNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button>
                                     <button type="button" title="Delete" onClick={() => deletePackNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button>
                                   </span>
+                                  <PlannedItemSwap item={entry.text} loadProducts={loadShopProducts} onSwap={(title) => swapPlannedItem(row, idx, title)} busy={saving === row.id} className="order-1" />
                                 </div>
                               )
                             })}

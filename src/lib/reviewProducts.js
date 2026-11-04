@@ -44,7 +44,11 @@ export function matchItem(item, products) {
     const hits = ALIASES[key].map((h) => byHandle.get(h)).filter(Boolean)
     if (hits.length) return hits
   }
-  const exact = (products || []).find((p) => norm(p.title) === key)
+  // Whole line first, so titles that start with a number ("5-in-1 …",
+  // "3-in-1 …") aren't read as a quantity.
+  const whole = norm(item)
+  const exact = (products || []).find((p) => norm(p.title) === whole)
+    || (products || []).find((p) => norm(p.title) === key)
   return exact ? [exact] : []
 }
 
