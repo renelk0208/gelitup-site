@@ -20,6 +20,7 @@ import { seminarCodeEmail } from '../lib/seminarEmail'
 
 const BRAND = '#D43790'
 const TOKEN_KEY = 'gelitup.seminar.token'
+const SHOP_URL = 'https://shop.gelitup.com'
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL || ''
 const EMAIL_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
@@ -166,14 +167,31 @@ function BookingPanel({ seminar, onClose }) {
 
   useEffect(() => {
     let cancelled = false
-    fetch(`/.netlify/functions/seminar-booking?id=${seminar.id}`)
-      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
-      .then((d) => {
+    ;(async () => {
+      try {
+        // Prices are read in the visitor's own browser so Shopify returns her market's prices.
+        const { data: row } = await supabase.from('seminars').select('sold_out, shopify_sku, shop_url, kit_url').eq('id', seminar.id).maybeSingle()
+        if (!row) throw new Error('not found')
+        const handle = (u) => (String(u || '').match(/\/products\/([^/?#]+)/) || [])[1]
+        const load = async (u) => { const h = handle(u); if (!h) return null; const r = await fetch(`${SHOP_URL}/products/${h}.js`); return r.ok ? r.json() : null }
+        const [seatP, kitP] = await Promise.all([load(row.shop_url), load(row.kit_url)])
+        const v = seatP?.variants?.find((x) => String(x.sku || '').trim() === String(row.shopify_sku || '').trim())
+        const d = {
+          soldOut: Boolean(row.sold_out),
+          seat: v ? { id: v.id, price: v.price / 100, available: v.available } : null,
+          kit: kitP ? {
+            options: (kitP.options || []).map((o) => ({ name: o.name, values: o.values })),
+            variants: (kitP.variants || []).map((x) => ({ id: x.id, options: x.options, price: x.price / 100, compareAt: x.compare_at_price ? x.compare_at_price / 100 : null, available: x.available })),
+          } : null,
+          checkoutBase: `${SHOP_URL}/cart/`,
+        }
         if (cancelled) return
         setData(d)
         setChoice((d.kit?.options || []).map((o) => o.values[0]))
-      })
-      .catch(() => { if (!cancelled) setError('Booking is not open yet for this seminar. Please check back soon.') })
+      } catch {
+        if (!cancelled) setError('Booking is not open yet for this seminar. Please check back soon.')
+      }
+    })()
     return () => { cancelled = true }
   }, [seminar.id])
 
