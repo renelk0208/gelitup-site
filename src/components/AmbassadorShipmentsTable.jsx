@@ -2,6 +2,8 @@ import { useMemo, useState } from 'react'
 import { carrierLabel, deliveryState, normalizeCountry, trackingLink } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import { whereAlreadySent } from '../lib/packageItems.js'
+import { isChooseSlot } from '../lib/ambassadorPacks.js'
+import PlannedItemSwap from './PlannedItemSwap.jsx'
 
 // Shipments overview, grouped so every ambassador sits in exactly ONE section
 // with ONE status:
@@ -235,7 +237,7 @@ function NameCell({ line, getType, onOpen, onSetType, onAskChoice, onAskReviews,
 
 // Items for the next package: type and Add, remove with ✕. Saved straight away.
 // Anything this ambassador already received is blocked unless ticked on purpose.
-function Planner({ line, onAdd, onRemove, busy }) {
+function Planner({ line, onAdd, onRemove, onSwap, loadProducts, busy }) {
   const [text, setText] = useState('')
   const items = line.planned
   const sentBefore = (item) => whereAlreadySent(item, line.shipments)
@@ -258,14 +260,15 @@ function Planner({ line, onAdd, onRemove, busy }) {
         : (
           <ul className="space-y-1">
             {items.map((item, i) => (
-              <li key={`${i}-${item}`} className="flex items-start justify-between gap-2 rounded border border-fuchsia-100 bg-fuchsia-50/50 px-2 py-1 text-slate-800">
-                <span>
+              <li key={`${i}-${item}`} className={`flex flex-wrap items-start justify-between gap-x-2 gap-y-1 rounded border px-2 py-1 text-slate-800 ${isChooseSlot(item) ? 'border-amber-300 bg-amber-50' : 'border-fuchsia-100 bg-fuchsia-50/50'}`}>
+                <span className="min-w-0 flex-1">
                   {item}
                   {sentBefore(item).length > 0 && (
                     <span className="ml-1 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-semibold text-amber-800">⚠ already sent in {sentLabel(sentBefore(item))}</span>
                   )}
                 </span>
-                <button type="button" title="Remove" onClick={() => onRemove(line.row, i)} disabled={busy} className="shrink-0 text-slate-400 hover:text-rose-600 disabled:opacity-50">✕</button>
+                <button type="button" title="Remove" onClick={() => onRemove(line.row, i)} disabled={busy} className="order-last shrink-0 text-slate-400 hover:text-rose-600 disabled:opacity-50">✕</button>
+                <PlannedItemSwap item={item} loadProducts={loadProducts} onSwap={onSwap ? (title) => onSwap(line.row, i, title) : null} busy={busy} />
               </li>
             ))}
           </ul>
@@ -346,7 +349,7 @@ function PackageHistory({ line, open = false, onEditContents, onMarkLost, onEdit
   )
 }
 
-export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, savingId, onEditContents, onSetType, onMarkLost, onPrintSheet, printBusy, onEditNote, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, onOpen, onMarkReceived, busyShipmentId }) {
+export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getType, plannedItems, onAddPlanned, onRemovePlanned, onSwapPlanned, loadProducts, savingId, onEditContents, onSetType, onMarkLost, onPrintSheet, printBusy, onEditNote, onAskChoice, onAskReviews, canApproveChoices, onApproveChoices, onRejectChoices, onOpen, onMarkReceived, busyShipmentId }) {
   const [carrier, setCarrier] = useState('')
   // Package history (with what was in each package) is shown open by default.
   const [expandAll, setExpandAll] = useState(true)
@@ -414,6 +417,8 @@ export default function AmbassadorShipmentsTable({ notesApi, rows, getMeta, getT
       line={l}
       onAdd={onAddPlanned}
       onRemove={onRemovePlanned}
+      onSwap={onSwapPlanned}
+      loadProducts={loadProducts}
       busy={savingId === l.row.id}
     />
   )
