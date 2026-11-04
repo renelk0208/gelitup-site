@@ -241,6 +241,21 @@ function BookingPanel({ seminar, onClose }) {
         const [seatP, kitP] = await Promise.all([load(isRec ? row.recording_shop_url : row.shop_url), isRec ? null : load(row.kit_url)])
         const wantSku = String((isRec ? row.recording_sku : row.shopify_sku) || '').trim()
         const v = seatP?.variants?.find((x) => String(x.sku || '').trim() === wantSku)
+        // Shopify's .js feed lists at most 250 variants. For bigger kits, add the missing
+        // combinations from /seminars/kit-variants/<handle>.json; price and stock follow a
+        // listed variant with the same last option (e.g. the forms choice).
+        if (kitP?.variants?.length && (kitP.options || []).reduce((n, o) => n * (o.values?.length || 1), 1) > kitP.variants.length) {
+          try {
+            const extra = await fetch(`/seminars/kit-variants/${handle(row.kit_url)}.json`).then((r) => (r.ok ? r.json() : null))
+            const have = new Set(kitP.variants.map((x) => x.options.join('|')))
+            const last = (opts) => opts[opts.length - 1]
+            for (const ev of extra?.variants || []) {
+              if (have.has(ev.options.join('|'))) continue
+              const twin = kitP.variants.find((x) => last(x.options) === last(ev.options)) || kitP.variants[0]
+              kitP.variants.push({ ...twin, id: ev.id, options: ev.options })
+            }
+          } catch { /* keep the listed variants */ }
+        }
         const d = {
           soldOut: isRec ? false : Boolean(row.sold_out),
           seat: v ? { id: v.id, price: v.price / 100, available: v.available } : null,
@@ -335,7 +350,7 @@ function BookingPanel({ seminar, onClose }) {
                         </select>
                       </label>
                     ))}
-                    {kitVariant && !kitVariant.available && <p className="text-sm text-red-600">This combination is currently unavailable — please choose another.</p>}
+                    {((kitVariant && !kitVariant.available) || !kitVariant) && <p className="text-sm text-red-600">This combination is currently unavailable — please choose another.</p>}
                   </div>
                 )}
               </div>
