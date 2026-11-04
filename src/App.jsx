@@ -7362,10 +7362,10 @@ function LangSwitcher() {
       <button
         type="button"
         onClick={() => setOpen((o) => !o)}
-        className="inline-flex items-center gap-1 rounded-lg px-2 py-1.5 text-[10px] font-semibold uppercase tracking-[0.08em] !text-white/70 transition hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
+        className="inline-flex h-9 items-center gap-2 rounded-lg px-3 !text-[11.5px] !font-semibold !leading-none uppercase tracking-[0.1em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 !text-white/80 hover:bg-white/10 hover:!text-white"
         aria-label="Change language"
       >
-        <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+        <svg xmlns="http://www.w3.org/2000/svg" className="h-3.5 w-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={1.8} aria-hidden="true">
           <path strokeLinecap="round" strokeLinejoin="round" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9a9 9 0 01-9-9m9 9c1.657 0 3-4.03 3-9s-1.343-9-3-9m0 18c-1.657 0-3-4.03-3-9s1.343-9 3-9m-9 9a9 9 0 019-9" />
         </svg>
         {lang.toUpperCase()}
@@ -7456,13 +7456,11 @@ function MainMenu() {
         onClick={() => setOpen((current) => !current)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="inline-flex items-center gap-2 rounded-lg border border-white/25 px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] !text-white/80 transition duration-300 hover:border-white/40 hover:bg-white/10 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500"
+        className="inline-flex h-9 items-center gap-2 rounded-lg px-3 !text-[11.5px] !font-semibold !leading-none uppercase tracking-[0.1em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 !text-white/80 hover:bg-white/10 hover:!text-white"
       >
-        <span className="flex flex-col items-center justify-center gap-[3px]" aria-hidden="true">
-          <span className="block h-px w-3 bg-current" />
-          <span className="block h-px w-3 bg-current" />
-          <span className="block h-px w-3 bg-current" />
-        </span>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-3.5 w-3.5 shrink-0">
+          <path d="M4 7h16M4 12h16M4 17h16" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+        </svg>
         Menu
       </button>
 
@@ -7544,14 +7542,14 @@ function LoginMenu() {
         onClick={() => setOpen((v) => !v)}
         aria-expanded={open}
         aria-haspopup="menu"
-        className="inline-flex items-center gap-1.5 rounded-lg border border-fuchsia-500 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white transition duration-300 hover:bg-fuchsia-600/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+        className="inline-flex h-9 items-center gap-2 rounded-lg px-3 !text-[11.5px] !font-semibold !leading-none uppercase tracking-[0.1em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 !text-white/80 hover:bg-white/10 hover:!text-white"
       >
         <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className="h-3.5 w-3.5 shrink-0">
           <circle cx="12" cy="8" r="3.25" stroke="currentColor" strokeWidth="1.8" />
           <path d="M5 19.5c1.2-3.3 4-5 7-5s5.8 1.7 7 5" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" />
         </svg>
         Login
-        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`}>
+        <svg viewBox="0 0 24 24" fill="none" aria-hidden="true" className={`h-3 w-3 opacity-70 transition-transform ${open ? 'rotate-180' : ''}`}>
           <path d="M6 9l6 6 6-6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         </svg>
       </button>
@@ -7577,25 +7575,26 @@ function LoginMenu() {
 
 function Nav() {
   return (
-    <nav className="hidden items-center justify-end gap-2 xl:flex">
+    <nav className="hidden items-center justify-end gap-1 xl:flex">
       <MainMenu />
 
       <NavLink
         to="/seminars"
         className={({ isActive }) =>
-          `inline-flex items-center gap-1.5 rounded-lg border-2 px-3 py-1 text-[11px] font-bold uppercase tracking-[0.1em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400 ${
-            isActive ? 'border-[#D43790] bg-[#D43790] !text-white' : 'border-[#D43790] !text-white hover:bg-[#D43790]/25'
+          `inline-flex h-9 items-center gap-2 rounded-lg px-3 !text-[11.5px] !font-semibold !leading-none uppercase tracking-[0.1em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+            isActive ? 'bg-white/10 !text-[#ff5fb0]' : '!text-[#ff5fb0] hover:bg-white/10'
           }`
         }
       >
-        <span aria-hidden="true">▶</span> Seminars
+        <svg viewBox="0 0 24 24" aria-hidden="true" className="h-3.5 w-3.5 shrink-0"><path d="M8 5v14l11-7z" fill="currentColor" /></svg>
+        Seminars
       </NavLink>
 
       <NavLink
         to="/blog"
         className={({ isActive }) =>
-          `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 ${
-            isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+          `inline-flex h-9 items-center gap-2 rounded-lg px-3 !text-[11.5px] !font-semibold !leading-none uppercase tracking-[0.1em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+            isActive ? 'bg-white/10 !text-white' : '!text-white/80 hover:bg-white/10 hover:!text-white'
           }`
         }
       >
@@ -7605,13 +7604,15 @@ function Nav() {
       <NavLink
         to="/work-with-us"
         className={({ isActive }) =>
-          `rounded-lg px-2.5 py-1.5 text-[11px] font-medium uppercase tracking-[0.08em] transition duration-300 ${
-            isActive ? 'bg-[#D43790] !text-white' : '!text-white/75 hover:bg-white/10 hover:!text-white'
+          `inline-flex h-9 items-center gap-2 rounded-lg px-3 !text-[11.5px] !font-semibold !leading-none uppercase tracking-[0.1em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 ${
+            isActive ? 'bg-white/10 !text-white' : '!text-white/80 hover:bg-white/10 hover:!text-white'
           }`
         }
       >
         Work With Us
       </NavLink>
+
+      <span aria-hidden="true" className="mx-1.5 h-5 w-px bg-white/20" />
 
       <LoginMenu />
 
@@ -7619,7 +7620,7 @@ function Nav() {
         href="https://shop.gelitup.com/pages/ourproducts"
         target="_blank"
         rel="noreferrer"
-        className="inline-flex items-center rounded-lg border border-fuchsia-500 bg-fuchsia-600 px-3 py-1.5 text-[11px] font-bold uppercase tracking-[0.08em] !text-white shadow-[0_0_12px_rgba(212,55,144,0.28)] transition duration-300 hover:bg-fuchsia-500 hover:!text-white focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+        className="inline-flex h-9 items-center gap-2 rounded-lg px-3 !text-[11.5px] !font-semibold !leading-none uppercase tracking-[0.1em] transition duration-300 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-500 bg-[#D43790] !text-white hover:bg-fuchsia-500 hover:!text-white"
       >
         SHOP NOW!
       </a>
