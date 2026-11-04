@@ -1477,6 +1477,8 @@ const HERO_PRODUCT_COPY = [
   },
 ]
 
+// Silver/Gold/Platinum "Create Package" builder is hidden from distributors (Nov 2026). Set to true to show it again.
+const SHOW_PACKAGE_BUILDER = false
 const PACKAGE_TIER_OPTIONS = ['Silver', 'Gold', 'Platinum']
 const DEFAULT_PACKAGE_ITEM_QTY = 1
 const PACKAGE_TECH_ESSENTIALS = [
@@ -16643,7 +16645,7 @@ function ProductsModule({ moduleView = 'products', tier = null, pricesAllocated 
           </div>
         )}
 
-        {!isCatalogView && isDistributorRole && (
+        {SHOW_PACKAGE_BUILDER && !isCatalogView && isDistributorRole && (
         <div className="mt-4 rounded-xl border border-slate-200 bg-slate-50 p-3 sm:p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-slate-500">Sales Manager</p>
           <p className="mt-1 text-sm font-semibold text-slate-900">Create Package</p>
