@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { Link, NavLink, Navigate, Route, Routes, useNavigate, useParams } from 'react-router-dom'
 import { supabase, hasSupabaseConfig } from '../lib/supabaseClient'
 import { seminarCodeEmail } from '../lib/seminarEmail'
@@ -752,6 +752,209 @@ function Countdown({ to }) {
   )
 }
 
+// ── Live stream (Cloudflare) + our own chat / Q&A ───────────────────────────
+const STREAM_FN = '/.netlify/functions/seminar-stream'
+async function streamCall(payload, withAuth = false) {
+  const headers = { 'Content-Type': 'application/json' }
+  if (withAuth) {
+    const { data } = await supabase.auth.getSession()
+    if (data?.session?.access_token) headers.Authorization = `Bearer ${data.session.access_token}`
+  }
+  const res = await fetch(STREAM_FN, { method: 'POST', headers, body: JSON.stringify(payload) })
+  return res.json().catch(() => ({ error: 'bad_response' }))
+}
+
+// Signed player: live while the seminar is on, the recording afterwards.
+function CfPlayer({ seminarId, token = '', staffMode = '', title = 'Seminar' }) {
+  const [state, setState] = useState({ loading: true })
+  useEffect(() => {
+    let alive = true
+    const load = async () => {
+      const r = await streamCall(token ? { action: 'play', seminar_id: seminarId, token } : { action: 'play', seminar_id: seminarId, mode: staffMode }, !token)
+      if (alive) setState({ loading: false, ...r })
+    }
+    load()
+    const t = setInterval(load, 30 * 60000) // fresh link before the old one expires
+    return () => { alive = false; clearInterval(t) }
+  }, [seminarId, token, staffMode])
+  const box = 'relative aspect-video rounded-2xl overflow-hidden bg-black'
+  if (state.loading) return <div className={`${box} flex items-center justify-center text-white/60 text-sm`}>Loading the player…</div>
+  if (state.pending) return <div className={`${box} flex items-center justify-center text-center p-6 text-white`}>The recording is being prepared — it usually takes a few minutes after the seminar ends. Please check back soon.</div>
+  if (!state.url) return <div className={`${box} flex items-center justify-center text-center p-6 text-white/80 text-sm`}>{state.error === 'stream_not_configured' ? 'The stream is not set up yet.' : state.error === 'no_stream' ? 'No stream has been created for this seminar yet.' : 'The player could not be loaded. Please refresh the page.'}</div>
+  return <div className={box}><iframe title={title} src={`${state.url}?autoplay=true&letterboxColor=transparent`} className="absolute inset-0 h-full w-full border-0" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen /></div>
+}
+
+const NAME_KEY = 'giup_seminar_chat_name'
+const timeHM = (iso) => new Date(iso).toLocaleTimeString('en-GB', { timeZone: EET_ZONE, hour: '2-digit', minute: '2-digit', hourCycle: 'h23' })
+
+function ChatList({ messages, staff = false, onModerate }) {
+  const ref = useRef(null)
+  useEffect(() => { if (ref.current) ref.current.scrollTop = ref.current.scrollHeight }, [messages.length])
+  return (
+    <div ref={ref} className="flex-1 overflow-y-auto p-3 grid content-start gap-2 text-sm min-h-[260px] max-h-[460px]">
+      {messages.length === 0 && <p className="text-black/40 text-center mt-6">No messages yet — say hello!</p>}
+      {messages.map((m) => (
+        <div key={m.id} className={`rounded-xl px-3 py-2 ${m.hidden ? 'opacity-40' : ''} ${m.role !== 'attendee' ? 'bg-[#F9D3E6]' : m.is_question ? 'bg-amber-50 border border-amber-200' : 'bg-black/[0.04]'}`}>
+          <p className="text-[11px] text-black/50">
+            <strong className={m.role !== 'attendee' ? 'text-[#9E1F63]' : 'text-black/70'}>{m.author}{m.role === 'trainer' ? ' · Trainer' : m.role === 'team' ? ' · GEL.IT.UP' : ''}</strong>
+            {' · '}{timeHM(m.at)}{m.is_question ? ' · ❓ Question' : ''}{m.answered ? ' · ✓ answered' : ''}{staff && m.email ? ` · ${m.email}` : ''}
+          </p>
+          <p className="whitespace-pre-wrap break-words">{m.body}</p>
+          {staff && m.role === 'attendee' && (
+            <p className="mt-1 flex gap-3 text-[11px]">
+              {m.is_question && <button type="button" className="underline" onClick={() => onModerate(m.id, { p_answered: !m.answered })}>{m.answered ? 'Mark unanswered' : 'Mark answered'}</button>}
+              <button type="button" className="underline" onClick={() => onModerate(m.id, { p_hidden: !m.hidden })}>{m.hidden ? 'Show again' : 'Hide'}</button>
+            </p>
+          )}
+        </div>
+      ))}
+    </div>
+  )
+}
+
+function useChatPoll(fetcher, deps) {
+  const [messages, setMessages] = useState([])
+  const [ok, setOk] = useState(true)
+  const reload = useCallback(async () => {
+    const r = await fetcher(0)
+    if (r?.ok) { setMessages(r.messages || []); setOk(true) } else setOk(false)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, deps)
+  useEffect(() => {
+    reload()
+    const t = setInterval(reload, 3000)
+    return () => clearInterval(t)
+  }, [reload])
+  return { messages, ok, reload }
+}
+
+function RoomChat({ seminarId, token }) {
+  const [name, setName] = useState(() => { try { return localStorage.getItem(NAME_KEY) || '' } catch { return '' } })
+  const [text, setText] = useState('')
+  const [question, setQuestion] = useState(false)
+  const [err, setErr] = useState('')
+  const { messages, ok, reload } = useChatPoll(async () => (await supabase.rpc('seminar_chat_list', { p_token: token, p_seminar: seminarId, p_after: 0 })).data, [seminarId, token])
+  const send = async (e) => {
+    e.preventDefault()
+    if (!text.trim()) return
+    try { localStorage.setItem(NAME_KEY, name) } catch { /* ignore */ }
+    const { data } = await supabase.rpc('seminar_chat_post', { p_token: token, p_seminar: seminarId, p_name: name, p_body: text, p_question: question })
+    if (data?.ok) { setText(''); setQuestion(false); setErr(''); reload() } else setErr(data?.error === 'slow' ? 'One moment — wait a second between messages.' : 'The chat is closed right now.')
+  }
+  return (
+    <div className="rounded-2xl border overflow-hidden flex flex-col">
+      <p className="px-4 py-3 border-b font-semibold text-sm">Questions &amp; chat</p>
+      {ok ? <ChatList messages={messages} /> : <p className="p-4 text-sm text-black/50">The chat opens 30 minutes before the start.</p>}
+      {ok && (
+        <form onSubmit={send} className="border-t p-3 grid gap-2">
+          <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Your first name" maxLength={40} className={`${inputCls} !py-1.5 text-sm`} />
+          <textarea value={text} onChange={(e) => setText(e.target.value)} rows={2} maxLength={1000} placeholder={question ? 'Type your question for the trainer…' : 'Write a message…'} className={`${inputCls} !py-1.5 text-sm`} onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) send(e) }} />
+          <div className="flex items-center justify-between gap-2">
+            <label className="flex items-center gap-2 text-xs"><input type="checkbox" checked={question} onChange={(e) => setQuestion(e.target.checked)} /> This is a question for the trainer</label>
+            <button type="submit" className="rounded-lg px-4 py-1.5 text-sm font-semibold text-white" style={{ background: BRAND }}>Send</button>
+          </div>
+          {err && <p className="text-xs text-red-600">{err}</p>}
+        </form>
+      )}
+    </div>
+  )
+}
+
+function StaffChat({ seminarId, defaultName }) {
+  const [text, setText] = useState('')
+  const [onlyQ, setOnlyQ] = useState(false)
+  const { messages, ok, reload } = useChatPoll(async () => (await supabase.rpc('seminar_chat_staff_list', { p_seminar: seminarId, p_after: 0 })).data, [seminarId])
+  const moderate = async (id, patch) => { await supabase.rpc('seminar_chat_moderate', { p_id: id, p_answered: null, p_hidden: null, ...patch }); reload() }
+  const send = async (e) => {
+    e.preventDefault()
+    if (!text.trim()) return
+    await supabase.rpc('seminar_chat_staff_post', { p_seminar: seminarId, p_name: defaultName || 'GEL.IT.UP', p_body: text })
+    setText(''); reload()
+  }
+  if (!ok) return null
+  const open = messages.filter((m) => m.is_question && !m.answered && !m.hidden).length
+  const shown = onlyQ ? messages.filter((m) => m.is_question || m.role !== 'attendee') : messages
+  return (
+    <div className="rounded-2xl border overflow-hidden flex flex-col">
+      <div className="px-4 py-3 border-b flex items-center justify-between gap-2 text-sm">
+        <span className="font-semibold">Questions &amp; chat{open ? <span className="ml-2 rounded-full px-2 py-0.5 text-[11px] text-white" style={{ background: BRAND }}>{open} open</span> : null}</span>
+        <label className="flex items-center gap-1 text-xs"><input type="checkbox" checked={onlyQ} onChange={(e) => setOnlyQ(e.target.checked)} /> Questions only</label>
+      </div>
+      <ChatList messages={shown} staff onModerate={moderate} />
+      <form onSubmit={send} className="border-t p-3 flex gap-2">
+        <input value={text} onChange={(e) => setText(e.target.value)} placeholder="Reply to everyone…" className={`${inputCls} !py-1.5 text-sm`} />
+        <button type="submit" className="rounded-lg px-4 text-sm font-semibold text-white" style={{ background: BRAND }}>Send</button>
+      </form>
+    </div>
+  )
+}
+
+function CopyField({ label, value, secret = false }) {
+  const [show, setShow] = useState(!secret)
+  const [copied, setCopied] = useState(false)
+  return (
+    <div>
+      <p className="text-xs font-semibold text-black/60">{label}</p>
+      <div className="mt-1 flex gap-2">
+        <input readOnly value={show ? value || '' : '••••••••••••••••••••'} className={`${inputCls} !py-1.5 font-mono text-xs`} />
+        {secret && <button type="button" onClick={() => setShow(!show)} className="rounded-lg border px-3 text-xs">{show ? 'Hide' : 'Show'}</button>}
+        <button type="button" onClick={() => { navigator.clipboard?.writeText(value || ''); setCopied(true); setTimeout(() => setCopied(false), 1500) }} className="rounded-lg px-3 text-xs font-semibold text-white" style={{ background: BRAND }}>{copied ? 'Copied' : 'Copy'}</button>
+      </div>
+    </div>
+  )
+}
+
+// Trainer / team: OBS settings, a preview of what attendees see, and the Q&A.
+function StaffStream({ seminar }) {
+  const [settings, setSettings] = useState(null)
+  const [busy, setBusy] = useState(false)
+  const [err, setErr] = useState('')
+  const [view, setView] = useState('')
+  const load = useCallback(async () => {
+    const { data } = await supabase.rpc('seminar_stream_settings', { p_seminar: seminar.id })
+    setSettings(data?.ok ? data : { has_stream: false })
+  }, [seminar.id])
+  // Reads the stream settings from the database when the card opens.
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { load() }, [load])
+  const create = async () => {
+    setBusy(true); setErr('')
+    const r = await streamCall({ action: 'create', seminar_id: seminar.id }, true)
+    setBusy(false)
+    if (r?.ok) load(); else setErr(r?.error === 'stream_not_configured' ? 'Cloudflare is not connected yet (CF_ACCOUNT_ID / CF_STREAM_API_TOKEN in Netlify).' : r?.message || 'Could not create the stream.')
+  }
+  if (!settings) return null
+  return (
+    <div className="mt-4 rounded-2xl bg-black/[0.03] p-4">
+      <p className="font-semibold">Live stream (OBS)</p>
+      {!settings.has_stream ? (
+        <div className="mt-2">
+          <p className="text-sm text-black/60">No stream yet. Create it once — the same settings work for the test and the live seminar.</p>
+          <button type="button" disabled={busy} onClick={create} className="mt-2 rounded-xl px-4 py-2 text-sm font-bold text-white disabled:opacity-50" style={{ background: BRAND }}>{busy ? 'Creating…' : 'Create the live stream'}</button>
+          {err && <p className="mt-2 text-sm text-red-600">{err}</p>}
+        </div>
+      ) : (
+        <div className="mt-2 grid gap-3">
+          <p className="text-sm text-black/60">In OBS: <strong>Settings → Stream</strong> → Service <strong>Custom…</strong>, then paste these two. Keep the stream key private.</p>
+          <CopyField label="Server" value={settings.server} />
+          <CopyField label="Stream key" value={settings.key} secret />
+          <p className="text-xs text-black/50">Everything you stream is recorded automatically and becomes the attendees' replay. <Link to="/seminars/obs-guide" className="underline" style={{ color: BRAND }}>OBS step-by-step guide →</Link></p>
+          <div className="flex flex-wrap gap-2">
+            <button type="button" onClick={() => setView(view === 'live' ? '' : 'live')} className="rounded-xl px-4 py-2 text-sm font-bold border" style={{ borderColor: BRAND, color: BRAND }}>{view === 'live' ? 'Hide preview' : 'Preview what attendees see'}</button>
+            <button type="button" onClick={() => setView(view === 'replay' ? '' : 'replay')} className="rounded-xl px-4 py-2 text-sm font-bold border">{view === 'replay' ? 'Hide recording' : 'Watch the recording'}</button>
+          </div>
+          {view && (
+            <div className="grid gap-3 lg:grid-cols-[1fr_340px]">
+              <CfPlayer key={view} seminarId={seminar.id} staffMode={view} title={`${seminar.title} preview`} />
+              <StaffChat seminarId={seminar.id} defaultName={seminar.trainer_name} />
+            </div>
+          )}
+        </div>
+      )}
+    </div>
+  )
+}
+
 function Room({ session }) {
   const { id } = useParams()
   useEffect(() => { const t = setInterval(() => session.refresh(), 45000); return () => clearInterval(t) }, [session])
@@ -771,15 +974,15 @@ function Room({ session }) {
 
       {s.phase === 'live' && (
         <div className="mt-6 grid gap-4 lg:grid-cols-[1fr_360px]">
-          {s.live_embed_url
+          {s.cf_stream ? <CfPlayer seminarId={s.id} token={session.token} title={s.title} /> : s.live_embed_url
             ? <div className="relative aspect-video rounded-2xl overflow-hidden bg-black"><iframe title={s.title} src={s.live_embed_url} className="absolute inset-0 h-full w-full" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen /></div>
             : <div className="aspect-video rounded-2xl bg-black text-white flex items-center justify-center text-center p-6">The stream will appear here in a moment — the page refreshes automatically.</div>}
-          <div className="rounded-2xl border overflow-hidden min-h-[420px] lg:min-h-0 flex flex-col">
+          {s.cf_stream ? <RoomChat seminarId={s.id} token={session.token} /> : <div className="rounded-2xl border overflow-hidden min-h-[420px] lg:min-h-0 flex flex-col">
             <p className="px-4 py-3 border-b font-semibold text-sm">Questions &amp; chat</p>
             {s.chat_embed_url
               ? <iframe title="Seminar Q&A" src={s.chat_embed_url} className="flex-1 w-full min-h-[380px]" />
               : <p className="p-4 text-sm text-black/50">The Q&amp;A opens when the seminar starts.</p>}
-          </div>
+          </div>}
         </div>
       )}
 
@@ -794,7 +997,7 @@ function Room({ session }) {
 
       {s.phase === 'replay' && (
         <div className="mt-6">
-          <div className="relative aspect-video rounded-2xl overflow-hidden bg-black"><iframe title={`${s.title} replay`} src={s.replay_embed_url} className="absolute inset-0 h-full w-full" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen /></div>
+          {s.cf_stream ? <CfPlayer seminarId={s.id} token={session.token} title={`${s.title} replay`} /> : <div className="relative aspect-video rounded-2xl overflow-hidden bg-black"><iframe title={`${s.title} replay`} src={s.replay_embed_url} className="absolute inset-0 h-full w-full" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen /></div>}
           <p className="text-sm text-black/60 mt-3">{s.access_type === 'recording' ? 'Recording' : 'Replay'} available until {formatWhen(s.replay_until, false)}.</p>
           {s.kit_url && (
             <a href={s.kit_url} className="mt-6 flex items-center gap-4 rounded-2xl border p-5 hover:border-[#D43790] transition-colors">
@@ -1076,11 +1279,11 @@ function TrainerPage() {
           </div>
         </div>
         <p className="mt-2 text-sm text-black/60">{r.recordings_sold > 0 ? `${r.recordings_sold} recording${r.recordings_sold === 1 ? '' : 's'} sold · ` : ''}{r.cancellations > 0 ? `${r.cancellations} cancelled · ` : ''}{r.private_pending > 0 ? `${r.private_pending} private request${r.private_pending === 1 ? '' : 's'} waiting for a reply` : ''}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
+        {(r.live_embed_url || r.replay_embed_url) && <div className="mt-3 flex flex-wrap gap-2">
           {ev && <a href={ev} target="_blank" rel="noreferrer" className="rounded-xl px-4 py-2 text-sm font-bold text-white" style={{ background: '#111' }}>Open the Vimeo event (go live) ↗</a>}
           <button type="button" onClick={() => setOpen(open === r.id ? null : r.id)} className="rounded-xl px-4 py-2 text-sm font-bold border" style={{ borderColor: BRAND, color: BRAND }}>{open === r.id ? 'Hide' : 'See what attendees see'}</button>
-        </div>
-        {!ev && <p className="mt-2 text-sm text-black/50">The Vimeo live link hasn't been added yet — it will appear here once the seminar team adds it.</p>}
+        </div>}
+        <StaffStream seminar={r} />
         {open === r.id && (
           r.live_embed_url || r.replay_embed_url ? (
             <div className="mt-4 grid gap-3 lg:grid-cols-3">
@@ -1144,7 +1347,7 @@ function TrainerPage() {
       {upcoming.length > 0 && (
         <section className="mt-8">
           <h2 className="font-bold text-lg">Group seminars</h2>
-          <div className="mt-2 grid gap-4">{upcoming.map((r) => <Card key={r.id} r={r} />)}</div>
+          <div className="mt-2 grid gap-4">{upcoming.map((r) => <Fragment key={r.id}>{Card({ r })}</Fragment>)}</div>
           <div className="mt-4 rounded-2xl bg-black/[0.03] p-4 text-sm">
             <p className="font-semibold">Before you go live</p>
             <ul className="mt-1 list-disc pl-5 text-black/70 space-y-0.5">
@@ -1161,7 +1364,7 @@ function TrainerPage() {
       {past.length > 0 && (
         <section className="mt-8">
           <h2 className="font-bold text-lg">Past seminars</h2>
-          <div className="mt-2 grid gap-4">{past.map((r) => <Card key={r.id} r={r} />)}</div>
+          <div className="mt-2 grid gap-4">{past.map((r) => <Fragment key={r.id}>{Card({ r })}</Fragment>)}</div>
         </section>
       )}
     </Shell>
@@ -1687,6 +1890,65 @@ function PrivateReply() {
   )
 }
 
+// ── OBS guide for trainers ───────────────────────────────────────────────────
+function ObsStep({ n, title, children }) {
+  return (
+    <section className="mt-6 flex gap-4">
+      <span className="shrink-0 h-8 w-8 rounded-full text-white font-bold flex items-center justify-center" style={{ background: BRAND }}>{n}</span>
+      <div className="flex-1"><h2 className="font-bold text-lg">{title}</h2><div className="mt-1 text-black/75 leading-relaxed grid gap-2">{children}</div></div>
+    </section>
+  )
+}
+
+function ObsGuide() {
+  return (
+    <Shell>
+      <p className="text-sm"><Link to="/seminars/trainer" className="underline">← My schedule</Link></p>
+      <p className="mt-4 text-xs font-bold uppercase tracking-widest" style={{ color: BRAND }}>GEL.IT.UP Seminars · Trainers</p>
+      <h1 className="text-3xl font-bold mt-1">Going live with OBS</h1>
+      <p className="mt-2 text-black/60">OBS Studio is a free program that sends your cameras to the seminar page. Set it up once, do a test with the seminar team, and on the day it's two clicks.</p>
+
+      <ObsStep n={1} title="Install OBS Studio">
+        <p>Download it free from <a className="underline" style={{ color: BRAND }} href="https://obsproject.com" target="_blank" rel="noreferrer">obsproject.com</a> (Windows or Mac) and install it. When it first opens, the setup wizard asks what you'll use it for: choose <strong>“Optimize for streaming”</strong>, resolution <strong>1920×1080</strong>, <strong>30 FPS</strong>.</p>
+      </ObsStep>
+
+      <ObsStep n={2} title="Connect OBS to your seminar">
+        <p>On <Link className="underline" style={{ color: BRAND }} to="/seminars/trainer">your trainer page</Link>, find the seminar and its <strong>Live stream (OBS)</strong> box. Then in OBS go to <strong>Settings → Stream</strong>:</p>
+        <ul className="list-disc pl-5"><li>Service: <strong>Custom…</strong></li><li>Server: paste <strong>Server</strong> from your trainer page</li><li>Stream key: paste <strong>Stream key</strong> (keep it private — anyone with it could stream to your seminar)</li></ul>
+        <p>Click <strong>OK</strong>. This only needs doing once per seminar.</p>
+      </ObsStep>
+
+      <ObsStep n={3} title="Add your cameras">
+        <p>In the <strong>Sources</strong> box at the bottom, click <strong>+ → Video Capture Device</strong> and choose your camera (face camera or webcam). For a close-up of the nails, add a second <strong>Video Capture Device</strong> for the second camera or your phone (apps like <em>Camo</em> or <em>DroidCam</em> turn a phone into a camera).</p>
+        <p>Drag and resize the boxes in the preview — for example the nails large and your face small in a corner.</p>
+        <p>Tip: make two <strong>Scenes</strong> (bottom left) — “Talking” (face big) and “Nails” (close-up big) — and click between them during the seminar.</p>
+      </ObsStep>
+
+      <ObsStep n={4} title="Add your microphone">
+        <p>In <strong>Audio Mixer</strong> check that your microphone moves when you speak. A clip-on microphone or headset sounds much better than the laptop's. If it doesn't show, <strong>Sources → + → Audio Input Capture</strong>.</p>
+      </ObsStep>
+
+      <ObsStep n={5} title="Settings for a smooth stream">
+        <p><strong>Settings → Output</strong>: Video bitrate <strong>4500 Kbps</strong> (use 2500 on slower internet), Audio bitrate 160. <strong>Settings → Video</strong>: Output resolution 1920×1080 (or 1280×720 on slower internet), 30 FPS.</p>
+        <p>Use a cable to your router if you can — Wi-Fi drops are the most common problem. Close other programs and video calls.</p>
+      </ObsStep>
+
+      <ObsStep n={6} title="On the day">
+        <ul className="list-disc pl-5">
+          <li>Start OBS <strong>15 minutes early</strong> and click <strong>Start Streaming</strong>. Attendees can enter the room 30 minutes before the start.</li>
+          <li>On your trainer page click <strong>Preview what attendees see</strong> to check picture and sound (there's a delay of about 10–20 seconds — that's normal).</li>
+          <li>The <strong>Questions &amp; chat</strong> box next to the preview shows attendees' messages. Questions are marked ❓ — tick <strong>Mark answered</strong> as you go, and <strong>Hide</strong> anything inappropriate.</li>
+          <li>When you finish, click <strong>Stop Streaming</strong>. The recording is saved automatically and becomes the replay within a few minutes — you don't need to upload anything.</li>
+        </ul>
+      </ObsStep>
+
+      <ObsStep n={7} title="Do a test first">
+        <p>At least a day before, stream for a few minutes with the seminar team watching the preview. Anything streamed before the seminar is recorded too, so tell the team after the test so they can remove the test recording if needed.</p>
+      </ObsStep>
+    </Shell>
+  )
+}
+
 // ── Seminar terms & conditions ───────────────────────────────────────────────
 // NOTE: have the text checked by a lawyer.
 function H({ children }) { return <h2 className="text-lg font-bold mt-8 mb-2">{children}</h2> }
@@ -1776,6 +2038,7 @@ export default function SeminarsPage() {
       <Route path="admin" element={<AdminPage />} />
       <Route path="admin/private/:id" element={<PrivateReply />} />
       <Route path="trainer" element={<TrainerPage />} />
+      <Route path="obs-guide" element={<ObsGuide />} />
       <Route path="*" element={<Navigate to="/seminars" replace />} />
     </Routes>
   )
