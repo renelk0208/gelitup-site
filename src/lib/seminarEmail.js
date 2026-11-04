@@ -29,6 +29,7 @@ export function seminarCodeEmail({ name, email, codes, seminar }) {
   <p><strong>When:</strong> ${escapeHtml(when)} (Greece / Bulgaria time)</p>
   <p style="text-align:center;margin:24px 0"><a href="${seminarSignInLink(many ? '' : email, list[0])}" style="background:${BRAND};color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:bold">Open my seminar</a></p>
   <p style="font-size:13px;color:#555">Sign in at gelitup.com/seminars with your email address and code. It works on phone, tablet or computer — nothing to install. Each code is personal and works on one device at a time. After the seminar you can rewatch the recording for ${Number(seminar.replay_days ?? 30)} days.</p>
+  <p style="font-size:13px;color:#555"><strong>Cancellation:</strong> you can cancel free of charge, with a full refund of the seminar seat, up to 24 hours before the start — sign in at gelitup.com/seminars and choose "Cancel my booking". Within 24 hours of the start the seat cannot be refunded.</p>
   <p style="font-size:13px;color:#555">Questions? Just reply to this email.</p>
 </div>`
   return { subject: `Your access code — ${seminar.title}`, html }

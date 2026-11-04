@@ -24,6 +24,11 @@ const SHOP_URL = 'https://shop.gelitup.com'
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL || ''
 const EMAIL_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
 
+async function sendMail(to, subject, html, replyTo = 'info@gelitup.com') {
+  if (!EMAIL_WEBHOOK_URL) return
+  await fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: EMAIL_ANON_KEY, Authorization: `Bearer ${EMAIL_ANON_KEY}` }, body: JSON.stringify({ to, subject, html, from: 'GEL.IT.UP Seminars <info@gelitup.com>', replyTo }) }).catch(() => {})
+}
+
 const readToken = () => { try { return localStorage.getItem(TOKEN_KEY) || '' } catch { return '' } }
 const writeToken = (t) => { try { t ? localStorage.setItem(TOKEN_KEY, t) : localStorage.removeItem(TOKEN_KEY) } catch { /* ignore */ } }
 
@@ -273,6 +278,7 @@ function BookingPanel({ seminar, onClose }) {
             </div>
             <Button type="button" onClick={checkout} disabled={withKit && (!kitVariant || !kitVariant.available)} className="w-full mt-4">Continue to secure payment →</Button>
             <p className="text-xs text-black/50 mt-3 text-center">Payment is processed securely by Shopify. Your access code is emailed straight after payment.</p>
+            <p className="text-xs text-black/50 mt-1 text-center">Free cancellation with a full refund of the seminar seat up to 24 hours before the start, from My seminars. Within 24 hours the seat cannot be refunded.</p>
           </>
         )}
       </div>
@@ -395,7 +401,42 @@ function MySeminars({ session }) {
   const [code, setCode] = useState('')
   const [msg, setMsg] = useState('')
   const [busy, setBusy] = useState(false)
-  useEffect(() => { const id = setInterval(() => session.refresh(), 60000); return () => clearInterval(id) }, [session])
+  const [confirming, setConfirming] = useState(null)
+  const [cancelled, setCancelled] = useState(null)
+  useEffect(() => { const id = setInterval(() => { if (!cancelled) session.refresh() }, 60000); return () => clearInterval(id) }, [session, cancelled])
+
+  const cancel = async (s) => {
+    setBusy(true); setMsg('')
+    const { data, error } = await supabase.rpc('seminar_cancel', { p_token: session.token, p_seminar_id: s.id })
+    setBusy(false); setConfirming(null)
+    if (error || !data?.ok) {
+      setMsg(data?.error === 'too_late' ? 'Cancellations close 24 hours before the seminar starts, so this booking can no longer be cancelled or refunded.' : 'The booking could not be cancelled. Please contact info@gelitup.com.')
+      return
+    }
+    const when = formatWhen(s.starts_at)
+    const orders = (data.orders || []).join(', ')
+    await Promise.all([
+      sendMail('info@gelitup.com', `Seminar cancellation — refund due (${orders})`,
+        `<h2>Seminar cancellation — please refund</h2><p><strong>${escapeHtml(s.title)}</strong><br/>${escapeHtml(when)}</p><p>Attendee: <strong>${escapeHtml(data.email)}</strong><br/>Seats cancelled: <strong>${data.seats}</strong><br/>Shopify order(s): <strong>${escapeHtml(orders)}</strong></p><p>The attendee cancelled more than 24 hours before the start. Please refund the seminar seat(s) in Shopify (the seminar kit follows the normal returns policy). Then mark the code(s) as refunded in gelitup.com/seminars/admin.</p>`,
+        data.email),
+      sendMail(data.email, `Your seminar booking is cancelled — ${s.title}`,
+        `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#111"><p style="color:${BRAND};font-weight:bold;letter-spacing:2px;font-size:12px">GEL.IT.UP LIVE SEMINAR</p><h1 style="font-size:20px">Your booking is cancelled</h1><p>Your seat${data.seats > 1 ? 's' : ''} for <strong>${escapeHtml(s.title)}</strong> (${escapeHtml(when)}) ${data.seats > 1 ? 'have' : 'has'} been cancelled and your access code no longer works.</p><p>Your refund for the seminar seat will be processed to your original payment method, usually within 5–10 working days.</p><p style="font-size:13px;color:#555">Questions? Just reply to this email.</p></div>`),
+    ])
+    setCancelled({ title: s.title, seats: data.seats })
+  }
+
+  if (cancelled) {
+    return (
+      <Shell>
+        <SubNav signedIn={false} />
+        <div className="border rounded-2xl p-8 text-center">
+          <p className="text-xl font-bold">Your booking is cancelled</p>
+          <p className="text-black/60 mt-2">{cancelled.seats > 1 ? `Your ${cancelled.seats} seats` : 'Your seat'} for {cancelled.title} {cancelled.seats > 1 ? 'have' : 'has'} been cancelled. Your refund will be processed to your original payment method, usually within 5–10 working days. A confirmation email is on its way.</p>
+          <Link to="/seminars" onClick={() => session.refresh()} className="inline-block mt-6 underline" style={{ color: BRAND }}>Back to seminars</Link>
+        </div>
+      </Shell>
+    )
+  }
 
   if (!session.signedIn && !session.loading) return <Navigate to="/seminars/login" replace />
   if (session.loading) return <Shell><p className="text-center text-black/40">Loading…</p></Shell>
@@ -424,6 +465,21 @@ function MySeminars({ session }) {
                 <h2 className="font-bold mt-1">{s.title}</h2>
                 <p className="text-sm text-black/60">{formatWhen(s.starts_at)}</p>
                 {(s.phase === 'replay' || s.phase === 'replay_pending') && <p className="text-xs text-black/50 mt-1">Replay open until {formatWhen(s.replay_until, false)}</p>}
+                {s.phase === 'upcoming' && s.can_cancel && confirming !== s.id && (
+                  <button type="button" onClick={() => setConfirming(s.id)} className="text-xs text-black/60 underline mt-2">Cancel my booking (free until {formatWhen(s.cancel_until, false)})</button>
+                )}
+                {s.phase === 'upcoming' && s.can_cancel && confirming === s.id && (
+                  <div className="mt-3 rounded-xl bg-black/[0.04] p-3 text-sm">
+                    <p>Cancel {s.my_seats > 1 ? `your ${s.my_seats} seats` : 'your seat'} and get a refund for the seminar? Your access code will stop working.</p>
+                    <div className="mt-2 flex gap-3">
+                      <button type="button" disabled={busy} onClick={() => cancel(s)} className="rounded-lg px-3 py-1.5 text-white font-semibold disabled:opacity-50" style={{ background: BRAND }}>{busy ? 'Cancelling…' : 'Yes, cancel'}</button>
+                      <button type="button" onClick={() => setConfirming(null)} className="underline">Keep my booking</button>
+                    </div>
+                  </div>
+                )}
+                {s.phase === 'upcoming' && !s.can_cancel && s.status === 'scheduled' && (
+                  <p className="text-xs text-black/50 mt-2">Cancellations closed 24 hours before the start — this booking can no longer be refunded.</p>
+                )}
               </div>
               {canEnter && <Link to={`/seminars/room/${s.id}`} className="shrink-0 rounded-lg px-4 py-2.5 text-sm font-semibold text-white" style={{ background: s.phase === 'live' ? BRAND : '#111' }}>{s.phase === 'live' ? 'Join now' : s.phase === 'replay' ? 'Watch replay' : 'Open'}</Link>}
             </div>
@@ -436,8 +492,8 @@ function MySeminars({ session }) {
           <input value={code} onChange={(e) => setCode(e.target.value.toUpperCase())} placeholder="SEM-XXXX-XXXX-XXXX" required className={`${inputCls} flex-1 min-w-[220px] font-mono`} />
           <Button type="submit" disabled={busy}>Add code</Button>
         </div>
-        {msg && <p className="text-sm mt-2 text-black/70">{msg}</p>}
       </form>
+      {msg && <p className="text-sm mt-4 text-black/70">{msg}</p>}
     </Shell>
   )
 }
@@ -655,6 +711,7 @@ function AdminPage() {
     setIssue({ email: '', name: '', count: 1, note: '' }); loadCodes(selected); load()
   }
 
+  const markRefunded = async (c) => { await supabase.from('seminar_access_codes').update({ refunded_at: new Date().toISOString() }).eq('code', c.code); loadCodes(selected) }
   const revoke = async (c) => { await supabase.from('seminar_access_codes').update({ revoked: !c.revoked, session_token: null }).eq('code', c.code); loadCodes(selected) }
   const resend = async (c) => {
     const s = seminars.find((x) => x.id === c.seminar_id)
@@ -741,13 +798,17 @@ function AdminPage() {
               <thead className="bg-black/[0.03] text-left"><tr><th className="p-3">Code</th><th className="p-3">Buyer</th><th className="p-3">Signed in as</th><th className="p-3">Order</th><th className="p-3">Last seen</th><th className="p-3"></th></tr></thead>
               <tbody>
                 {codes.map((c) => (
-                  <tr key={c.code} className={`border-t ${c.revoked ? 'opacity-40' : ''}`}>
+                  <tr key={c.code} className={`border-t ${c.revoked && !c.cancelled_at ? 'opacity-40' : ''}`}>
                     <td className="p-3 font-mono">{c.code}</td>
                     <td className="p-3">{c.buyer_name || ''}<div className="text-xs text-black/50">{c.buyer_email}</div></td>
                     <td className="p-3">{c.attendee_email || <span className="text-black/40">not yet</span>}</td>
                     <td className="p-3">{c.order_ref || c.source}</td>
                     <td className="p-3 whitespace-nowrap">{c.last_seen_at ? formatWhen(c.last_seen_at, false) : '—'}</td>
-                    <td className="p-3 whitespace-nowrap text-right"><button onClick={() => resend(c)} className="underline mr-3">Resend</button><button onClick={() => revoke(c)} className="underline">{c.revoked ? 'Restore' : 'Revoke'}</button></td>
+                    <td className="p-3 whitespace-nowrap text-right">
+                      {c.cancelled_at && !c.refunded_at && <><span className="text-xs font-bold text-amber-700 mr-2">Cancelled — refund due</span><button onClick={() => markRefunded(c)} className="underline mr-3">Mark refunded</button></>}
+                      {c.refunded_at && <span className="text-xs font-bold text-emerald-700 mr-3">Refunded</span>}
+                      {!c.cancelled_at && <><button onClick={() => resend(c)} className="underline mr-3">Resend</button><button onClick={() => revoke(c)} className="underline">{c.revoked ? 'Restore' : 'Revoke'}</button></>}
+                    </td>
                   </tr>
                 ))}
                 {!codes.length && <tr><td colSpan={6} className="p-6 text-center text-black/50">No codes yet.</td></tr>}
