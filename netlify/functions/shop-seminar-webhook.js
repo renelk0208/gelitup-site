@@ -6,11 +6,11 @@ import { seminarCodeEmail } from '../../src/lib/seminarEmail.js'
 // in gelitup.com/seminars/admin), one personal access code is created and the
 // codes are emailed to the buyer. Retries are safe: a repeated call returns the
 // codes already made and does not email twice.
-// The webhook address carries the private key SHOP_ORDER_WEBHOOK_KEY.
+// The webhook address carries the private key SHOP_SEMINAR_WEBHOOK_KEY.
 
 const SUPABASE_URL = process.env.SUPABASE_URL || process.env.VITE_SUPABASE_URL || ''
 const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_SERVICE_ROLE || ''
-const WEBHOOK_KEY = process.env.SHOP_ORDER_WEBHOOK_KEY || ''
+const WEBHOOK_KEY = process.env.SHOP_SEMINAR_WEBHOOK_KEY || process.env.SHOP_ORDER_WEBHOOK_KEY || ''
 const EMAIL_WEBHOOK_URL = process.env.VITE_EMAIL_WEBHOOK_URL || process.env.EMAIL_WEBHOOK_URL || ''
 const EMAIL_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || SUPABASE_SERVICE_ROLE_KEY
 
