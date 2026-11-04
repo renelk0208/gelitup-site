@@ -156,9 +156,15 @@ function SeminarCard({ s, onBook }) {
         <p className="text-xs uppercase tracking-wider text-black/50">{formatWhen(s.starts_at, false)}</p>
         <h3 className="font-bold text-lg leading-snug">{s.title}</h3>
         {s.trainer_name && <p className="text-sm text-black/60">with {s.trainer_name}</p>}
-        <p className="mt-2 text-sm font-semibold" style={{ color: recording ? BRAND : soldOut || past || closed ? '#6b7280' : BRAND }}>
-          {recording ? `Watch the recording (${s.recording_days || 30}-day access) →` : past ? 'This seminar has finished' : soldOut ? 'Sold out — watch for the next date' : closed ? `Online booking closed ${BOOKING_CUTOFF_HOURS} hours before the start` : 'Book your seat →'}
-        </p>
+        {clickable ? (
+          <span className="mt-3 inline-flex w-full items-center justify-center rounded-xl px-5 py-3 text-sm font-bold text-white transition group-hover:opacity-90" style={{ background: BRAND }}>
+            {recording ? `Watch the recording (${s.recording_days || 30}-day access) →` : 'Book your seat →'}
+          </span>
+        ) : (
+          <p className="mt-2 text-sm font-semibold text-gray-500">
+            {past ? 'This seminar has finished' : soldOut ? 'Sold out — watch for the next date' : `Online booking closed ${BOOKING_CUTOFF_HOURS} hours before the start`}
+          </p>
+        )}
       </div>
     </>
   )
@@ -380,10 +386,10 @@ function SeminarsHome({ session }) {
             <div key={s.id}>
               <SeminarCard s={s} onBook={setBooking} />
               {s.private_price != null && (
-                <Link to={`/seminars/private?seminar=${s.id}`} className="mt-3 flex items-center justify-between gap-3 rounded-xl border px-4 py-3 text-sm hover:bg-black/[0.03]" style={{ borderColor: BRAND }}>
-                  <span><span className="block font-semibold">Private 1-to-1 session</span><span className="block text-black/60">{Math.round((s.private_minutes || 120) / 60 * 10) / 10} hours with {s.trainer_name || 'the trainer'}, at a time that suits you</span></span>
-                  <span className="shrink-0 font-bold" style={{ color: BRAND }}>€{Number(s.private_price).toFixed(0)} · Request →</span>
-                </Link>
+                <p className="mt-3 text-sm text-black/60 text-center">
+                  Prefer a private 1-to-1 at a time that suits you?{' '}
+                  <Link to={`/seminars/private?seminar=${s.id}`} className="font-semibold underline underline-offset-2" style={{ color: BRAND }}>{Math.round((s.private_minutes || 120) / 60 * 10) / 10} hours · €{Number(s.private_price).toFixed(0)} — request it</Link>
+                </p>
               )}
             </div>
           ))}
