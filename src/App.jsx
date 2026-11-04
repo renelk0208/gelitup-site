@@ -7518,6 +7518,7 @@ const LOGIN_OPTIONS = [
   { to: '/portal/login?portal=distributor', label: 'Distributor / B2B', hint: 'Wholesale ordering portal' },
   { to: '/portal/login?portal=ambassador', label: 'Ambassador', hint: 'Your ambassador profile and codes' },
   { to: '/seminars/login', label: 'Online seminars', hint: 'Sign in with your seminar access code' },
+  { to: '/seminars/trainer', label: 'Seminar trainer', hint: 'Your schedule, bookings and live link' },
 ]
 
 function LoginMenu() {
@@ -7724,6 +7725,14 @@ function MobileNav() {
             className="flex items-center justify-center rounded-lg border border-fuchsia-500 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-white transition duration-200 hover:bg-fuchsia-600/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
           >
             Seminar Login
+          </NavLink>
+
+          <NavLink
+            to="/seminars/trainer"
+            onClick={() => setOpen(false)}
+            className="flex items-center justify-center rounded-lg border border-fuchsia-500 px-4 py-3 text-center text-sm font-bold uppercase tracking-[0.05em] !text-white transition duration-200 hover:bg-fuchsia-600/25 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-fuchsia-400"
+          >
+            Trainer Login
           </NavLink>
 
           <NavLink

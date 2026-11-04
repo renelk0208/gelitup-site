@@ -544,6 +544,7 @@ function SignInPage({ session }) {
           <Button type="submit" disabled={busy} className="w-full">{busy ? 'Signing in…' : 'Sign in'}</Button>
         </form>
         <p className="text-xs text-black/50 mt-4">Your code works on one device at a time — signing in somewhere new signs out the previous device.</p>
+        <p className="text-sm mt-6 text-center">Are you a trainer? <Link to="/seminars/trainer" className="font-semibold underline" style={{ color: BRAND }}>Trainer login →</Link></p>
       </div>
     </Shell>
   )
@@ -833,7 +834,7 @@ function PrivateRequest({ session }) {
 // ── Seminar admin sign-in (seminar team accounts, e.g. seminars@gelitup.com) ─
 // Access is granted only to emails listed in seminar_admins (or B2B admins) — it gives
 // the seminar admin pages only, not the B2B portal.
-function SeminarAdminSignIn({ initialMode = 'signin' }) {
+function SeminarAdminSignIn({ initialMode = 'signin', signInTitle = 'Seminar team sign-in', kicker = 'GEL.IT.UP Seminars' }) {
   const [mode, setMode] = useState(initialMode) // signin | create | forgot | newpass
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -891,11 +892,11 @@ function SeminarAdminSignIn({ initialMode = 'signin' }) {
     )
   }
 
-  const titles = { signin: 'Seminar team sign-in', create: 'Create your password', forgot: 'Reset your password', newpass: 'Choose a new password' }
+  const titles = { signin: signInTitle, create: 'Create your password', forgot: 'Reset your password', newpass: 'Choose a new password' }
   return (
     <Shell>
       <form onSubmit={submit} className="max-w-sm mx-auto border rounded-2xl p-6 grid gap-3">
-        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND }}>GEL.IT.UP Seminars</p>
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND }}>{kicker}</p>
         <h1 className="text-xl font-bold">{titles[mode]}</h1>
         {mode !== 'newpass' && <label className="block"><span className="text-sm font-medium">Email</span><input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} className={`${inputCls} mt-1`} /></label>}
         {mode !== 'forgot' && <label className="block"><span className="text-sm font-medium">{mode === 'signin' ? 'Password' : 'New password (min. 8 characters)'}</span><input type="password" required minLength={mode === 'signin' ? 1 : 8} autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} className={`${inputCls} mt-1`} /></label>}
@@ -948,7 +949,7 @@ function TrainerPage() {
   }, [])
 
   if (state === 'checking') return <Shell><p className="text-center text-black/40">Loading…</p></Shell>
-  if (state === 'signin') return <SeminarAdminSignIn />
+  if (state === 'signin') return <SeminarAdminSignIn signInTitle="Trainer login" kicker="GEL.IT.UP Seminars · Trainers" />
 
   const endOf = (r) => new Date(r.starts_at).getTime() + (r.duration_minutes || 120) * 60000
   const upcoming = rows.filter((r) => endOf(r) >= now)
@@ -1067,14 +1068,29 @@ function AdminPage() {
   const [requests, setRequests] = useState([])
   const [msg, setMsg] = useState('')
   const [issue, setIssue] = useState({ email: '', name: '', count: 1, note: '' })
+  const [trainers, setTrainers] = useState([])
+  const [newTrainer, setNewTrainer] = useState({ name: '', email: '' })
 
   const load = useCallback(async () => {
-    const [{ data: s }, { data: r }] = await Promise.all([
+    const [{ data: s }, { data: r }, { data: t }] = await Promise.all([
       supabase.from('seminars').select('*, seminar_media(*), seminar_access_codes(count)').order('starts_at', { ascending: false }),
       supabase.from('seminar_private_requests').select('*').order('created_at', { ascending: false }).limit(50),
+      supabase.from('seminar_trainers').select('*').order('name'),
     ])
-    setSeminars(s || []); setRequests(r || [])
+    setSeminars(s || []); setRequests(r || []); setTrainers(t || [])
   }, [])
+  const addTrainer = async (e) => {
+    e.preventDefault()
+    const row = { name: newTrainer.name.trim(), email: newTrainer.email.trim().toLowerCase() }
+    if (!row.name || !row.email) return
+    const { error } = await supabase.from('seminar_trainers').insert(row)
+    setMsg(error ? `Could not add trainer: ${error.message}` : `${row.name} added. They can sign in at gelitup.com/seminars/trainer with "First time? Create password" once a seminar is assigned to them.`)
+    if (!error) { setNewTrainer({ name: '', email: '' }); load() }
+  }
+  const removeTrainer = async (t) => {
+    if (!window.confirm(`Remove ${t.name} from the trainers list? Their seminars keep their name and login email.`)) return
+    await supabase.from('seminar_trainers').delete().eq('id', t.id); load()
+  }
 
   useEffect(() => {
     ;(async () => {
@@ -1164,8 +1180,13 @@ function AdminPage() {
         <form onSubmit={save} className="mt-6 border rounded-2xl p-5 md:p-6 grid gap-4 md:grid-cols-2">
           <h2 className="md:col-span-2 font-bold text-lg">{editing.id ? 'Edit seminar' : 'New seminar'}</h2>
           <div className="md:col-span-2">{F({ label: 'Title *', k: 'title', required: true })}</div>
-          {F({ label: 'Trainer', k: 'trainer_name' })}
-          {F({ label: 'Trainer login email (sees bookings & schedule at /seminars/trainer)', k: 'trainer_email', type: 'email' })}
+          <label className="block md:col-span-2"><span className="text-sm font-medium">Trainer</span>
+            <select value={trainers.find((t) => t.email === String(editing.trainer_email || '').toLowerCase())?.id || ''} onChange={(e) => { const t = trainers.find((x) => x.id === e.target.value); setEditing((x) => ({ ...x, trainer_name: t ? t.name : '', trainer_email: t ? t.email : '' })) }} className={`${inputCls} mt-1`}>
+              <option value="">{editing.trainer_name && !trainers.some((t) => t.email === String(editing.trainer_email || '').toLowerCase()) ? `${editing.trainer_name} (not in the trainers list — add below)` : '— choose a trainer —'}</option>
+              {trainers.map((t) => <option key={t.id} value={t.id}>{t.name} · {t.email}</option>)}
+            </select>
+            <span className="text-xs text-black/50">The trainer sees this seminar's bookings and schedule at gelitup.com/seminars/trainer.</span>
+          </label>
           {F({ label: 'Starts (your local time) *', k: 'starts_at', type: 'datetime-local', required: true })}
           {F({ label: 'Duration (minutes)', k: 'duration_minutes', type: 'number', min: 15 })}
           {F({ label: 'Replay days after seminar', k: 'replay_days', type: 'number', min: 0 })}
@@ -1258,6 +1279,28 @@ function AdminPage() {
           </div>
         </section>
       )}
+
+      <section className="mt-10">
+        <h2 className="font-bold text-lg">Trainers</h2>
+        <div className="mt-3 border rounded-2xl divide-y text-sm">
+          {trainers.map((t) => {
+            const count = seminars.filter((x) => String(x.trainer_email || '').toLowerCase() === t.email && x.status !== 'cancelled').length
+            return (
+              <div key={t.id} className="flex flex-wrap items-center gap-3 px-4 py-3">
+                <span className="font-semibold">{t.name}</span><a className="underline text-black/60" href={`mailto:${t.email}`}>{t.email}</a>
+                <span className="text-black/50">{count} seminar{count === 1 ? '' : 's'}</span>
+                <button type="button" onClick={() => removeTrainer(t)} className="ml-auto text-xs underline text-black/50">Remove</button>
+              </div>
+            )
+          })}
+          {!trainers.length && <p className="px-4 py-3 text-black/50">No trainers yet.</p>}
+          <form onSubmit={addTrainer} className="flex flex-wrap items-end gap-2 px-4 py-3 bg-black/[0.02]">
+            <label className="block"><span className="text-xs text-black/60">Name</span><input value={newTrainer.name} onChange={(e) => setNewTrainer((x) => ({ ...x, name: e.target.value }))} className={`${inputCls} !w-56`} required /></label>
+            <label className="block"><span className="text-xs text-black/60">Login email</span><input type="email" value={newTrainer.email} onChange={(e) => setNewTrainer((x) => ({ ...x, email: e.target.value }))} className={`${inputCls} !w-72`} required /></label>
+            <Button type="submit">+ Add trainer</Button>
+          </form>
+        </div>
+      </section>
 
       <section className="mt-10">
         <h2 className="font-bold text-lg">Private seminar requests</h2>
