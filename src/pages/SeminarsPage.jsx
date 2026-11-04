@@ -863,7 +863,7 @@ function AdminPage() {
 }
 
 // ── Seminar terms & conditions ───────────────────────────────────────────────
-// NOTE: the VAT number must be filled in, and the text checked by a lawyer, before launch.
+// NOTE: have the text checked by a lawyer.
 function H({ children }) { return <h2 className="text-lg font-bold mt-8 mb-2">{children}</h2> }
 
 function TermsPage({ session }) {
@@ -873,7 +873,7 @@ function TermsPage({ session }) {
       <article className="text-sm text-black/80 leading-relaxed">
         <h1 className="text-2xl md:text-3xl font-bold text-black">Online seminar terms &amp; conditions</h1>
         <p className="text-black/50 mt-1">Last updated: 4 November 2026</p>
-        <p className="mt-4">These terms apply to bookings for GEL.IT.UP live online seminars and their recordings made at gelitup.com/seminars. The seller is <strong>Thermitek Ltd</strong>, 8 Racho Dimchev, 1000 Sofia, Bulgaria, VAT no. [number], email info@gelitup.com (“we”, “us”). Products such as seminar kits are also subject to the general terms of shop.gelitup.com.</p>
+        <p className="mt-4">These terms apply to bookings for GEL.IT.UP live online seminars and their recordings made at gelitup.com/seminars. The seller is <strong>Thermitek Ltd</strong>, 8 Racho Dimchev, 1000 Sofia, Bulgaria, VAT no. BG202102027, email info@gelitup.com (“we”, “us”). Products such as seminar kits are also subject to the general terms of shop.gelitup.com.</p>
 
         <H>1. Booking and payment</H>
         <ul className="list-disc pl-5 space-y-1">
