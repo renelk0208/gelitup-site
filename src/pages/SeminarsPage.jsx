@@ -268,7 +268,7 @@ function BookingPanel({ seminar, onClose }) {
                   <input type="checkbox" checked={withKit} onChange={(e) => setWithKit(e.target.checked)} className="mt-1" />
                   <span className="flex-1">
                     <span className="font-semibold block">Add the seminar kit{qty > 1 ? ` (×${qty})` : ''}</span>
-                    <span className="text-sm text-black/60">All the products used in the seminar, shipped before the date. 10% off.</span>
+                    <span className="text-sm text-black/60">All the products used in the seminar, shipped before the date. 15% off.</span>
                   </span>
                   {kitVariant && <span className="text-right shrink-0"><span className="font-semibold block">{money(kitVariant.price)}</span>{kitVariant.compareAt > kitVariant.price && <span className="text-xs line-through text-black/40">{money(kitVariant.compareAt)}</span>}</span>}
                 </label>
@@ -606,7 +606,7 @@ function Room({ session }) {
           {s.kit_url && (
             <a href={s.kit_url} className="mt-6 flex items-center gap-4 rounded-2xl border p-5 hover:border-[#D43790] transition-colors">
               <span className="text-3xl" aria-hidden="true">💅</span>
-              <span className="flex-1"><span className="block font-bold">Ready to try it yourself?</span><span className="block text-sm text-black/60">Get all the products used in this seminar in one kit — 10% off the products bought separately.</span></span>
+              <span className="flex-1"><span className="block font-bold">Ready to try it yourself?</span><span className="block text-sm text-black/60">Get all the products used in this seminar in one kit — 15% off the products bought separately.</span></span>
               <span className="shrink-0 font-semibold" style={{ color: BRAND }}>Shop the kit →</span>
             </a>
           )}
