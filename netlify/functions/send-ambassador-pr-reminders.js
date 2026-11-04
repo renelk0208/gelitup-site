@@ -190,6 +190,7 @@ export async function handler(event) {
     .select('id, full_name, email, country, status, paused_at, admin_comment, next_package_due, ambassador_type')
     .eq('status', 'approved')
     .is('paused_at', null)
+    .eq('is_educator', false) // educators: packages when needed, never due/overdue
     .not('next_package_due', 'is', null)
     .limit(1000)
 
