@@ -370,7 +370,7 @@ function SeminarsHome({ session }) {
       <header className="text-center max-w-2xl mx-auto mb-10">
         <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: BRAND }}>GEL.IT.UP Education</p>
         <h1 className="text-3xl md:text-5xl font-bold mt-2">Live online seminars</h1>
-        <p className="mt-4 text-black/60">Learn live from GEL.IT.UP trainers, ask your questions in the live Q&amp;A, and rewatch the recording for 30 days. Missed one? Many seminars are also available as a recording.</p>
+        <p className="mt-4 text-black/60">Learn live from GEL.IT.UP trainers, ask your questions in the live Q&amp;A, and rewatch the recording for 30 days.{seminars?.some((x) => x.past && x.recording_on_sale) ? ' Missed one? Many seminars are also available as a recording.' : ''}</p>
       </header>
 
       {seminars === null && <p className="text-center text-black/40">Loading seminars…</p>}
