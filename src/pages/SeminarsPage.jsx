@@ -830,6 +830,88 @@ function PrivateRequest({ session }) {
   )
 }
 
+// ── Seminar admin sign-in (seminar team accounts, e.g. seminars@gelitup.com) ─
+// Access is granted only to emails listed in seminar_admins (or B2B admins) — it gives
+// the seminar admin pages only, not the B2B portal.
+function SeminarAdminSignIn({ initialMode = 'signin' }) {
+  const [mode, setMode] = useState(initialMode) // signin | create | forgot | newpass
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
+  const [msg, setMsg] = useState('')
+  const [busy, setBusy] = useState(false)
+  const [signedInAs, setSignedInAs] = useState('')
+
+  useEffect(() => {
+    if (!hasSupabaseConfig) return undefined
+    supabase.auth.getSession().then(({ data }) => setSignedInAs(data?.session?.user?.email || ''))
+    const { data: sub } = supabase.auth.onAuthStateChange((event) => { if (event === 'PASSWORD_RECOVERY') setMode('newpass') })
+    return () => sub?.subscription?.unsubscribe()
+  }, [])
+
+  const back = `${window.location.origin}${window.location.pathname}${window.location.search}`
+  const submit = async (e) => {
+    e.preventDefault(); setBusy(true); setMsg('')
+    const em = email.trim().toLowerCase()
+    try {
+      if (mode === 'signin') {
+        const { error } = await supabase.auth.signInWithPassword({ email: em, password })
+        if (error) throw error
+        window.location.reload(); return
+      }
+      if (mode === 'create') {
+        const { error } = await supabase.auth.signUp({ email: em, password, options: { emailRedirectTo: back } })
+        if (error) throw error
+        setMsg('Check your inbox and click the confirmation link — it brings you back here, signed in.')
+      }
+      if (mode === 'forgot') {
+        const { error } = await supabase.auth.resetPasswordForEmail(em, { redirectTo: `${window.location.origin}/seminars/admin?reset=1` })
+        if (error) throw error
+        setMsg('We sent you a link to set a new password.')
+      }
+      if (mode === 'newpass') {
+        const { error } = await supabase.auth.updateUser({ password })
+        if (error) throw error
+        window.location.replace(`${window.location.origin}/seminars/admin`); return
+      }
+    } catch (err) {
+      setMsg(err?.message || 'Something went wrong. Please try again.')
+    }
+    setBusy(false)
+  }
+
+  if (signedInAs && mode !== 'newpass') {
+    return (
+      <Shell>
+        <div className="max-w-sm mx-auto border rounded-2xl p-6 text-center">
+          <p className="font-semibold">Signed in as {signedInAs}</p>
+          <p className="text-sm text-black/60 mt-2">This account doesn't have access to the seminar admin. Sign out and sign in with the seminar account (e.g. seminars@gelitup.com).</p>
+          <Button type="button" className="w-full mt-4" onClick={async () => { await supabase.auth.signOut(); window.location.reload() }}>Sign out</Button>
+        </div>
+      </Shell>
+    )
+  }
+
+  const titles = { signin: 'Seminar admin sign-in', create: 'Create your password', forgot: 'Reset your password', newpass: 'Choose a new password' }
+  return (
+    <Shell>
+      <form onSubmit={submit} className="max-w-sm mx-auto border rounded-2xl p-6 grid gap-3">
+        <p className="text-xs font-bold uppercase tracking-widest" style={{ color: BRAND }}>GEL.IT.UP Seminars</p>
+        <h1 className="text-xl font-bold">{titles[mode]}</h1>
+        {mode !== 'newpass' && <label className="block"><span className="text-sm font-medium">Email</span><input type="email" required autoComplete="username" value={email} onChange={(e) => setEmail(e.target.value)} className={`${inputCls} mt-1`} /></label>}
+        {mode !== 'forgot' && <label className="block"><span className="text-sm font-medium">{mode === 'signin' ? 'Password' : 'New password (min. 8 characters)'}</span><input type="password" required minLength={mode === 'signin' ? 1 : 8} autoComplete={mode === 'signin' ? 'current-password' : 'new-password'} value={password} onChange={(e) => setPassword(e.target.value)} className={`${inputCls} mt-1`} /></label>}
+        <Button type="submit" disabled={busy} className="w-full">{busy ? 'Please wait…' : mode === 'signin' ? 'Sign in' : mode === 'create' ? 'Create password' : mode === 'forgot' ? 'Send reset link' : 'Save password'}</Button>
+        {msg && <p className="text-sm text-center">{msg}</p>}
+        {mode !== 'newpass' && (
+          <div className="flex justify-between text-sm">
+            {mode !== 'signin' ? <button type="button" className="underline" onClick={() => { setMode('signin'); setMsg('') }}>Back to sign in</button> : <button type="button" className="underline" onClick={() => { setMode('create'); setMsg('') }}>First time? Create password</button>}
+            {mode === 'signin' && <button type="button" className="underline" onClick={() => { setMode('forgot'); setMsg('') }}>Forgot password?</button>}
+          </div>
+        )}
+      </form>
+    </Shell>
+  )
+}
+
 // ── Admin ────────────────────────────────────────────────────────────────────
 const EMPTY = { title: '', trainer_name: '', description: '', starts_at: '', duration_minutes: 90, replay_days: 30, status: 'draft', kind: 'group', shopify_sku: '', shop_url: '', kit_url: '', image_url: '', sold_out: false, recording_sku: '', recording_shop_url: '', recording_days: 30, recording_on_sale: false, vimeo_event: '', replay_video: '' }
 
@@ -863,6 +945,7 @@ function AdminPage() {
   useEffect(() => {
     ;(async () => {
       if (!hasSupabaseConfig) { setAuthState('no'); return }
+      if (new URLSearchParams(window.location.search).get('reset')) { setAuthState('reset'); return }
       const { data: sess } = await supabase.auth.getSession()
       if (!sess?.session) { setAuthState('no'); return }
       const { data: ok } = await supabase.rpc('seminar_is_admin')
@@ -878,7 +961,8 @@ function AdminPage() {
   }
 
   if (authState === 'checking') return <Shell><p className="text-center text-black/40">Checking access…</p></Shell>
-  if (authState === 'no') return <Shell><p className="text-center">Admins only. <Link className="underline" to="/portal/admin-login">Sign in as admin</Link>, then come back to /seminars/admin.</p></Shell>
+  if (authState === 'reset') return <SeminarAdminSignIn initialMode="newpass" />
+  if (authState === 'no') return <SeminarAdminSignIn />
 
   const startEdit = (s) => {
     const m = Array.isArray(s?.seminar_media) ? s.seminar_media[0] : s?.seminar_media
@@ -1122,7 +1206,7 @@ function PrivateReply() {
   }, [id, slot])
 
   if (authState === 'checking') return <Shell><p className="text-center text-black/40">Checking access…</p></Shell>
-  if (authState === 'no') return <Shell><p className="text-center">Admins only. <Link className="underline" to="/portal/admin-login">Sign in as admin</Link>, then open the link from the email again.</p></Shell>
+  if (authState === 'no') return <SeminarAdminSignIn />
   if (req === null) return <Shell><p className="text-center text-black/40">Loading request…</p></Shell>
   if (req === false) return <Shell><p className="text-center">Request not found. <Link className="underline" to="/seminars/admin">Back to seminar admin</Link></p></Shell>
 
