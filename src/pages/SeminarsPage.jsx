@@ -251,7 +251,7 @@ function SeminarCard({ s, onBook }) {
           {hasPrivate && (
             <Link to={`/seminars/private?seminar=${s.id}`} className="rounded-xl px-3 py-3 text-left transition hover:brightness-95" style={{ background: '#F9D3E6', color: '#9E1F63' }}>
               <span className="block text-[11px] font-bold uppercase tracking-wider opacity-80">Private session</span>
-              <span className="block text-sm font-bold">{Math.round((s.private_minutes || 120) / 60 * 10) / 10} h 1-to-1 · Request →</span>
+              <span className="block text-sm font-bold">{Math.round((s.private_minutes || 120) / 60 * 10) / 10} h 1-on-1 · Request →</span>
             </Link>
           )}
         </div>
@@ -740,7 +740,7 @@ function Room({ session }) {
 function PrivateRequest({ session }) {
   const [form, setForm] = useState({ name: '', email: '', phone: '', country: '', topic: '', attendees: 1, wants_kit: false, notes: '', slots: [{ date: '', time: '' }, { date: '', time: '' }, { date: '', time: '' }] })
   const [state, setState] = useState('idle')
-  // /seminars/private?seminar=<id> = a private 1-to-1 session of a listed seminar, at its fixed price.
+  // /seminars/private?seminar=<id> = a private 1-on-1 session of a listed seminar, at its fixed price.
   const [seminarId] = useState(() => (typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('seminar')))
   const [seminar, setSeminar] = useState(null)
   useEffect(() => {
@@ -757,7 +757,7 @@ function PrivateRequest({ session }) {
     e.preventDefault(); setState('sending')
     const slots = form.slots.filter((s) => s.date).map((s) => ({ ...s, tz: EET_ZONE }))
     const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : undefined
-    const record = { id, name: form.name, email: form.email.trim().toLowerCase(), phone: form.phone, country: form.country, timezone: tz, preferred_slots: slots, topic: seminar ? `Private 1-to-1: ${seminar.title} (€${Number(seminar.private_price).toFixed(0)}, ${hours} h)${form.topic ? ` — ${form.topic}` : ''}` : form.topic, attendees: seminar ? 1 : Number(form.attendees) || 1, wants_kit: form.wants_kit, notes: form.notes, seminar_id: seminar?.id || null }
+    const record = { id, name: form.name, email: form.email.trim().toLowerCase(), phone: form.phone, country: form.country, timezone: tz, preferred_slots: slots, topic: seminar ? `Private 1-on-1: ${seminar.title} (€${Number(seminar.private_price).toFixed(0)}, ${hours} h)${form.topic ? ` — ${form.topic}` : ''}` : form.topic, attendees: seminar ? 1 : Number(form.attendees) || 1, wants_kit: form.wants_kit, notes: form.notes, seminar_id: seminar?.id || null }
     const { error } = await supabase.from('seminar_private_requests').insert(record)
     if (error) { setState('error'); return }
     if (EMAIL_WEBHOOK_URL) {
@@ -769,7 +769,7 @@ function PrivateRequest({ session }) {
         return `<tr><td style="padding:8px 12px 8px 0">${iso ? `<strong>${escapeHtml(whenEET(iso))}</strong>${theirs}` : `${escapeHtml(sl.date)} (no time given)`}</td><td style="padding:8px 0"><a href="${replyUrl}?slot=${i}" style="background:${BRAND};color:#fff;padding:9px 14px;border-radius:8px;text-decoration:none;font-weight:bold;white-space:nowrap">✓ Agree this time</a></td></tr>`
       }).join('')
       const html = brandEmail(`<div>
-        <h2 style="margin:0 0 4px">${seminar ? 'Private 1-to-1 request' : 'Private seminar request'}</h2>
+        <h2 style="margin:0 0 4px">${seminar ? 'Private 1-on-1 request' : 'Private seminar request'}</h2>
         ${seminar ? `<p style="margin:0 0 14px;color:#444">${escapeHtml(seminar.title)} · ${hours} hours · €${Number(seminar.private_price).toFixed(0)}</p>` : ''}
         <table style="font-size:14px">${rows.filter(([, v]) => v !== '' && v != null).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666">${escapeHtml(k)}</td><td><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}</table>
         <h3 style="margin:20px 0 4px">Preferred times — click the one you agree</h3>
@@ -777,7 +777,7 @@ function PrivateRequest({ session }) {
         <p style="margin:18px 0"><a href="${replyUrl}" style="color:${BRAND};font-weight:bold">Reply with another time or a comment →</a></p>
         <p style="font-size:12px;color:#777">Each button opens the reply page (admin sign-in needed), where you can add a comment for the client and send the confirmation with the €${seminar ? Number(seminar.private_price).toFixed(0) : ''} payment link.</p>
       </div>`, 'Internal notification — private session request')
-      fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: EMAIL_ANON_KEY, Authorization: `Bearer ${EMAIL_ANON_KEY}` }, body: JSON.stringify({ to: PRIVATE_INBOX, subject: seminar ? `Private 1-to-1 request — ${seminar.title} — ${record.name}` : `Private seminar request — ${record.name}`, html, from: 'GEL.IT.UP Seminars <info@gelitup.com>', replyTo: record.email }) }).catch(() => {})
+      fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: EMAIL_ANON_KEY, Authorization: `Bearer ${EMAIL_ANON_KEY}` }, body: JSON.stringify({ to: PRIVATE_INBOX, subject: seminar ? `Private 1-on-1 request — ${seminar.title} — ${record.name}` : `Private seminar request — ${record.name}`, html, from: 'GEL.IT.UP Seminars <info@gelitup.com>', replyTo: record.email }) }).catch(() => {})
     }
     setState('done')
   }
@@ -785,7 +785,7 @@ function PrivateRequest({ session }) {
   return (
     <Shell>
       <SubNav signedIn={session.signedIn} />
-      <h1 className="text-3xl font-bold text-center">{seminar ? 'Private 1-to-1 session' : 'Private seminar'}</h1>
+      <h1 className="text-3xl font-bold text-center">{seminar ? 'Private 1-on-1 session' : 'Private seminar'}</h1>
       {seminar ? (
         <div className="text-center mt-2 max-w-xl mx-auto">
           <p className="text-lg font-semibold">{seminar.title}</p>
@@ -1055,7 +1055,7 @@ function AdminPage() {
             <label className="flex items-center gap-2 mt-6"><input type="checkbox" checked={Boolean(editing.recording_on_sale)} onChange={(e) => setEditing((x) => ({ ...x, recording_on_sale: e.target.checked }))} /><span className="text-sm font-semibold">Recording on sale (shows "Watch the recording" after the seminar)</span></label>
           </div>
           <div className="md:col-span-2 rounded-xl bg-black/[0.03] p-4 grid gap-3 md:grid-cols-2">
-            <p className="font-semibold text-sm md:col-span-2">Private 1-to-1 session (leave the price empty to not offer it)</p>
+            <p className="font-semibold text-sm md:col-span-2">Private 1-on-1 session (leave the price empty to not offer it)</p>
             {F({ label: 'Private session price (€)', k: 'private_price', type: 'number', min: 0 })}
             {F({ label: 'Private session length (minutes)', k: 'private_minutes', type: 'number', min: 15 })}
             {F({ label: 'Payment link: Shopify variant ID of the unlisted private-session product', k: 'private_variant_id', placeholder: 'e.g. 55333004214610' })}
@@ -1157,11 +1157,11 @@ function privateReplyEmail({ req, seminar, startIso, comment, decline, payUrl })
   return {
     subject: `Your private session is reserved — ${title}`,
     html: brandEmail(`
-      <p style="color:${BRAND};font-weight:bold;letter-spacing:2px;font-size:12px;margin:0">PRIVATE 1-TO-1 SESSION</p>
+      <p style="color:${BRAND};font-weight:bold;letter-spacing:2px;font-size:12px;margin:0">PRIVATE 1-ON-1 SESSION</p>
       <h1 style="font-size:22px;margin:4px 0 12px">${escapeHtml(title)}</h1>
       <p>Hi ${escapeHtml(req.name || 'there')},</p>
       <p>Good news — ${seminar?.trainer_name ? escapeHtml(seminar.trainer_name) : 'our trainer'} is available. We have reserved this time for you:</p>
-      <p style="font-size:18px;background:#f6f6f6;border-radius:8px;padding:14px;text-align:center"><strong>${escapeHtml(whenEET(startIso))}</strong>${tzLine}${hours ? `<br/><span style="color:#666">${hours} hours, live online, 1-to-1</span>` : ''}</p>
+      <p style="font-size:18px;background:#f6f6f6;border-radius:8px;padding:14px;text-align:center"><strong>${escapeHtml(whenEET(startIso))}</strong>${tzLine}${hours ? `<br/><span style="color:#666">${hours} hours, live online, 1-on-1</span>` : ''}</p>
       ${commentHtml}
       <p style="text-align:center;margin:24px 0 10px"><a href="${payUrl}" style="display:inline-block;margin:4px;background:${BRAND};color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:bold">Pay${seminar?.private_price != null ? ` €${Number(seminar.private_price).toFixed(0)}` : ''} to book your session</a>${seminar?.kit_url ? `<a href="${seminar.kit_url}" style="display:inline-block;margin:4px;background:#ffffff;color:${BRAND};border:2px solid ${BRAND};padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold">Shop the seminar kit</a>` : ''}</p>
       ${seminar?.kit_url ? `<p style="text-align:center;font-size:13px;color:#555;margin:0 0 20px">${req.wants_kit ? 'You asked about the products — ' : ''}the kit has every product used in the session, 15% off the products bought separately. Delivery time depends on your country, so please order it soon to have it in time for your session.</p>` : ''}
@@ -1232,7 +1232,7 @@ function PrivateReply() {
   return (
     <Shell>
       <p className="text-sm"><Link to="/seminars/admin" className="underline">← Seminar admin</Link></p>
-      <h1 className="text-2xl font-bold mt-3">{seminar ? 'Private 1-to-1 request' : 'Private seminar request'}</h1>
+      <h1 className="text-2xl font-bold mt-3">{seminar ? 'Private 1-on-1 request' : 'Private seminar request'}</h1>
       {seminar && <p className="text-black/60">{seminar.title} · €{Number(seminar.private_price).toFixed(0)}</p>}
       <div className="mt-4 border rounded-2xl p-4 text-sm grid gap-1">
         <p><strong>{req.name}</strong> · <a className="underline" href={`mailto:${req.email}`}>{req.email}</a>{req.phone ? ` · ${req.phone}` : ''}{req.country ? ` · ${req.country}` : ''}</p>
@@ -1336,7 +1336,7 @@ function TermsPage({ session }) {
           <li>If the recording cannot be played because of a problem on our side, we will fix it or refund you.</li>
         </ul>
 
-        <H>Private 1-to-1 sessions</H>
+        <H>Private 1-on-1 sessions</H>
         <ul className="list-disc pl-5 space-y-1">
           <li>You request a private session with your preferred dates and times. We confirm one date and time with the trainer and send you a payment link; the session is booked once payment is received.</li>
           <li><strong>Cancellation:</strong> you can cancel free of charge, with a full refund, up to {PRIVATE_CANCEL_HOURS} hours before the confirmed start. Less than {PRIVATE_CANCEL_HOURS} hours before the start, or if you do not attend, the session cannot be refunded. You may ask to move the session once, free of charge, if you tell us at least {PRIVATE_CANCEL_HOURS} hours before the start.</li>
