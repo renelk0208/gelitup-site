@@ -765,23 +765,30 @@ async function streamCall(payload, withAuth = false) {
 }
 
 // Signed player: live while the seminar is on, the recording afterwards.
+// Live: the page asks every few seconds whether the trainer is on air, shows "waiting" until she is,
+// and switches to the new broadcast by itself if her connection drops and comes back.
 function CfPlayer({ seminarId, token = '', staffMode = '', title = 'Seminar' }) {
   const [state, setState] = useState({ loading: true })
   useEffect(() => {
     let alive = true
+    let timer = null
     const load = async () => {
       const r = await streamCall(token ? { action: 'play', seminar_id: seminarId, token } : { action: 'play', seminar_id: seminarId, mode: staffMode }, !token)
-      if (alive) setState({ loading: false, ...r })
+      if (!alive) return
+      // Keep the same player (no reload) while the same broadcast is on air.
+      setState((prev) => (r?.uid && prev.uid === r.uid ? prev : { loading: false, ...r }))
+      const next = r?.mode === 'live' ? (r.waiting ? 8000 : 20000) : 30 * 60000
+      timer = setTimeout(load, next)
     }
     load()
-    const t = setInterval(load, 30 * 60000) // fresh link before the old one expires
-    return () => { alive = false; clearInterval(t) }
+    return () => { alive = false; clearTimeout(timer) }
   }, [seminarId, token, staffMode])
   const box = 'relative aspect-video rounded-2xl overflow-hidden bg-black'
   if (state.loading) return <div className={`${box} flex items-center justify-center text-white/60 text-sm`}>Loading the player…</div>
+  if (state.waiting) return <div className={`${box} flex flex-col items-center justify-center text-center p-6 text-white`}><span className="h-3 w-3 rounded-full animate-pulse" style={{ background: BRAND }} /><p className="mt-3 font-semibold">Waiting for the trainer to go live…</p><p className="mt-1 text-sm text-white/60">The picture appears here by itself — no need to refresh.</p></div>
   if (state.pending) return <div className={`${box} flex items-center justify-center text-center p-6 text-white`}>The recording is being prepared — it usually takes a few minutes after the seminar ends. Please check back soon.</div>
   if (!state.url) return <div className={`${box} flex items-center justify-center text-center p-6 text-white/80 text-sm`}>{state.error === 'stream_not_configured' ? 'The stream is not set up yet.' : state.error === 'no_stream' ? 'No stream has been created for this seminar yet.' : 'The player could not be loaded. Please refresh the page.'}</div>
-  return <div className={box}><iframe title={title} src={`${state.url}?autoplay=true&letterboxColor=transparent`} className="absolute inset-0 h-full w-full border-0" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen /></div>
+  return <div className={box}><iframe key={state.uid || state.url} title={title} src={`${state.url}?autoplay=true&letterboxColor=transparent`} className="absolute inset-0 h-full w-full border-0" allow="accelerometer; gyroscope; autoplay; encrypted-media; picture-in-picture; fullscreen" allowFullScreen /></div>
 }
 
 const NAME_KEY = 'giup_seminar_chat_name'
@@ -1930,6 +1937,7 @@ function ObsGuide() {
 
       <ObsStep n={5} title="Settings for a smooth stream">
         <p><strong>Settings → Output</strong>: Video bitrate <strong>4500 Kbps</strong> (use 2500 on slower internet), Audio bitrate 160. <strong>Settings → Video</strong>: Output resolution 1920×1080 (or 1280×720 on slower internet), 30 FPS.</p>
+        <p>For a shorter delay: <strong>Settings → Output</strong>, tick <strong>Enable Custom Encoder Settings</strong> and type <code className="rounded bg-black/5 px-1">keyint=60 tune=zerolatency</code>. Attendees still see you about 10 seconds later than real time — that's normal; read the chat at natural pauses.</p>
         <p>Use a cable to your router if you can — Wi-Fi drops are the most common problem. Close other programs and video calls.</p>
       </ObsStep>
 

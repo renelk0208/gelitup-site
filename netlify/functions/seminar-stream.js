@@ -112,7 +112,14 @@ export async function handler(event) {
         mode = body.mode === 'replay' ? 'replay' : 'live'
       }
       const key = await signingKey(admin)
-      if (mode === 'live') return json(200, { ok: true, mode, url: signedPlayerUrl(key, media.cf_live_input_uid, 6) })
+      if (mode === 'live') {
+        // Play the broadcast that is on air right now (never an older recording). If the trainer
+        // isn't streaming yet, say so — the page asks again every few seconds.
+        const vids = await cf(`/live_inputs/${media.cf_live_input_uid}/videos`)
+        const onAir = (vids || []).filter((v) => v?.status?.state === 'live-inprogress').sort((a, b) => new Date(b.created) - new Date(a.created))[0]
+        if (!onAir) return json(200, { ok: true, mode, waiting: true })
+        return json(200, { ok: true, mode, uid: onAir.uid, url: signedPlayerUrl(key, onAir.uid, 6) })
+      }
       const { data: sem } = await admin.from('seminars').select('starts_at').eq('id', seminarId).maybeSingle()
       // Staff can look at the newest recording at any time (e.g. after the test) without fixing it as the replay.
       const rec = media.cf_recording_uid || (await findRecording(admin, seminarId, media.cf_live_input_uid, sem?.starts_at, Boolean(body.token)))
