@@ -250,7 +250,7 @@ function SeminarCard({ s, onBook }) {
           )}
           {hasPrivate && (
             <Link to={`/seminars/private?seminar=${s.id}`} className="rounded-xl px-3 py-3 text-left transition hover:brightness-95" style={{ background: '#F9D3E6', color: '#9E1F63' }}>
-              <span className="block text-[11px] font-bold uppercase tracking-wider opacity-80">Private session · €{Number(s.private_price).toFixed(0)}</span>
+              <span className="block text-[11px] font-bold uppercase tracking-wider opacity-80">Private session</span>
               <span className="block text-sm font-bold">{Math.round((s.private_minutes || 120) / 60 * 10) / 10} h 1-to-1 · Request →</span>
             </Link>
           )}
