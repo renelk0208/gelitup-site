@@ -122,10 +122,10 @@ function useSeminarSession() {
 }
 
 // ── Public: upcoming seminars ────────────────────────────────────────────────
-function SeminarCard({ s }) {
-  const soldOut = s.sold_out || (s.seats_taken ?? 0) >= s.seats
+function SeminarCard({ s, onBook }) {
+  const soldOut = Boolean(s.sold_out)
   const past = Boolean(s.past)
-  const clickable = !soldOut && !past && s.shop_url
+  const clickable = !soldOut && !past
   const inner = (
     <>
       <div className="relative aspect-[4/5] bg-black/5 overflow-hidden rounded-2xl">
@@ -138,13 +138,8 @@ function SeminarCard({ s }) {
           </div>
         )}
         {past && <span className="absolute top-3 left-3 rounded-full bg-black/80 text-white text-xs font-semibold px-3 py-1">Finished</span>}
-        {!soldOut && !past && s.seats - (s.seats_taken ?? 0) <= 5 && (
-          <span className="absolute top-3 left-3 rounded-full text-white text-xs font-semibold px-3 py-1" style={{ background: BRAND }}>
-            Only {s.seats - (s.seats_taken ?? 0)} seats left
-          </span>
-        )}
       </div>
-      <div className="pt-3">
+      <div className="pt-3 text-left">
         <p className="text-xs uppercase tracking-wider text-black/50">{formatWhen(s.starts_at, false)}</p>
         <h3 className="font-bold text-lg leading-snug">{s.title}</h3>
         {s.trainer_name && <p className="text-sm text-black/60">with {s.trainer_name}</p>}
@@ -155,26 +150,132 @@ function SeminarCard({ s }) {
     </>
   )
   return clickable
-    ? <a href={s.shop_url} className="group block" aria-label={`Book ${s.title}`}>{inner}</a>
+    ? <button type="button" onClick={() => onBook(s)} className="group block w-full" aria-label={`Book ${s.title}`}>{inner}</button>
     : <div className="block cursor-default" aria-disabled="true">{inner}</div>
+}
+
+const money = (n) => (n == null ? '' : `€${Number(n).toFixed(2)}`)
+
+// Booking panel: seat + optional kit with its choices, then straight to Shopify checkout.
+function BookingPanel({ seminar, onClose }) {
+  const [data, setData] = useState(null)
+  const [error, setError] = useState('')
+  const [qty, setQty] = useState(1)
+  const [withKit, setWithKit] = useState(false)
+  const [choice, setChoice] = useState([])
+
+  useEffect(() => {
+    let cancelled = false
+    fetch(`/.netlify/functions/seminar-booking?id=${seminar.id}`)
+      .then((r) => (r.ok ? r.json() : Promise.reject(new Error(String(r.status)))))
+      .then((d) => {
+        if (cancelled) return
+        setData(d)
+        setChoice((d.kit?.options || []).map((o) => o.values[0]))
+      })
+      .catch(() => { if (!cancelled) setError('Booking is not open yet for this seminar. Please check back soon.') })
+    return () => { cancelled = true }
+  }, [seminar.id])
+
+  useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') onClose() }
+    window.addEventListener('keydown', onKey)
+    return () => window.removeEventListener('keydown', onKey)
+  }, [onClose])
+
+  const kitVariant = data?.kit?.variants?.find((v) => v.options.every((o, i) => o === choice[i]))
+  const seatOk = data?.seat && data.seat.available && !data.soldOut
+  const total = (seatOk ? data.seat.price * qty : 0) + (withKit && kitVariant ? kitVariant.price * qty : 0)
+
+  const checkout = () => {
+    const items = [`${data.seat.id}:${qty}`]
+    if (withKit && kitVariant) items.push(`${kitVariant.id}:${qty}`)
+    window.location.href = `${data.checkoutBase}${items.join(',')}`
+  }
+
+  return (
+    <div className="fixed inset-0 z-[100] flex items-end sm:items-center justify-center bg-black/60 p-0 sm:p-4" role="dialog" aria-modal="true" aria-label={`Book ${seminar.title}`} onClick={onClose}>
+      <div className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
+        <div className="flex justify-between gap-4">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: BRAND }}>Book your seat</p>
+            <h2 className="text-xl font-bold mt-1">{seminar.title}</h2>
+            <p className="text-sm text-black/60">{formatWhen(seminar.starts_at)}</p>
+          </div>
+          <button type="button" onClick={onClose} aria-label="Close" className="text-2xl leading-none text-black/40 hover:text-black">×</button>
+        </div>
+
+        {!data && !error && <p className="mt-6 text-black/40 text-sm">Loading…</p>}
+        {error && <p className="mt-6 text-sm text-black/70">{error}</p>}
+        {data && !seatOk && <p className="mt-6 text-sm text-black/70">{data.soldOut ? 'This seminar is sold out.' : 'Booking is not open yet for this seminar. Please check back soon.'}</p>}
+
+        {data && seatOk && (
+          <>
+            <div className="mt-6 flex items-center justify-between border rounded-xl p-4">
+              <div><p className="font-semibold">Live seminar seat</p><p className="text-sm text-black/60">Includes live Q&amp;A and 30-day replay</p></div>
+              <div className="text-right"><p className="font-semibold">{money(data.seat.price)}</p>
+                <label className="text-xs text-black/60">Seats{' '}
+                  <select value={qty} onChange={(e) => setQty(Number(e.target.value))} className="border rounded px-1 py-0.5 ml-1">
+                    {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}</option>)}
+                  </select>
+                </label>
+              </div>
+            </div>
+            {qty > 1 && <p className="text-xs text-black/50 mt-1">Each seat gets its own access code — forward one to each person.</p>}
+
+            {data.kit && (
+              <div className={`mt-4 border rounded-xl p-4 ${withKit ? 'border-[#D43790] bg-[#D43790]/[0.03]' : ''}`}>
+                <label className="flex items-start gap-3 cursor-pointer">
+                  <input type="checkbox" checked={withKit} onChange={(e) => setWithKit(e.target.checked)} className="mt-1" />
+                  <span className="flex-1">
+                    <span className="font-semibold block">Add the seminar kit{qty > 1 ? ` (×${qty})` : ''}</span>
+                    <span className="text-sm text-black/60">All the products used in the seminar, shipped before the date. 10% off.</span>
+                  </span>
+                  {kitVariant && <span className="text-right shrink-0"><span className="font-semibold block">{money(kitVariant.price)}</span>{kitVariant.compareAt > kitVariant.price && <span className="text-xs line-through text-black/40">{money(kitVariant.compareAt)}</span>}</span>}
+                </label>
+                {withKit && (
+                  <div className="mt-4 grid gap-3">
+                    {data.kit.options.map((o, i) => (
+                      <label key={o.name} className="block"><span className="text-sm font-medium">{o.name}</span>
+                        <select value={choice[i] || ''} onChange={(e) => setChoice((c) => c.map((v, j) => (j === i ? e.target.value : v)))} className={`${inputCls} mt-1`}>
+                          {o.values.map((v) => <option key={v} value={v}>{v}</option>)}
+                        </select>
+                      </label>
+                    ))}
+                    {kitVariant && !kitVariant.available && <p className="text-sm text-red-600">This combination is currently unavailable — please choose another.</p>}
+                  </div>
+                )}
+              </div>
+            )}
+
+            <div className="mt-6 flex items-center justify-between">
+              <p className="text-sm text-black/60">Total{withKit ? ' (shipping added at checkout)' : ''}</p>
+              <p className="text-2xl font-bold">{money(total)}</p>
+            </div>
+            <Button type="button" onClick={checkout} disabled={withKit && (!kitVariant || !kitVariant.available)} className="w-full mt-4">Continue to secure payment →</Button>
+            <p className="text-xs text-black/50 mt-3 text-center">Payment is processed securely by Shopify. Your access code is emailed straight after payment.</p>
+          </>
+        )}
+      </div>
+    </div>
+  )
 }
 
 function SeminarsHome({ session }) {
   const [seminars, setSeminars] = useState(null)
+  const [booking, setBooking] = useState(null)
+  const closeBooking = useCallback(() => setBooking(null), [])
   useEffect(() => {
     let cancelled = false
     ;(async () => {
       if (!hasSupabaseConfig) { setSeminars([]); return }
       const since = new Date(Date.now() - 2 * 86400000).toISOString()
       const { data } = await supabase.from('seminars')
-        .select('id, title, trainer_name, starts_at, duration_minutes, seats, sold_out, shop_url, image_url, status, kind')
+        .select('id, title, trainer_name, starts_at, duration_minutes, sold_out, image_url, status, kind')
         .eq('kind', 'group').eq('status', 'scheduled').gte('starts_at', since).order('starts_at')
-      const rows = data || []
-      const withSeats = await Promise.all(rows.map(async (s) => {
-        const { data: taken } = await supabase.rpc('seminar_seats_taken', { p_seminar_id: s.id })
-        return { ...s, seats_taken: taken ?? 0, past: new Date(s.starts_at).getTime() + s.duration_minutes * 60000 < Date.now() }
-      }))
-      if (!cancelled) setSeminars(withSeats)
+      const now = Date.now()
+      const rows = (data || []).map((s) => ({ ...s, past: new Date(s.starts_at).getTime() + s.duration_minutes * 60000 < now }))
+      if (!cancelled) setSeminars(rows)
     })()
     return () => { cancelled = true }
   }, [])
@@ -185,7 +286,7 @@ function SeminarsHome({ session }) {
       <header className="text-center max-w-2xl mx-auto mb-10">
         <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: BRAND }}>GEL.IT.UP Education</p>
         <h1 className="text-3xl md:text-5xl font-bold mt-2">Live online seminars</h1>
-        <p className="mt-4 text-black/60">Learn live from GEL.IT.UP trainers, ask your questions in the live Q&amp;A, and rewatch the recording for 30 days. Only 20 seats per date.</p>
+        <p className="mt-4 text-black/60">Learn live from GEL.IT.UP trainers, ask your questions in the live Q&amp;A, and rewatch the recording for 30 days.</p>
       </header>
 
       {seminars === null && <p className="text-center text-black/40">Loading seminars…</p>}
@@ -197,7 +298,7 @@ function SeminarsHome({ session }) {
       )}
       {seminars?.length > 0 && (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {seminars.map((s) => <SeminarCard key={s.id} s={s} />)}
+          {seminars.map((s) => <SeminarCard key={s.id} s={s} onBook={setBooking} />)}
         </div>
       )}
 
@@ -211,6 +312,7 @@ function SeminarsHome({ session }) {
         ))}
       </section>
       <p className="text-center mt-8 text-sm text-black/60">Already booked? <Link to="/seminars/login" className="font-semibold underline" style={{ color: BRAND }}>Sign in with your access code</Link></p>
+      {booking && <BookingPanel seminar={booking} onClose={closeBooking} />}
     </Shell>
   )
 }
@@ -440,7 +542,7 @@ function PrivateRequest({ session }) {
 }
 
 // ── Admin ────────────────────────────────────────────────────────────────────
-const EMPTY = { title: '', trainer_name: '', description: '', starts_at: '', duration_minutes: 90, seats: 20, replay_days: 30, status: 'draft', kind: 'group', shopify_sku: '', shop_url: '', kit_url: '', image_url: '', sold_out: false, vimeo_event: '', replay_video: '' }
+const EMPTY = { title: '', trainer_name: '', description: '', starts_at: '', duration_minutes: 90, replay_days: 30, status: 'draft', kind: 'group', shopify_sku: '', shop_url: '', kit_url: '', image_url: '', sold_out: false, vimeo_event: '', replay_video: '' }
 
 const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); const p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}` }
 
@@ -498,9 +600,9 @@ function AdminPage() {
   const save = async (e) => {
     e.preventDefault(); setMsg('Saving…')
     const { vimeo_event, replay_video, id } = editing
-    const FIELDS = ['title', 'trainer_name', 'description', 'duration_minutes', 'seats', 'replay_days', 'status', 'kind', 'shopify_sku', 'shop_url', 'kit_url', 'image_url', 'sold_out']
+    const FIELDS = ['title', 'trainer_name', 'description', 'duration_minutes', 'replay_days', 'status', 'kind', 'shopify_sku', 'shop_url', 'kit_url', 'image_url', 'sold_out']
     const rest = Object.fromEntries(FIELDS.map((f) => [f, editing[f] === '' ? null : editing[f]]))
-    const row = { ...rest, starts_at: new Date(editing.starts_at).toISOString(), shopify_sku: rest.shopify_sku?.trim() || null, duration_minutes: Number(rest.duration_minutes), seats: Number(rest.seats), replay_days: Number(rest.replay_days), updated_at: new Date().toISOString() }
+    const row = { ...rest, starts_at: new Date(editing.starts_at).toISOString(), shopify_sku: rest.shopify_sku?.trim() || null, duration_minutes: Number(rest.duration_minutes), replay_days: Number(rest.replay_days), updated_at: new Date().toISOString() }
     const q = id ? supabase.from('seminars').update(row).eq('id', id).select().single() : supabase.from('seminars').insert(row).select().single()
     const { data, error } = await q
     if (error) { setMsg(`Could not save: ${error.message}`); return }
@@ -557,7 +659,6 @@ function AdminPage() {
           {F({ label: 'Trainer', k: 'trainer_name' })}
           {F({ label: 'Starts (your local time) *', k: 'starts_at', type: 'datetime-local', required: true })}
           {F({ label: 'Duration (minutes)', k: 'duration_minutes', type: 'number', min: 15 })}
-          {F({ label: 'Seats', k: 'seats', type: 'number', min: 1 })}
           {F({ label: 'Replay days after seminar', k: 'replay_days', type: 'number', min: 0 })}
           <label className="block"><span className="text-sm font-medium">Status</span>
             <select value={editing.status} onChange={(e) => setEditing((x) => ({ ...x, status: e.target.value }))} className={`${inputCls} mt-1`}>
@@ -568,8 +669,8 @@ function AdminPage() {
               <option value="group">Group seminar (public listing)</option><option value="private">Private seminar (not listed)</option>
             </select></label>
           {F({ label: 'Shopify SKU of this date (links orders → codes)', k: 'shopify_sku', placeholder: 'e.g. SEM-LIVE-2026-12-05' })}
-          {F({ label: 'Booking page (shop.gelitup.com link)', k: 'shop_url', type: 'url' })}
-          {F({ label: 'Seminar kit page (optional)', k: 'kit_url', type: 'url' })}
+          {F({ label: 'Seminar product page on shop.gelitup.com (…/products/…)', k: 'shop_url', type: 'url' })}
+          {F({ label: 'Seminar kit product page (optional, …/products/…)', k: 'kit_url', type: 'url' })}
           {F({ label: 'Booking image URL (1200 × 1500 px)', k: 'image_url', type: 'url' })}
           <label className="flex items-center gap-2 mt-6"><input type="checkbox" checked={Boolean(editing.sold_out)} onChange={(e) => setEditing((x) => ({ ...x, sold_out: e.target.checked }))} /><span className="text-sm font-semibold">Show SOLD OUT</span></label>
           <div className="md:col-span-2"><label className="block"><span className="text-sm font-medium">Description</span><textarea rows={4} value={editing.description || ''} onChange={(e) => setEditing((x) => ({ ...x, description: e.target.value }))} className={`${inputCls} mt-1`} /></label></div>
@@ -584,14 +685,14 @@ function AdminPage() {
 
       <div className="mt-6 overflow-x-auto border rounded-2xl">
         <table className="w-full text-sm">
-          <thead className="bg-black/[0.03] text-left"><tr><th className="p-3">Seminar</th><th className="p-3">Date</th><th className="p-3">Status</th><th className="p-3">Codes / seats</th><th className="p-3">Sold out</th><th className="p-3"></th></tr></thead>
+          <thead className="bg-black/[0.03] text-left"><tr><th className="p-3">Seminar</th><th className="p-3">Date</th><th className="p-3">Status</th><th className="p-3">Booked</th><th className="p-3">Sold out</th><th className="p-3"></th></tr></thead>
           <tbody>
             {seminars.map((s) => (
               <tr key={s.id} className={`border-t ${selected === s.id ? 'bg-[#D43790]/5' : ''}`}>
                 <td className="p-3 font-semibold">{s.title}<div className="text-xs font-normal text-black/50">{s.kind === 'private' ? 'Private · ' : ''}{s.shopify_sku || 'no SKU'}</div></td>
                 <td className="p-3 whitespace-nowrap">{formatWhen(s.starts_at, false)}</td>
                 <td className="p-3">{s.status}</td>
-                <td className="p-3">{s.seminar_access_codes?.[0]?.count ?? 0} / {s.seats}</td>
+                <td className="p-3">{s.seminar_access_codes?.[0]?.count ?? 0}</td>
                 <td className="p-3"><button onClick={() => toggleSoldOut(s)} className={`rounded-full px-3 py-1 text-xs font-bold ${s.sold_out ? 'bg-black text-white' : 'bg-black/5'}`}>{s.sold_out ? 'SOLD OUT' : 'Off'}</button></td>
                 <td className="p-3 whitespace-nowrap text-right"><button onClick={() => startEdit(s)} className="underline mr-3">Edit</button><button onClick={() => loadCodes(s.id)} className="underline">Codes</button></td>
               </tr>
