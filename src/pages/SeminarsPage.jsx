@@ -337,10 +337,18 @@ function BookingPanel({ seminar, onClose }) {
   const total = (seatOk ? data.seat.price * qty : 0) + (withKit && kitVariant ? kitVariant.price * qty : 0)
 
   const checkout = () => {
-    const items = [`${data.seat.id}:${qty}`]
-    if (withKit && kitVariant) items.push(`${kitVariant.id}:${qty}`)
-    // storefront=true opens the shop's cart first, so the buyer can still remove or change items before paying.
-    window.location.href = `${data.checkoutBase}${items.join(',')}?storefront=true`
+    // Add to the shop cart (keeps anything already in it, e.g. a kit added earlier) and open
+    // the cart, where the buyer can still remove or change items before paying.
+    const items = [{ id: data.seat.id, quantity: qty }]
+    if (withKit && kitVariant) items.push({ id: kitVariant.id, quantity: qty })
+    const form = document.createElement('form')
+    form.method = 'POST'
+    form.action = `${SHOP_URL}/cart/add`
+    const field = (name, value) => { const i = document.createElement('input'); i.type = 'hidden'; i.name = name; i.value = String(value); form.appendChild(i) }
+    items.forEach((it, n) => { field(`items[${n}][id]`, it.id); field(`items[${n}][quantity]`, it.quantity) })
+    field('return_to', '/cart')
+    document.body.appendChild(form)
+    form.submit()
   }
 
   return (
