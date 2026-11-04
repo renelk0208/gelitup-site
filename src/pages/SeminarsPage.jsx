@@ -1014,7 +1014,8 @@ function privateReplyEmail({ req, seminar, startIso, comment, decline, payUrl })
       <p>Good news — ${seminar?.trainer_name ? escapeHtml(seminar.trainer_name) : 'our trainer'} is available. We have reserved this time for you:</p>
       <p style="font-size:18px;background:#f6f6f6;border-radius:8px;padding:14px;text-align:center"><strong>${escapeHtml(whenIn(startIso, tz))}</strong> (your time)${tzLine}${hours ? `<br/><span style="color:#666">${hours} hours, live online, 1-to-1</span>` : ''}</p>
       ${commentHtml}
-      <p style="text-align:center;margin:24px 0"><a href="${payUrl}" style="background:${BRAND};color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:bold">Pay${seminar?.private_price != null ? ` €${Number(seminar.private_price).toFixed(0)}` : ''} to book your session</a></p>
+      <p style="text-align:center;margin:24px 0 10px"><a href="${payUrl}" style="display:inline-block;margin:4px;background:${BRAND};color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:bold">Pay${seminar?.private_price != null ? ` €${Number(seminar.private_price).toFixed(0)}` : ''} to book your session</a>${seminar?.kit_url ? `<a href="${seminar.kit_url}" style="display:inline-block;margin:4px;background:#ffffff;color:${BRAND};border:2px solid ${BRAND};padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold">Shop the seminar kit</a>` : ''}</p>
+      ${seminar?.kit_url ? `<p style="text-align:center;font-size:13px;color:#555;margin:0 0 20px">${req.wants_kit ? 'You asked about the products — ' : ''}the kit has every product used in the session, 15% off the products bought separately. Order it early so it arrives before your session.</p>` : ''}
       <p style="font-size:13px;color:#555">Your session is booked once payment is received. We'll then send you the link to join. Free cancellation with a full refund up to ${PRIVATE_CANCEL_HOURS} hours before the start; after that, or if you don't attend, it can't be refunded. You can move the session once, free of charge, with at least ${PRIVATE_CANCEL_HOURS} hours' notice. Full terms: <a href="${SEMINAR_SITE_URL}/seminars/terms" style="color:${BRAND}">gelitup.com/seminars/terms</a>.</p>
       <p style="font-size:13px;color:#555">Questions? Just reply to this email.</p>
       <p>Warm regards,<br/>GEL.IT.UP Seminars</p>`),
@@ -1043,7 +1044,7 @@ function PrivateReply() {
       const { data: r } = await supabase.from('seminar_private_requests').select('*').eq('id', id).maybeSingle()
       setReq(r || false)
       if (r?.seminar_id) {
-        const { data: sm } = await supabase.from('seminars').select('id, title, trainer_name, private_price, private_minutes, private_variant_id').eq('id', r.seminar_id).maybeSingle()
+        const { data: sm } = await supabase.from('seminars').select('id, title, trainer_name, private_price, private_minutes, private_variant_id, kit_url').eq('id', r.seminar_id).maybeSingle()
         setSeminar(sm || null)
       }
       const picked = r && slot != null ? (r.preferred_slots || [])[Number(slot)] : null
