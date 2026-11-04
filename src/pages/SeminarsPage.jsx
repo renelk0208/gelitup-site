@@ -294,7 +294,12 @@ function SeminarsHome({ session }) {
         .eq('kind', 'group').eq('status', 'scheduled').gte('starts_at', since).order('starts_at')
       const now = Date.now()
       const rows = (data || []).map((s) => ({ ...s, past: new Date(s.starts_at).getTime() + s.duration_minutes * 60000 < now }))
-      if (!cancelled) setSeminars(rows)
+      if (cancelled) return
+      setSeminars(rows)
+      // gelitup.com/seminars?book=<seminar id> opens that seminar's booking panel (used by the kit page link).
+      const want = new URLSearchParams(window.location.search).get('book')
+      const hit = want && rows.find((r) => r.id === want && !r.past && !r.sold_out)
+      if (hit) setBooking(hit)
     })()
     return () => { cancelled = true }
   }, [])
