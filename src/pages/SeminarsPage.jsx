@@ -266,7 +266,7 @@ const money = (n) => (n == null ? '' : `€${Number(n).toFixed(2)}`)
 // Countries where the shop does not ship: the seminar kit comes from the local distributor.
 // Fill in contact/email per country when known; until then buyers are pointed to info@gelitup.com.
 const KIT_DISTRIBUTOR_COUNTRIES = {
-  BG: { name: 'Bulgaria', contact: '', email: '' },
+  BG: { name: 'Bulgaria', contact: 'GEL.IT.UP Bulgaria', email: 'gelitup_professional@abv.bg' },
   IT: { name: 'Italy', contact: 'GEL.IT.UP Italia', email: 'info@gelitup.it' },
 }
 const guessDistributorCountry = () => {
