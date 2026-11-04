@@ -20,6 +20,8 @@ import { seminarCodeEmail } from '../lib/seminarEmail'
 
 const BRAND = '#D43790'
 const TOKEN_KEY = 'gelitup.seminar.token'
+const BOOKING_CUTOFF_HOURS = 12
+const CANCEL_HOURS = 24
 const SHOP_URL = 'https://shop.gelitup.com'
 const EMAIL_WEBHOOK_URL = import.meta.env.VITE_EMAIL_WEBHOOK_URL || ''
 const EMAIL_ANON_KEY = import.meta.env.VITE_SUPABASE_ANON_KEY || ''
@@ -131,7 +133,8 @@ function useSeminarSession() {
 function SeminarCard({ s, onBook }) {
   const soldOut = Boolean(s.sold_out)
   const past = Boolean(s.past)
-  const clickable = !soldOut && !past
+  const closed = Boolean(s.closed) && !past
+  const clickable = !soldOut && !past && !closed
   const inner = (
     <>
       <div className="relative aspect-[4/5] bg-black/5 overflow-hidden rounded-2xl">
@@ -149,8 +152,8 @@ function SeminarCard({ s, onBook }) {
         <p className="text-xs uppercase tracking-wider text-black/50">{formatWhen(s.starts_at, false)}</p>
         <h3 className="font-bold text-lg leading-snug">{s.title}</h3>
         {s.trainer_name && <p className="text-sm text-black/60">with {s.trainer_name}</p>}
-        <p className="mt-2 text-sm font-semibold" style={{ color: soldOut || past ? '#6b7280' : BRAND }}>
-          {past ? 'This seminar has finished' : soldOut ? 'Sold out — watch for the next date' : 'Book your seat →'}
+        <p className="mt-2 text-sm font-semibold" style={{ color: soldOut || past || closed ? '#6b7280' : BRAND }}>
+          {past ? 'This seminar has finished' : soldOut ? 'Sold out — watch for the next date' : closed ? `Online booking closed ${BOOKING_CUTOFF_HOURS} hours before the start` : 'Book your seat →'}
         </p>
       </div>
     </>
@@ -170,6 +173,7 @@ function BookingPanel({ seminar, onClose }) {
   const [withKit, setWithKit] = useState(false)
   const [choice, setChoice] = useState([])
   const [agreed, setAgreed] = useState(false)
+  const [consented, setConsented] = useState(false)
 
   useEffect(() => {
     let cancelled = false
@@ -208,7 +212,8 @@ function BookingPanel({ seminar, onClose }) {
   }, [onClose])
 
   const kitVariant = data?.kit?.variants?.find((v) => v.options.every((o, i) => o === choice[i]))
-  const seatOk = data?.seat && data.seat.available && !data.soldOut
+  const bookingClosed = new Date(seminar.starts_at).getTime() - BOOKING_CUTOFF_HOURS * 3600000 < Date.now()
+  const seatOk = data?.seat && data.seat.available && !data.soldOut && !bookingClosed
   const total = (seatOk ? data.seat.price * qty : 0) + (withKit && kitVariant ? kitVariant.price * qty : 0)
 
   const checkout = () => {
@@ -232,7 +237,7 @@ function BookingPanel({ seminar, onClose }) {
         {seminar.description && <p className="mt-4 text-sm text-black/70 whitespace-pre-line max-h-48 overflow-y-auto pr-1">{seminar.description}</p>}
         {!data && !error && <p className="mt-6 text-black/40 text-sm">Loading…</p>}
         {error && <p className="mt-6 text-sm text-black/70">{error}</p>}
-        {data && !seatOk && <p className="mt-6 text-sm text-black/70">{data.soldOut ? 'This seminar is sold out.' : 'Booking is not open yet for this seminar. Please check back soon.'}</p>}
+        {data && !seatOk && <p className="mt-6 text-sm text-black/70">{bookingClosed ? `Online booking closed ${BOOKING_CUTOFF_HOURS} hours before the start.` : data.soldOut ? 'This seminar is sold out.' : 'Booking is not open yet for this seminar. Please check back soon.'}</p>}
 
         {data && seatOk && (
           <>
@@ -278,21 +283,26 @@ function BookingPanel({ seminar, onClose }) {
               <p className="text-2xl font-bold">{money(total)}</p>
             </div>
             <div className="mt-5 rounded-xl bg-black/[0.03] p-4 text-xs text-black/70">
-              <p className="font-semibold text-sm text-black">Booking terms</p>
+              <p className="font-semibold text-sm text-black">Booking terms — summary</p>
               <ul className="mt-2 space-y-1.5 list-disc pl-4">
-                <li><strong>Cancellation & refund:</strong> you can cancel free of charge, with a full refund of the seminar seat, up to 24 hours before the start — in My seminars at gelitup.com/seminars.</li>
-                <li><strong>Less than 24 hours before the start</strong> the seat can no longer be cancelled or refunded, including if you do not attend.</li>
-                <li>Your access code is personal and works on one device at a time. It may not be shared, and the seminar may not be recorded or redistributed.</li>
-                <li>The recording is available to attendees for 30 days after the seminar.</li>
-                {withKit && <li>The seminar kit is a physical product and follows the shop's normal shipping and returns policy; it is not refunded when a seat is cancelled.</li>}
+                <li><strong>Payment</strong> is taken in full at checkout. Prices include VAT.</li>
+                <li><strong>Free cancellation</strong> with a full refund of the seat up to {CANCEL_HOURS} hours before the start, in My seminars. <strong>Within {CANCEL_HOURS} hours</strong> the seat cannot be cancelled or refunded, including if you do not attend.</li>
+                <li>Your access code is <strong>personal and non-transferable</strong> once used, works on one device at a time, and may not be shared. Recording or redistributing the seminar is not allowed.</li>
+                <li>Replay access for {30} days after the seminar. Participants must be 18 or older.</li>
+                {withKit && <li>The kit is a physical product: normal 14-day right of withdrawal and shop returns policy apply; it is not refunded automatically when a seat is cancelled.</li>}
               </ul>
+              <a href="/seminars/terms" target="_blank" rel="noopener" className="inline-block mt-2 underline" style={{ color: BRAND }}>Read the full seminar terms &amp; conditions</a>
               <label className="mt-3 flex items-start gap-2 text-sm text-black cursor-pointer">
                 <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5" />
-                <span>I have read and agree to the booking terms</span>
+                <span>I have read and agree to the seminar terms &amp; conditions.</span>
+              </label>
+              <label className="mt-2 flex items-start gap-2 text-sm text-black cursor-pointer">
+                <input type="checkbox" checked={consented} onChange={(e) => setConsented(e.target.checked)} className="mt-0.5" />
+                <span>I ask for the seminar to be provided on the booked date and for access to the recording to start after it, even if this is within the 14-day withdrawal period. I understand that I lose my right of withdrawal once the seminar has been provided and the recording made available, and that cancellations follow the {CANCEL_HOURS}-hour rule above.</span>
               </label>
             </div>
-            <Button type="button" onClick={checkout} disabled={!agreed || (withKit && (!kitVariant || !kitVariant.available))} className="w-full mt-4">Continue to secure payment →</Button>
-            {!agreed && <p className="text-xs text-black/50 mt-2 text-center">Please tick the box to agree to the booking terms.</p>}
+            <Button type="button" onClick={checkout} disabled={!agreed || !consented || (withKit && (!kitVariant || !kitVariant.available))} className="w-full mt-4">Continue to secure payment →</Button>
+            {(!agreed || !consented) && <p className="text-xs text-black/50 mt-2 text-center">Please tick both boxes to continue.</p>}
             <p className="text-xs text-black/50 mt-3 text-center">Payment is processed securely by Shopify. Your access code is emailed straight after payment.</p>
           </>
         )}
@@ -314,12 +324,12 @@ function SeminarsHome({ session }) {
         .select('id, title, description, trainer_name, starts_at, duration_minutes, sold_out, image_url, status, kind')
         .eq('kind', 'group').eq('status', 'scheduled').gte('starts_at', since).order('starts_at')
       const now = Date.now()
-      const rows = (data || []).map((s) => ({ ...s, past: new Date(s.starts_at).getTime() + s.duration_minutes * 60000 < now }))
+      const rows = (data || []).map((s) => ({ ...s, past: new Date(s.starts_at).getTime() + s.duration_minutes * 60000 < now, closed: new Date(s.starts_at).getTime() - BOOKING_CUTOFF_HOURS * 3600000 < now }))
       if (cancelled) return
       setSeminars(rows)
       // gelitup.com/seminars?book=<seminar id> opens that seminar's booking panel (used by the kit page link).
       const want = new URLSearchParams(window.location.search).get('book')
-      const hit = want && rows.find((r) => r.id === want && !r.past && !r.sold_out)
+      const hit = want && rows.find((r) => r.id === want && !r.past && !r.closed && !r.sold_out)
       if (hit) setBooking(hit)
     })()
     return () => { cancelled = true }
@@ -852,6 +862,65 @@ function AdminPage() {
   )
 }
 
+// ── Seminar terms & conditions ───────────────────────────────────────────────
+// NOTE: the [bracketed] seller details must be filled in, and the text checked by a lawyer, before launch.
+function H({ children }) { return <h2 className="text-lg font-bold mt-8 mb-2">{children}</h2> }
+
+function TermsPage({ session }) {
+  return (
+    <Shell>
+      <SubNav signedIn={session.signedIn} />
+      <article className="text-sm text-black/80 leading-relaxed">
+        <h1 className="text-2xl md:text-3xl font-bold text-black">Online seminar terms &amp; conditions</h1>
+        <p className="text-black/50 mt-1">Last updated: 4 November 2026</p>
+        <p className="mt-4">These terms apply to bookings for GEL.IT.UP live online seminars and their recordings made at gelitup.com/seminars. The seller is <strong>[company legal name]</strong>, [registered address, Bulgaria], VAT no. [number], email info@gelitup.com (“we”, “us”). Products such as seminar kits are also subject to the general terms of shop.gelitup.com.</p>
+
+        <H>1. Booking and payment</H>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>A booking is confirmed when payment is completed and you receive our confirmation email with your personal access code.</li>
+          <li>Full payment is required at checkout, using the payment methods offered at checkout.</li>
+          <li>Prices are shown in euro and include VAT where applicable. We may correct obvious pricing errors before your booking is confirmed; if this affects you, we will contact you and you may cancel free of charge.</li>
+          <li>Online booking closes {BOOKING_CUTOFF_HOURS} hours before the seminar starts.</li>
+          <li>Participants must be 18 years or older.</li>
+        </ul>
+
+        <H>2. Cancellation and refunds</H>
+        <ul className="list-disc pl-5 space-y-1">
+          <li><strong>By you, more than {CANCEL_HOURS} hours before the start:</strong> you can cancel free of charge in My seminars at gelitup.com/seminars and receive a full refund of the seminar seat to your original payment method, usually within 5–10 working days.</li>
+          <li><strong>By you, less than {CANCEL_HOURS} hours before the start, or if you do not attend:</strong> the seat cannot be cancelled or refunded. You keep access to the recording for the replay period.</li>
+          <li><strong>Your right of withdrawal (consumers in the EU):</strong> when you book, you expressly ask us to provide the seminar on the booked date and to make the recording available afterwards, even if this falls within the 14-day withdrawal period, and you acknowledge that you lose your right of withdrawal once the seminar has been provided and the recording made available. Before that point, cancellation is handled as described above. Nothing in these terms limits rights you have under mandatory consumer law in your country.</li>
+          <li><strong>By us:</strong> if we cancel or move a seminar, you can choose a seat on the new date or a full refund.</li>
+          <li><strong>Seminar kits</strong> are physical products. The normal 14-day right of withdrawal and the shop’s shipping and returns policy apply to them; a kit is not refunded automatically when a seat is cancelled.</li>
+          <li>Business customers (buying for their salon or business) do not have the consumer right of withdrawal; the {CANCEL_HOURS}-hour cancellation rule applies to them in the same way.</li>
+        </ul>
+
+        <H>3. Access and use</H>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Each access code is for one participant. If you book several seats, forward one code to each participant; once a code has been used, it is linked to that person’s email address and cannot be transferred.</li>
+          <li>A code works on one device at a time. Sharing codes, links or the stream with others is not allowed.</li>
+          <li>The live seminar and recording are our intellectual property. You may not record, copy, download, publish or redistribute them.</li>
+          <li>If these rules are broken, we may suspend access without a refund.</li>
+          <li>The recording is available to participants for 30 days after the seminar. After that, access ends.</li>
+          <li>You need a stable internet connection and an up-to-date browser. We are not responsible for problems with your own device or connection; if the seminar cannot take place because of a problem on our side, we will reschedule or refund.</li>
+        </ul>
+
+        <H>4. Certificates and professional use</H>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Where a certificate of participation is offered, it is issued after the seminar to participants who attended or completed the course and paid in full.</li>
+          <li>A certificate of participation confirms that you took part in the training. It is not a professional qualification. Whether it is accepted for professional insurance, licensing or other purposes is decided by your insurer and the rules in your country.</li>
+          <li>Products and techniques shown are for professional use. Always follow the product instructions and the health and safety rules that apply in your country.</li>
+        </ul>
+
+        <H>5. Personal data</H>
+        <p>We use your name, email address and booking details to provide the seminar, send your access code and handle cancellations. See our <Link to="/privacy-policy" className="underline" style={{ color: BRAND }}>privacy policy</Link>.</p>
+
+        <H>6. Questions and complaints</H>
+        <p>Contact us at info@gelitup.com and we will reply as soon as possible. If we cannot resolve a complaint, consumers can contact the competent consumer protection or alternative dispute resolution body in their country. These terms are governed by the law of Bulgaria; this does not remove the protection of mandatory consumer law in your country of residence.</p>
+      </article>
+    </Shell>
+  )
+}
+
 // ── Router ───────────────────────────────────────────────────────────────────
 export default function SeminarsPage() {
   const session = useSeminarSession()
@@ -863,6 +932,7 @@ export default function SeminarsPage() {
       <Route path="my" element={<MySeminars session={session} />} />
       <Route path="room/:id" element={<Room session={session} />} />
       <Route path="private" element={<PrivateRequest session={session} />} />
+      <Route path="terms" element={<TermsPage session={session} />} />
       <Route path="admin" element={<AdminPage />} />
       <Route path="*" element={<Navigate to="/seminars" replace />} />
     </Routes>
