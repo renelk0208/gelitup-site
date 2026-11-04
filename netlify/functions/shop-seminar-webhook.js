@@ -71,6 +71,24 @@ export async function handler(event) {
       }
     }
   }
+  // Private 1-to-1 session paid via the link we emailed (cart attribute private_request=<request id>).
+  const attrs = Array.isArray(order?.note_attributes) ? order.note_attributes : []
+  const privateId = String(attrs.find((a) => a?.name === 'private_request')?.value || '').trim()
+  if (/^[0-9a-f-]{36}$/i.test(privateId)) {
+    const { data: reqRow, error: pErr } = await supabase.from('seminar_private_requests')
+      .update({ status: 'paid', paid_at: new Date().toISOString(), order_ref: String(order.name || order.id) })
+      .eq('id', privateId).is('paid_at', null).select('id, name, email, confirmed_start').maybeSingle()
+    if (pErr) console.error('shop-seminar-webhook: private paid', pErr.message)
+    if (reqRow && EMAIL_WEBHOOK_URL) {
+      const when = reqRow.confirmed_start ? new Date(reqRow.confirmed_start).toLocaleString('en-GB', { timeZone: 'Europe/Athens', weekday: 'short', day: 'numeric', month: 'long', hour: '2-digit', minute: '2-digit' }) : 'date to confirm'
+      const esc = (v) => String(v ?? '').replaceAll('&', '&amp;').replaceAll('<', '&lt;').replaceAll('>', '&gt;')
+      try {
+        await sendEmail('seminars@gelitup.com', `PAID — private session — ${reqRow.name} (${order.name})`,
+          `<div style="font-family:Arial,sans-serif"><h2 style="color:#D43790">Private session paid</h2><p><strong>${esc(reqRow.name)}</strong> (${esc(reqRow.email)}) has paid order <strong>${esc(order.name)}</strong>.</p><p>Session: <strong>${esc(when)} Greece time</strong>.</p><p>Next: send them the link to join (e.g. a private Vimeo or Zoom link) by replying to them.</p><p><a href="https://gelitup.com/seminars/admin/private/${privateId}">Open the request →</a></p></div>`)
+      } catch (err) { console.error('shop-seminar-webhook: private email failed', err.message) }
+    }
+  }
+
   console.log('shop-seminar-webhook', order.name, JSON.stringify({ issued }))
   return { statusCode: 200, body: JSON.stringify({ ok: true, issued }) }
 }

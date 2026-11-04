@@ -46,6 +46,46 @@ function formatWhen(iso, withZone = true) {
   return `${local} (your time) · ${athens} Greece / Bulgaria time`
 }
 
+// Time-zone helpers for private sessions: customers give times in their own zone.
+const SEMINAR_SITE_URL = 'https://gelitup.com'
+const PRIVATE_INBOX = 'seminars@gelitup.com'
+function tzOffsetMs(ms, tz) {
+  try {
+    const parts = Object.fromEntries(new Intl.DateTimeFormat('en-US', { timeZone: tz, hourCycle: 'h23', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', second: '2-digit' }).formatToParts(new Date(ms)).map((x) => [x.type, x.value]))
+    return Date.UTC(+parts.year, +parts.month - 1, +parts.day, +parts.hour % 24, +parts.minute, +parts.second) - ms
+  } catch { return 0 }
+}
+// "2026-11-20" + "10:00" in "Europe/Rome" → ISO instant
+function wallTimeToIso(date, time, tz) {
+  if (!date) return null
+  const [y, m, d] = date.split('-').map(Number)
+  const [hh, mm] = (time || '00:00').split(':').map(Number)
+  const guess = Date.UTC(y, m - 1, d, hh || 0, mm || 0)
+  let t = guess - tzOffsetMs(guess, tz || 'Europe/Athens')
+  t = guess - tzOffsetMs(t, tz || 'Europe/Athens')
+  return new Date(t).toISOString()
+}
+function whenIn(iso, tz) {
+  if (!iso) return ''
+  try { return new Date(iso).toLocaleString('en-GB', { timeZone: tz || 'Europe/Athens', weekday: 'short', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit' }) } catch { return iso }
+}
+// Branded frame for seminar emails: logo, pink rule, soft footer.
+function brandEmail(inner, footerNote = '') {
+  return `<div style="background:#f4f1f2;padding:24px 12px;font-family:Arial,Helvetica,sans-serif">
+  <div style="max-width:600px;margin:0 auto;background:#ffffff;border-radius:14px;overflow:hidden;border:1px solid #eadfe4">
+    <div style="padding:22px 28px 14px;text-align:center"><img src="${SEMINAR_SITE_URL}/email/gelitup-logo-email.png" width="200" alt="GEL.IT.UP" style="display:inline-block;border:0;max-width:200px;height:auto" /></div>
+    <div style="height:4px;background:${BRAND}"></div>
+    <div style="padding:26px 28px 22px;color:#111;font-size:15px;line-height:1.55">${inner}</div>
+    <div style="padding:16px 28px;background:#1a1a1a;color:#bbb;font-size:12px;text-align:center;line-height:1.6">
+      <strong style="color:#fff;letter-spacing:2px">GEL.IT.UP SEMINARS</strong><br/>
+      ${footerNote ? `${footerNote}<br/>` : ''}<a href="${SEMINAR_SITE_URL}/seminars" style="color:${BRAND};text-decoration:none">gelitup.com/seminars</a> · <a href="mailto:${PRIVATE_INBOX}" style="color:#bbb;text-decoration:none">${PRIVATE_INBOX}</a>
+    </div>
+  </div>
+</div>`
+}
+
+const privatePayUrl = (variantId, email, requestId) => `${SHOP_URL}/cart/${variantId}:1?checkout[email]=${encodeURIComponent(email || '')}&attributes[private_request]=${encodeURIComponent(requestId)}`
+
 // Turn whatever Vimeo link is pasted into the right embed addresses.
 function vimeoLiveEmbeds(input) {
   const s = String(input || '').trim()
@@ -658,12 +698,28 @@ function PrivateRequest({ session }) {
   const submit = async (e) => {
     e.preventDefault(); setState('sending')
     const slots = form.slots.filter((s) => s.date)
-    const record = { name: form.name, email: form.email.trim().toLowerCase(), phone: form.phone, country: form.country, timezone: tz, preferred_slots: slots, topic: seminar ? `Private 1-to-1: ${seminar.title} (€${Number(seminar.private_price).toFixed(0)}, ${hours} h)${form.topic ? ` — ${form.topic}` : ''}` : form.topic, attendees: seminar ? 1 : Number(form.attendees) || 1, wants_kit: form.wants_kit, notes: form.notes, seminar_id: seminar?.id || null }
+    const id = (typeof crypto !== 'undefined' && crypto.randomUUID) ? crypto.randomUUID() : undefined
+    const record = { id, name: form.name, email: form.email.trim().toLowerCase(), phone: form.phone, country: form.country, timezone: tz, preferred_slots: slots, topic: seminar ? `Private 1-to-1: ${seminar.title} (€${Number(seminar.private_price).toFixed(0)}, ${hours} h)${form.topic ? ` — ${form.topic}` : ''}` : form.topic, attendees: seminar ? 1 : Number(form.attendees) || 1, wants_kit: form.wants_kit, notes: form.notes, seminar_id: seminar?.id || null }
     const { error } = await supabase.from('seminar_private_requests').insert(record)
     if (error) { setState('error'); return }
     if (EMAIL_WEBHOOK_URL) {
-      const rows = [['Name', record.name], ['Email', record.email], ['Phone', record.phone], ['Country', record.country], ['Time zone', tz], ['People', record.attendees], ['Kit', record.wants_kit ? 'Yes' : 'No'], ['Topic', record.topic], ['Preferred', slots.map((s) => `${s.date} ${s.time}`).join(' / ')], ['Notes', record.notes]]
-      fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: EMAIL_ANON_KEY, Authorization: `Bearer ${EMAIL_ANON_KEY}` }, body: JSON.stringify({ to: 'seminars@gelitup.com', subject: seminar ? `Private 1-to-1 request — ${seminar.title} — ${record.name}` : `Private seminar request — ${record.name}`, html: `<h2>Private seminar request</h2><table>${rows.map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666">${escapeHtml(k)}</td><td><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}</table>`, from: 'GEL.IT.UP Seminars <info@gelitup.com>', replyTo: record.email }) }).catch(() => {})
+      const rows = [['Name', record.name], ['Email', record.email], ['Phone', record.phone], ['Country', record.country], ['Time zone', tz], ['People', record.attendees], ['Kit', record.wants_kit ? 'Yes' : 'No'], ['Topic', record.topic], ['Notes', record.notes]]
+      const replyUrl = id ? `${SEMINAR_SITE_URL}/seminars/admin/private/${id}` : `${SEMINAR_SITE_URL}/seminars/admin`
+      const slotRows = slots.map((sl, i) => {
+        const iso = sl.time ? wallTimeToIso(sl.date, sl.time, tz) : null
+        const label = iso ? `${whenIn(iso, tz)} (their time) · <strong>${escapeHtml(whenIn(iso, 'Europe/Athens'))} Greece time</strong>` : `${escapeHtml(sl.date)} (no time given)`
+        return `<tr><td style="padding:8px 12px 8px 0">${iso ? escapeHtml(whenIn(iso, tz)) + ' (their time)<br/><strong>' + escapeHtml(whenIn(iso, 'Europe/Athens')) + ' Greece time</strong>' : label}</td><td style="padding:8px 0"><a href="${replyUrl}?slot=${i}" style="background:${BRAND};color:#fff;padding:9px 14px;border-radius:8px;text-decoration:none;font-weight:bold;white-space:nowrap">✓ Agree this time</a></td></tr>`
+      }).join('')
+      const html = brandEmail(`<div>
+        <h2 style="margin:0 0 4px">${seminar ? 'Private 1-to-1 request' : 'Private seminar request'}</h2>
+        ${seminar ? `<p style="margin:0 0 14px;color:#444">${escapeHtml(seminar.title)} · ${hours} hours · €${Number(seminar.private_price).toFixed(0)}</p>` : ''}
+        <table style="font-size:14px">${rows.filter(([, v]) => v !== '' && v != null).map(([k, v]) => `<tr><td style="padding:4px 12px 4px 0;color:#666">${escapeHtml(k)}</td><td><strong>${escapeHtml(v)}</strong></td></tr>`).join('')}</table>
+        <h3 style="margin:20px 0 4px">Preferred times — click the one you agree</h3>
+        <table style="font-size:14px">${slotRows}</table>
+        <p style="margin:18px 0"><a href="${replyUrl}" style="color:${BRAND};font-weight:bold">Reply with another time or a comment →</a></p>
+        <p style="font-size:12px;color:#777">Each button opens the reply page (admin sign-in needed), where you can add a comment for the client and send the confirmation with the €${seminar ? Number(seminar.private_price).toFixed(0) : ''} payment link.</p>
+      </div>`, 'Internal notification — private session request')
+      fetch(EMAIL_WEBHOOK_URL, { method: 'POST', headers: { 'Content-Type': 'application/json', apikey: EMAIL_ANON_KEY, Authorization: `Bearer ${EMAIL_ANON_KEY}` }, body: JSON.stringify({ to: PRIVATE_INBOX, subject: seminar ? `Private 1-to-1 request — ${seminar.title} — ${record.name}` : `Private seminar request — ${record.name}`, html, from: 'GEL.IT.UP Seminars <info@gelitup.com>', replyTo: record.email }) }).catch(() => {})
     }
     setState('done')
   }
@@ -768,7 +824,7 @@ function AdminPage() {
   const save = async (e) => {
     e.preventDefault(); setMsg('Saving…')
     const { vimeo_event, replay_video, id } = editing
-    const FIELDS = ['title', 'trainer_name', 'description', 'duration_minutes', 'replay_days', 'status', 'kind', 'shopify_sku', 'shop_url', 'kit_url', 'image_url', 'sold_out', 'recording_sku', 'recording_shop_url', 'recording_days', 'recording_on_sale', 'private_price', 'private_minutes']
+    const FIELDS = ['title', 'trainer_name', 'description', 'duration_minutes', 'replay_days', 'status', 'kind', 'shopify_sku', 'shop_url', 'kit_url', 'image_url', 'sold_out', 'recording_sku', 'recording_shop_url', 'recording_days', 'recording_on_sale', 'private_price', 'private_minutes', 'private_variant_id']
     const rest = Object.fromEntries(FIELDS.map((f) => [f, editing[f] === '' ? null : editing[f]]))
     const row = { ...rest, starts_at: new Date(editing.starts_at).toISOString(), shopify_sku: rest.shopify_sku?.trim() || null, duration_minutes: Number(rest.duration_minutes), replay_days: Number(rest.replay_days), recording_days: Number(rest.recording_days) || 30, recording_sku: rest.recording_sku?.trim() || null, updated_at: new Date().toISOString() }
     const q = id ? supabase.from('seminars').update(row).eq('id', id).select().single() : supabase.from('seminars').insert(row).select().single()
@@ -853,6 +909,7 @@ function AdminPage() {
             <p className="font-semibold text-sm md:col-span-2">Private 1-to-1 session (leave the price empty to not offer it)</p>
             {F({ label: 'Private session price (€)', k: 'private_price', type: 'number', min: 0 })}
             {F({ label: 'Private session length (minutes)', k: 'private_minutes', type: 'number', min: 15 })}
+            {F({ label: 'Payment link: Shopify variant ID of the unlisted private-session product', k: 'private_variant_id', placeholder: 'e.g. 55333004214610' })}
           </div>
           <div className="md:col-span-2"><label className="block"><span className="text-sm font-medium">Description</span><textarea rows={4} value={editing.description || ''} onChange={(e) => setEditing((x) => ({ ...x, description: e.target.value }))} className={`${inputCls} mt-1`} /></label></div>
           <div className="md:col-span-2 rounded-xl bg-black/[0.03] p-4 grid gap-3">
@@ -927,12 +984,151 @@ function AdminPage() {
               <p className="text-black/70 mt-1">{r.topic}</p>
               <p className="text-black/50 mt-1">{(r.preferred_slots || []).map((s) => `${s.date} ${s.time || ''}`).join(' / ')} ({r.timezone}) · {r.attendees} people · kit: {r.wants_kit ? 'yes' : 'no'}{r.country ? ` · ${r.country}` : ''}</p>
               {r.notes && <p className="text-black/60 mt-1 italic">{r.notes}</p>}
-              <div className="mt-2 flex gap-3">{['contacted', 'confirmed', 'declined'].map((st) => <button key={st} onClick={() => setRequestStatus(r, st)} className="underline">{st}</button>)}</div>
+              {r.confirmed_start && <p className="mt-1 font-semibold">Agreed: {whenIn(r.confirmed_start, 'Europe/Athens')} Greece time{r.paid_at ? ` · PAID ${r.order_ref || ''}` : ' · awaiting payment'}</p>}
+              <div className="mt-2 flex flex-wrap gap-3"><Link to={`/seminars/admin/private/${r.id}`} className="font-semibold underline" style={{ color: BRAND }}>Open &amp; reply →</Link>{['contacted', 'confirmed', 'paid', 'declined'].map((st) => <button key={st} onClick={() => setRequestStatus(r, st)} className="underline">{st}</button>)}</div>
             </div>
           ))}
           {!requests.length && <p className="text-black/50 text-sm">No requests yet.</p>}
         </div>
       </section>
+    </Shell>
+  )
+}
+
+// ── Admin: reply to a private-session request ────────────────────────────────
+function privateReplyEmail({ req, seminar, startIso, comment, decline, payUrl }) {
+  const tz = req.timezone || 'Europe/Athens'
+  const hours = seminar ? Math.round((seminar.private_minutes || 120) / 60 * 10) / 10 : null
+  const title = seminar?.title || 'your private seminar'
+  const commentHtml = comment ? `<p style="background:#f6f6f6;border-radius:8px;padding:12px 14px;white-space:pre-wrap">${escapeHtml(comment)}</p>` : ''
+  if (decline) {
+    return { subject: `Your private session request — ${title}`, html: brandEmail(`<p>Hi ${escapeHtml(req.name || 'there')},</p><p>Thank you for your request for a private session${seminar ? ` of <strong>${escapeHtml(title)}</strong>` : ''}.</p>${commentHtml}<p>Just reply to this email and we'll find a solution together.</p><p>Warm regards,<br/>GEL.IT.UP Seminars</p>`) }
+  }
+  const tzLine = tz === 'Europe/Athens' ? '' : `<br/><span style="color:#666">${escapeHtml(whenIn(startIso, 'Europe/Athens'))} Greece time</span>`
+  return {
+    subject: `Your private session is reserved — ${title}`,
+    html: brandEmail(`
+      <p style="color:${BRAND};font-weight:bold;letter-spacing:2px;font-size:12px;margin:0">PRIVATE 1-TO-1 SESSION</p>
+      <h1 style="font-size:22px;margin:4px 0 12px">${escapeHtml(title)}</h1>
+      <p>Hi ${escapeHtml(req.name || 'there')},</p>
+      <p>Good news — ${seminar?.trainer_name ? escapeHtml(seminar.trainer_name) : 'our trainer'} is available. We have reserved this time for you:</p>
+      <p style="font-size:18px;background:#f6f6f6;border-radius:8px;padding:14px;text-align:center"><strong>${escapeHtml(whenIn(startIso, tz))}</strong> (your time)${tzLine}${hours ? `<br/><span style="color:#666">${hours} hours, live online, 1-to-1</span>` : ''}</p>
+      ${commentHtml}
+      <p style="text-align:center;margin:24px 0"><a href="${payUrl}" style="background:${BRAND};color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:bold">Pay${seminar?.private_price != null ? ` €${Number(seminar.private_price).toFixed(0)}` : ''} to book your session</a></p>
+      <p style="font-size:13px;color:#555">Your session is booked once payment is received. We'll then send you the link to join. Free cancellation with a full refund up to ${PRIVATE_CANCEL_HOURS} hours before the start; after that, or if you don't attend, it can't be refunded. You can move the session once, free of charge, with at least ${PRIVATE_CANCEL_HOURS} hours' notice. Full terms: <a href="${SEMINAR_SITE_URL}/seminars/terms" style="color:${BRAND}">gelitup.com/seminars/terms</a>.</p>
+      <p style="font-size:13px;color:#555">Questions? Just reply to this email.</p>
+      <p>Warm regards,<br/>GEL.IT.UP Seminars</p>`),
+  }
+}
+
+function PrivateReply() {
+  const { id } = useParams()
+  const [authState, setAuthState] = useState('checking')
+  const [req, setReq] = useState(null)
+  const [seminar, setSeminar] = useState(null)
+  const [slot] = useState(() => (typeof window === 'undefined' ? null : new URLSearchParams(window.location.search).get('slot')))
+  const [when, setWhen] = useState({ date: '', time: '' })
+  const [comment, setComment] = useState('')
+  const [mode, setMode] = useState('confirm')
+  const [msg, setMsg] = useState('')
+
+  useEffect(() => {
+    ;(async () => {
+      if (!hasSupabaseConfig) { setAuthState('no'); return }
+      const { data: sess } = await supabase.auth.getSession()
+      if (!sess?.session) { setAuthState('no'); return }
+      const { data: ok } = await supabase.rpc('seminar_is_admin')
+      if (!ok) { setAuthState('no'); return }
+      setAuthState('yes')
+      const { data: r } = await supabase.from('seminar_private_requests').select('*').eq('id', id).maybeSingle()
+      setReq(r || false)
+      if (r?.seminar_id) {
+        const { data: sm } = await supabase.from('seminars').select('id, title, trainer_name, private_price, private_minutes, private_variant_id').eq('id', r.seminar_id).maybeSingle()
+        setSeminar(sm || null)
+      }
+      const picked = r && slot != null ? (r.preferred_slots || [])[Number(slot)] : null
+      if (picked) setWhen({ date: picked.date || '', time: picked.time || '' })
+      if (r?.reply_comment) setComment(r.reply_comment)
+    })()
+  }, [id, slot])
+
+  if (authState === 'checking') return <Shell><p className="text-center text-black/40">Checking access…</p></Shell>
+  if (authState === 'no') return <Shell><p className="text-center">Admins only. <Link className="underline" to="/portal/admin-login">Sign in as admin</Link>, then open the link from the email again.</p></Shell>
+  if (req === null) return <Shell><p className="text-center text-black/40">Loading request…</p></Shell>
+  if (req === false) return <Shell><p className="text-center">Request not found. <Link className="underline" to="/seminars/admin">Back to seminar admin</Link></p></Shell>
+
+  const tz = req.timezone || 'Europe/Athens'
+  const startIso = when.date && when.time ? wallTimeToIso(when.date, when.time, tz) : null
+  const payUrl = seminar?.private_variant_id ? privatePayUrl(seminar.private_variant_id, req.email, req.id) : ''
+  const decline = mode === 'decline'
+  const ready = decline ? Boolean(comment.trim()) : Boolean(startIso && payUrl)
+  const preview = ready ? privateReplyEmail({ req, seminar, startIso, comment: comment.trim(), decline, payUrl }) : null
+
+  const send = async () => {
+    if (!preview) return
+    setMsg('Sending…')
+    await sendMail(req.email, preview.subject, preview.html, PRIVATE_INBOX)
+    const patch = decline
+      ? { status: 'declined', reply_comment: comment.trim() || null, replied_at: new Date().toISOString() }
+      : { status: 'confirmed', confirmed_start: startIso, reply_comment: comment.trim() || null, replied_at: new Date().toISOString() }
+    const { error } = await supabase.from('seminar_private_requests').update(patch).eq('id', req.id)
+    setMsg(error ? `Email sent, but the request could not be updated: ${error.message}` : decline ? 'Sent. The request is marked as declined.' : 'Sent. The client has the agreed time and the payment link; you will get an email when they pay.')
+    setReq((r) => ({ ...r, ...patch }))
+  }
+
+  return (
+    <Shell>
+      <p className="text-sm"><Link to="/seminars/admin" className="underline">← Seminar admin</Link></p>
+      <h1 className="text-2xl font-bold mt-3">{seminar ? 'Private 1-to-1 request' : 'Private seminar request'}</h1>
+      {seminar && <p className="text-black/60">{seminar.title} · €{Number(seminar.private_price).toFixed(0)}</p>}
+      <div className="mt-4 border rounded-2xl p-4 text-sm grid gap-1">
+        <p><strong>{req.name}</strong> · <a className="underline" href={`mailto:${req.email}`}>{req.email}</a>{req.phone ? ` · ${req.phone}` : ''}{req.country ? ` · ${req.country}` : ''}</p>
+        <p className="text-black/70">{req.topic}</p>
+        {req.notes && <p className="italic text-black/60">{req.notes}</p>}
+        <p className="text-black/50">Kit: {req.wants_kit ? 'yes' : 'no'} · Status: <strong>{req.status}</strong>{req.paid_at ? ` · paid ${req.order_ref || ''}` : ''}</p>
+      </div>
+
+      <div className="mt-6 flex gap-2">
+        <button type="button" onClick={() => setMode('confirm')} className={`rounded-full px-4 py-2 text-sm font-semibold border ${!decline ? 'text-white' : ''}`} style={!decline ? { background: BRAND, borderColor: BRAND } : {}}>Confirm a time</button>
+        <button type="button" onClick={() => setMode('decline')} className={`rounded-full px-4 py-2 text-sm font-semibold border ${decline ? 'text-white bg-black border-black' : ''}`}>Can't do it / reply only</button>
+      </div>
+
+      {!decline && (
+        <div className="mt-4">
+          <p className="text-sm font-medium">Their preferred times — pick one, or type another below</p>
+          <div className="mt-2 grid gap-2">
+            {(req.preferred_slots || []).map((sl, i) => {
+              const iso = sl.time ? wallTimeToIso(sl.date, sl.time, tz) : null
+              const on = when.date === sl.date && when.time === (sl.time || '')
+              return (
+                <label key={i} className={`flex items-center gap-3 border rounded-xl px-3 py-2 text-sm cursor-pointer ${on ? 'border-[#D43790] bg-[#D43790]/5' : ''}`}>
+                  <input type="radio" name="slot" checked={on} onChange={() => setWhen({ date: sl.date, time: sl.time || '' })} />
+                  <span>{iso ? <>{whenIn(iso, tz)} <span className="text-black/50">(their time)</span> · <strong>{whenIn(iso, 'Europe/Athens')} Greece</strong></> : <>{sl.date} <span className="text-black/50">(no time given — add one below)</span></>}</span>
+                </label>
+              )
+            })}
+          </div>
+          <div className="mt-3 flex flex-wrap items-end gap-2">
+            <label className="block"><span className="text-xs text-black/60">Date</span><input type="date" value={when.date} onChange={(e) => setWhen((w) => ({ ...w, date: e.target.value }))} className={inputCls} /></label>
+            <label className="block"><span className="text-xs text-black/60">Time ({tz}, the client's time zone)</span><input type="time" value={when.time} onChange={(e) => setWhen((w) => ({ ...w, time: e.target.value }))} className={inputCls} /></label>
+          </div>
+          {startIso && <p className="mt-2 text-sm">= <strong>{whenIn(startIso, 'Europe/Athens')}</strong> Greece time</p>}
+          {!payUrl && <p className="mt-2 text-sm text-red-600">This seminar has no private-session product linked yet, so a payment link can't be added.</p>}
+        </div>
+      )}
+
+      <label className="block mt-5"><span className="text-sm font-medium">{decline ? 'Your message to the client *' : 'Comment for the client (optional)'}</span>
+        <textarea rows={4} value={comment} onChange={(e) => setComment(e.target.value)} className={`${inputCls} mt-1`} placeholder={decline ? 'e.g. Daniela is away that week — could you do 1 or 2 December instead?' : 'e.g. Please have your products and dual forms ready before we start.'} />
+      </label>
+
+      {preview && (
+        <div className="mt-6">
+          <p className="text-sm font-medium">Email the client will receive · <span className="text-black/60">{preview.subject}</span></p>
+          <div className="mt-2 border rounded-2xl p-4 bg-white" dangerouslySetInnerHTML={{ __html: preview.html }} />
+        </div>
+      )}
+      <div className="mt-4"><Button type="button" disabled={!ready || msg === 'Sending…'} onClick={send} className="w-full">{decline ? 'Send reply' : 'Send confirmation with payment link'}</Button></div>
+      {msg && <p className="mt-3 text-sm text-center">{msg}</p>}
     </Shell>
   )
 }
@@ -1024,6 +1220,7 @@ export default function SeminarsPage() {
       <Route path="private" element={<PrivateRequest session={session} />} />
       <Route path="terms" element={<TermsPage session={session} />} />
       <Route path="admin" element={<AdminPage />} />
+      <Route path="admin/private/:id" element={<PrivateReply />} />
       <Route path="*" element={<Navigate to="/seminars" replace />} />
     </Routes>
   )
