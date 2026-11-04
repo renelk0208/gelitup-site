@@ -748,6 +748,7 @@ function PrivateRequest({ session }) {
           <label className="block md:col-span-2"><span className="text-sm font-medium">{seminar ? 'Anything you would like to focus on?' : 'What would you like to learn? *'}</span><textarea required={!seminar} rows={3} value={form.topic} onChange={set('topic')} className={`${inputCls} mt-1`} placeholder={seminar ? 'Optional' : 'e.g. Builder gel structure and apex, almond shape'} /></label>
           <div className="md:col-span-2">
             <p className="text-sm font-medium">Preferred dates &amp; times <span className="text-black/50 font-normal">(your time zone: {tz || 'local'})</span></p>
+            <p className="mt-1 rounded-lg bg-[#D43790]/5 px-3 py-2 text-xs text-black/70"><strong>Need the products?</strong> If you'd like the seminar kit, choose dates that leave enough time for it to reach you — delivery time depends on your country. We'll also check this when we confirm your date.</p>
             <div className="mt-1 grid gap-2">
               {form.slots.map((s, i) => (
                 <div key={i} className="flex gap-2"><input type="date" required={i === 0} value={s.date} onChange={setSlot(i, 'date')} className={inputCls} /><input type="time" value={s.time} onChange={setSlot(i, 'time')} className={inputCls} /></div>
@@ -755,7 +756,7 @@ function PrivateRequest({ session }) {
             </div>
           </div>
           {!seminar && <label className="block"><span className="text-sm font-medium">Number of people</span><input type="number" min={1} max={100} value={form.attendees} onChange={set('attendees')} className={`${inputCls} mt-1`} /></label>}
-          <label className="flex items-center gap-2 mt-6"><input type="checkbox" checked={form.wants_kit} onChange={set('wants_kit')} /> <span className="text-sm">I'd like the seminar kit (products) too</span></label>
+          <label className="flex items-center gap-2 mt-6"><input type="checkbox" checked={form.wants_kit} onChange={set('wants_kit')} /> <span className="text-sm">I'd like the seminar kit (products) too <span className="text-black/50">— delivered to you before the session</span></span></label>
           <label className="block md:col-span-2"><span className="text-sm font-medium">Anything else?</span><textarea rows={2} value={form.notes} onChange={set('notes')} className={`${inputCls} mt-1`} /></label>
           {state === 'error' && <p className="text-sm text-red-600 md:col-span-2">Sorry, the request could not be sent. Please try again or email seminars@gelitup.com.</p>}
           <div className="md:col-span-2"><Button type="submit" disabled={state === 'sending'} className="w-full">{state === 'sending' ? 'Sending…' : 'Send request'}</Button></div>
@@ -1015,7 +1016,7 @@ function privateReplyEmail({ req, seminar, startIso, comment, decline, payUrl })
       <p style="font-size:18px;background:#f6f6f6;border-radius:8px;padding:14px;text-align:center"><strong>${escapeHtml(whenIn(startIso, tz))}</strong> (your time)${tzLine}${hours ? `<br/><span style="color:#666">${hours} hours, live online, 1-to-1</span>` : ''}</p>
       ${commentHtml}
       <p style="text-align:center;margin:24px 0 10px"><a href="${payUrl}" style="display:inline-block;margin:4px;background:${BRAND};color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:bold">Pay${seminar?.private_price != null ? ` €${Number(seminar.private_price).toFixed(0)}` : ''} to book your session</a>${seminar?.kit_url ? `<a href="${seminar.kit_url}" style="display:inline-block;margin:4px;background:#ffffff;color:${BRAND};border:2px solid ${BRAND};padding:12px 22px;border-radius:8px;text-decoration:none;font-weight:bold">Shop the seminar kit</a>` : ''}</p>
-      ${seminar?.kit_url ? `<p style="text-align:center;font-size:13px;color:#555;margin:0 0 20px">${req.wants_kit ? 'You asked about the products — ' : ''}the kit has every product used in the session, 15% off the products bought separately. Order it early so it arrives before your session.</p>` : ''}
+      ${seminar?.kit_url ? `<p style="text-align:center;font-size:13px;color:#555;margin:0 0 20px">${req.wants_kit ? 'You asked about the products — ' : ''}the kit has every product used in the session, 15% off the products bought separately. Delivery time depends on your country, so please order it soon to have it in time for your session.</p>` : ''}
       <p style="font-size:13px;color:#555">Your session is booked once payment is received. We'll then send you the link to join. Free cancellation with a full refund up to ${PRIVATE_CANCEL_HOURS} hours before the start; after that, or if you don't attend, it can't be refunded. You can move the session once, free of charge, with at least ${PRIVATE_CANCEL_HOURS} hours' notice. Full terms: <a href="${SEMINAR_SITE_URL}/seminars/terms" style="color:${BRAND}">gelitup.com/seminars/terms</a>.</p>
       <p style="font-size:13px;color:#555">Questions? Just reply to this email.</p>
       <p>Warm regards,<br/>GEL.IT.UP Seminars</p>`),
