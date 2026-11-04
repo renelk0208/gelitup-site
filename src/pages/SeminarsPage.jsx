@@ -134,7 +134,8 @@ function SeminarCard({ s, onBook }) {
   const soldOut = Boolean(s.sold_out)
   const past = Boolean(s.past)
   const closed = Boolean(s.closed) && !past
-  const recording = Boolean(s.recording_on_sale) && (past || closed)
+  // Recordings are only offered once the seminar has finished — never before.
+  const recording = Boolean(s.recording_on_sale) && past
   const clickable = recording || (!soldOut && !past && !closed)
   const inner = (
     <>
@@ -350,8 +351,8 @@ function SeminarsHome({ session }) {
       setSeminars(rows)
       // gelitup.com/seminars?book=<seminar id> opens that seminar's booking panel (used by the kit page link).
       const want = new URLSearchParams(window.location.search).get('book')
-      const hit = want && rows.find((r) => r.id === want && ((!r.past && !r.closed && !r.sold_out) || r.recording_on_sale))
-      if (hit) setBooking({ ...hit, mode: (hit.past || hit.closed) && hit.recording_on_sale ? 'recording' : 'live' })
+      const hit = want && rows.find((r) => r.id === want && ((!r.past && !r.closed && !r.sold_out) || (r.past && r.recording_on_sale)))
+      if (hit) setBooking({ ...hit, mode: hit.past && hit.recording_on_sale ? 'recording' : 'live' })
     })()
     return () => { cancelled = true }
   }, [])
