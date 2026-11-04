@@ -196,11 +196,7 @@ function SeminarCard({ s, onBook }) {
         <p className="text-xs uppercase tracking-wider text-black/50">{formatWhen(s.starts_at, false)}</p>
         <h3 className="font-bold text-lg leading-snug">{s.title}</h3>
         {s.trainer_name && <p className="text-sm text-black/60">with {s.trainer_name}</p>}
-        {clickable ? (
-          <span className="mt-3 inline-flex w-full items-center justify-center rounded-xl px-5 py-3 text-sm font-bold text-white transition group-hover:opacity-90" style={{ background: BRAND }}>
-            {recording ? `Watch the recording (${s.recording_days || 30}-day access) →` : 'Book your seat →'}
-          </span>
-        ) : (
+        {!clickable && (
           <p className="mt-2 text-sm font-semibold text-gray-500">
             {past ? 'This seminar has finished' : soldOut ? 'Sold out — watch for the next date' : `Online booking closed ${BOOKING_CUTOFF_HOURS} hours before the start`}
           </p>
@@ -208,9 +204,31 @@ function SeminarCard({ s, onBook }) {
       </div>
     </>
   )
-  return clickable
-    ? <button type="button" onClick={() => onBook({ ...s, mode: recording ? 'recording' : 'live' })} className="group block w-full" aria-label={recording ? `Watch the recording of ${s.title}` : `Book ${s.title}`}>{inner}</button>
-    : <div className="block cursor-default" aria-disabled="true">{inner}</div>
+  const book = () => onBook({ ...s, mode: recording ? 'recording' : 'live' })
+  const hasPrivate = s.private_price != null
+  return (
+    <div>
+      {clickable
+        ? <button type="button" onClick={book} className="group block w-full" aria-label={recording ? `Watch the recording of ${s.title}` : `Book ${s.title}`}>{inner}</button>
+        : <div className="block cursor-default" aria-disabled="true">{inner}</div>}
+      {(clickable || hasPrivate) && (
+        <div className={`mt-3 grid gap-2 ${clickable && hasPrivate ? 'grid-cols-2' : 'grid-cols-1'}`}>
+          {clickable && (
+            <button type="button" onClick={book} className="rounded-xl px-3 py-3 text-left text-white transition hover:opacity-90" style={{ background: BRAND }}>
+              <span className="block text-[11px] font-bold uppercase tracking-wider opacity-80">{recording ? 'Recording' : 'Online group'}</span>
+              <span className="block text-sm font-bold">{recording ? `Watch (${s.recording_days || 30} days) →` : 'Book your seat →'}</span>
+            </button>
+          )}
+          {hasPrivate && (
+            <Link to={`/seminars/private?seminar=${s.id}`} className="rounded-xl px-3 py-3 text-left transition hover:brightness-95" style={{ background: '#F9D3E6', color: '#9E1F63' }}>
+              <span className="block text-[11px] font-bold uppercase tracking-wider opacity-80">Private session · €{Number(s.private_price).toFixed(0)}</span>
+              <span className="block text-sm font-bold">{Math.round((s.private_minutes || 120) / 60 * 10) / 10} h 1-to-1 · Request →</span>
+            </Link>
+          )}
+        </div>
+      )}
+    </div>
+  )
 }
 
 const money = (n) => (n == null ? '' : `€${Number(n).toFixed(2)}`)
@@ -443,17 +461,7 @@ function SeminarsHome({ session }) {
       )}
       {seminars?.length > 0 && (
         <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-          {seminars.map((s) => (
-            <div key={s.id}>
-              <SeminarCard s={s} onBook={setBooking} />
-              {s.private_price != null && (
-                <p className="mt-3 text-sm text-black/60 text-center">
-                  Prefer a private 1-to-1 at a time that suits you?{' '}
-                  <Link to={`/seminars/private?seminar=${s.id}`} className="font-semibold underline underline-offset-2" style={{ color: BRAND }}>{Math.round((s.private_minutes || 120) / 60 * 10) / 10} hours · €{Number(s.private_price).toFixed(0)} — request it</Link>
-                </p>
-              )}
-            </div>
-          ))}
+          {seminars.map((s) => <SeminarCard key={s.id} s={s} onBook={setBooking} />)}
         </div>
       )}
 
