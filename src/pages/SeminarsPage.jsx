@@ -134,32 +134,34 @@ function SeminarCard({ s, onBook }) {
   const soldOut = Boolean(s.sold_out)
   const past = Boolean(s.past)
   const closed = Boolean(s.closed) && !past
-  const clickable = !soldOut && !past && !closed
+  const recording = Boolean(s.recording_on_sale) && (past || closed)
+  const clickable = recording || (!soldOut && !past && !closed)
   const inner = (
     <>
       <div className="relative aspect-[4/5] bg-black/5 overflow-hidden rounded-2xl">
         {s.image_url
-          ? <img src={s.image_url} alt={s.title} loading="lazy" className={`h-full w-full object-cover transition-transform duration-500 ${clickable ? 'group-hover:scale-[1.03]' : ''} ${soldOut || past ? 'grayscale-[60%] opacity-80' : ''}`} />
+          ? <img src={s.image_url} alt={s.title} loading="lazy" className={`h-full w-full object-cover transition-transform duration-500 ${clickable ? 'group-hover:scale-[1.03]' : ''} ${(soldOut || past) && !recording ? 'grayscale-[60%] opacity-80' : ''}`} />
           : <div className="h-full w-full flex items-center justify-center text-black/30 text-sm p-6 text-center">Seminar image<br />1200 × 1500 px</div>}
-        {soldOut && !past && (
+        {soldOut && !past && !recording && (
           <div className="absolute inset-0 flex items-center justify-center">
             <span className="rotate-[-12deg] border-4 border-white bg-black/80 px-6 py-2 text-2xl md:text-3xl font-black tracking-widest text-white shadow-xl">SOLD OUT</span>
           </div>
         )}
-        {past && <span className="absolute top-3 left-3 rounded-full bg-black/80 text-white text-xs font-semibold px-3 py-1">Finished</span>}
+        {past && !recording && <span className="absolute top-3 left-3 rounded-full bg-black/80 text-white text-xs font-semibold px-3 py-1">Finished</span>}
+        {recording && <span className="absolute top-3 left-3 rounded-full text-white text-xs font-semibold px-3 py-1" style={{ background: BRAND }}>▶ Recording available</span>}
       </div>
       <div className="pt-3 text-left">
         <p className="text-xs uppercase tracking-wider text-black/50">{formatWhen(s.starts_at, false)}</p>
         <h3 className="font-bold text-lg leading-snug">{s.title}</h3>
         {s.trainer_name && <p className="text-sm text-black/60">with {s.trainer_name}</p>}
-        <p className="mt-2 text-sm font-semibold" style={{ color: soldOut || past || closed ? '#6b7280' : BRAND }}>
-          {past ? 'This seminar has finished' : soldOut ? 'Sold out — watch for the next date' : closed ? `Online booking closed ${BOOKING_CUTOFF_HOURS} hours before the start` : 'Book your seat →'}
+        <p className="mt-2 text-sm font-semibold" style={{ color: recording ? BRAND : soldOut || past || closed ? '#6b7280' : BRAND }}>
+          {recording ? `Watch the recording (${s.recording_days || 30}-day access) →` : past ? 'This seminar has finished' : soldOut ? 'Sold out — watch for the next date' : closed ? `Online booking closed ${BOOKING_CUTOFF_HOURS} hours before the start` : 'Book your seat →'}
         </p>
       </div>
     </>
   )
   return clickable
-    ? <button type="button" onClick={() => onBook(s)} className="group block w-full" aria-label={`Book ${s.title}`}>{inner}</button>
+    ? <button type="button" onClick={() => onBook({ ...s, mode: recording ? 'recording' : 'live' })} className="group block w-full" aria-label={recording ? `Watch the recording of ${s.title}` : `Book ${s.title}`}>{inner}</button>
     : <div className="block cursor-default" aria-disabled="true">{inner}</div>
 }
 
@@ -167,6 +169,8 @@ const money = (n) => (n == null ? '' : `€${Number(n).toFixed(2)}`)
 
 // Booking panel: seat + optional kit with its choices, then straight to Shopify checkout.
 function BookingPanel({ seminar, onClose }) {
+  const isRec = seminar.mode === 'recording'
+  const recDays = seminar.recording_days || 30
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [qty, setQty] = useState(1)
@@ -180,14 +184,17 @@ function BookingPanel({ seminar, onClose }) {
     ;(async () => {
       try {
         // Prices are read in the visitor's own browser so Shopify returns her market's prices.
-        const { data: row } = await supabase.from('seminars').select('sold_out, shopify_sku, shop_url, kit_url').eq('id', seminar.id).maybeSingle()
+        const { data: row } = await supabase.from('seminars').select('sold_out, shopify_sku, shop_url, kit_url, recording_sku, recording_shop_url, recording_on_sale').eq('id', seminar.id).maybeSingle()
         if (!row) throw new Error('not found')
         const handle = (u) => (String(u || '').match(/\/products\/([^/?#]+)/) || [])[1]
         const load = async (u) => { const h = handle(u); if (!h) return null; const r = await fetch(`${SHOP_URL}/products/${h}.js`); return r.ok ? r.json() : null }
-        const [seatP, kitP] = await Promise.all([load(row.shop_url), load(row.kit_url)])
-        const v = seatP?.variants?.find((x) => String(x.sku || '').trim() === String(row.shopify_sku || '').trim())
+        if (isRec && !row.recording_on_sale) throw new Error('not on sale')
+        // Recordings: the kit is suggested after watching, not at checkout.
+        const [seatP, kitP] = await Promise.all([load(isRec ? row.recording_shop_url : row.shop_url), isRec ? null : load(row.kit_url)])
+        const wantSku = String((isRec ? row.recording_sku : row.shopify_sku) || '').trim()
+        const v = seatP?.variants?.find((x) => String(x.sku || '').trim() === wantSku)
         const d = {
-          soldOut: Boolean(row.sold_out),
+          soldOut: isRec ? false : Boolean(row.sold_out),
           seat: v ? { id: v.id, price: v.price / 100, available: v.available } : null,
           kit: kitP ? {
             options: (kitP.options || []).map((o) => ({ name: o.name, values: o.values })),
@@ -203,7 +210,7 @@ function BookingPanel({ seminar, onClose }) {
       }
     })()
     return () => { cancelled = true }
-  }, [seminar.id])
+  }, [seminar.id, isRec])
 
   useEffect(() => {
     const onKey = (e) => { if (e.key === 'Escape') onClose() }
@@ -212,7 +219,7 @@ function BookingPanel({ seminar, onClose }) {
   }, [onClose])
 
   const kitVariant = data?.kit?.variants?.find((v) => v.options.every((o, i) => o === choice[i]))
-  const bookingClosed = new Date(seminar.starts_at).getTime() - BOOKING_CUTOFF_HOURS * 3600000 < Date.now()
+  const bookingClosed = !isRec && new Date(seminar.starts_at).getTime() - BOOKING_CUTOFF_HOURS * 3600000 < Date.now()
   const seatOk = data?.seat && data.seat.available && !data.soldOut && !bookingClosed
   const total = (seatOk ? data.seat.price * qty : 0) + (withKit && kitVariant ? kitVariant.price * qty : 0)
 
@@ -227,9 +234,9 @@ function BookingPanel({ seminar, onClose }) {
       <div className="w-full sm:max-w-lg max-h-[92vh] overflow-y-auto bg-white rounded-t-2xl sm:rounded-2xl p-6" onClick={(e) => e.stopPropagation()}>
         <div className="flex justify-between gap-4">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: BRAND }}>Book your seat</p>
+            <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: BRAND }}>{isRec ? 'Watch the recording' : 'Book your seat'}</p>
             <h2 className="text-xl font-bold mt-1">{seminar.title}</h2>
-            <p className="text-sm text-black/60">{formatWhen(seminar.starts_at)}</p>
+            <p className="text-sm text-black/60">{isRec ? `Recorded on ${formatWhen(seminar.starts_at, false)}` : formatWhen(seminar.starts_at)}</p>
           </div>
           <button type="button" onClick={onClose} aria-label="Close" className="text-2xl leading-none text-black/40 hover:text-black">×</button>
         </div>
@@ -242,16 +249,18 @@ function BookingPanel({ seminar, onClose }) {
         {data && seatOk && (
           <>
             <div className="mt-6 flex items-center justify-between border rounded-xl p-4">
-              <div><p className="font-semibold">Live seminar seat</p><p className="text-sm text-black/60">Includes live Q&amp;A and 30-day replay</p></div>
+              <div>{isRec
+                ? <><p className="font-semibold">Seminar recording</p><p className="text-sm text-black/60">Watch as often as you like for {recDays} days from purchase</p></>
+                : <><p className="font-semibold">Live seminar seat</p><p className="text-sm text-black/60">Includes live Q&amp;A and 30-day replay</p></>}</div>
               <div className="text-right"><p className="font-semibold">{money(data.seat.price)}</p>
-                <label className="text-xs text-black/60">Seats{' '}
+                <label className="text-xs text-black/60">{isRec ? 'Quantity' : 'Seats'}{' '}
                   <select value={qty} onChange={(e) => setQty(Number(e.target.value))} className="border rounded px-1 py-0.5 ml-1">
                     {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => <option key={n} value={n}>{n}</option>)}
                   </select>
                 </label>
               </div>
             </div>
-            {qty > 1 && <p className="text-xs text-black/50 mt-1">Each seat gets its own access code — forward one to each person.</p>}
+            {qty > 1 && <p className="text-xs text-black/50 mt-1">Each {isRec ? 'one' : 'seat'} gets its own access code — forward one to each person.</p>}
 
             {data.kit && (
               <div className={`mt-4 border rounded-xl p-4 ${withKit ? 'border-[#D43790] bg-[#D43790]/[0.03]' : ''}`}>
@@ -284,6 +293,15 @@ function BookingPanel({ seminar, onClose }) {
             </div>
             <div className="mt-5 rounded-xl bg-black/[0.03] p-4 text-xs text-black/70">
               <p className="font-semibold text-sm text-black">Booking terms — summary</p>
+              {isRec ? (
+                <ul className="mt-2 space-y-1.5 list-disc pl-4">
+                  <li><strong>Payment</strong> is taken in full at checkout. Prices include VAT.</li>
+                  <li>The recording is <strong>digital content</strong>: access starts as soon as your code arrives, for <strong>{recDays} days from purchase</strong>.</li>
+                  <li><strong>No cancellation or refund</strong> once access has started (see the consent below). The {CANCEL_HOURS}-hour rule for live seats does not apply to recordings.</li>
+                  <li>Your access code is <strong>personal and non-transferable</strong>, works on one device at a time, and may not be shared. Downloading, recording or redistributing the video is not allowed.</li>
+                  <li>Participants must be 18 or older.</li>
+                </ul>
+              ) : (
               <ul className="mt-2 space-y-1.5 list-disc pl-4">
                 <li><strong>Payment</strong> is taken in full at checkout. Prices include VAT.</li>
                 <li><strong>Free cancellation</strong> with a full refund of the seat up to {CANCEL_HOURS} hours before the start, in My seminars. <strong>Within {CANCEL_HOURS} hours</strong> the seat cannot be cancelled or refunded, including if you do not attend.</li>
@@ -291,6 +309,7 @@ function BookingPanel({ seminar, onClose }) {
                 <li>Replay access for {30} days after the seminar. Participants must be 18 or older.</li>
                 {withKit && <li>The kit is a physical product: normal 14-day right of withdrawal and shop returns policy apply; it is not refunded automatically when a seat is cancelled.</li>}
               </ul>
+              )}
               <a href="/seminars/terms" target="_blank" rel="noopener" className="inline-block mt-2 underline" style={{ color: BRAND }}>Read the full seminar terms &amp; conditions</a>
               <label className="mt-3 flex items-start gap-2 text-sm text-black cursor-pointer">
                 <input type="checkbox" checked={agreed} onChange={(e) => setAgreed(e.target.checked)} className="mt-0.5" />
@@ -298,7 +317,9 @@ function BookingPanel({ seminar, onClose }) {
               </label>
               <label className="mt-2 flex items-start gap-2 text-sm text-black cursor-pointer">
                 <input type="checkbox" checked={consented} onChange={(e) => setConsented(e.target.checked)} className="mt-0.5" />
-                <span>I ask for the seminar to be provided on the booked date and for access to the recording to start after it, even if this is within the 14-day withdrawal period. I understand that I lose my right of withdrawal once the seminar has been provided and the recording made available, and that cancellations follow the {CANCEL_HOURS}-hour rule above.</span>
+                <span>{isRec
+                  ? 'I ask for access to the recording to start immediately, within the 14-day withdrawal period. I understand that I lose my right of withdrawal once access has started, so the recording cannot be cancelled or refunded.'
+                  : `I ask for the seminar to be provided on the booked date and for access to the recording to start after it, even if this is within the 14-day withdrawal period. I understand that I lose my right of withdrawal once the seminar has been provided and the recording made available, and that cancellations follow the ${CANCEL_HOURS}-hour rule above.`}</span>
               </label>
             </div>
             <Button type="button" onClick={checkout} disabled={!agreed || !consented || (withKit && (!kitVariant || !kitVariant.available))} className="w-full mt-4">Continue to secure payment →</Button>
@@ -321,16 +342,16 @@ function SeminarsHome({ session }) {
       if (!hasSupabaseConfig) { setSeminars([]); return }
       const since = new Date(Date.now() - 2 * 86400000).toISOString()
       const { data } = await supabase.from('seminars')
-        .select('id, title, description, trainer_name, starts_at, duration_minutes, sold_out, image_url, status, kind')
-        .eq('kind', 'group').eq('status', 'scheduled').gte('starts_at', since).order('starts_at')
+        .select('id, title, description, trainer_name, starts_at, duration_minutes, sold_out, image_url, status, kind, recording_on_sale, recording_days')
+        .eq('kind', 'group').in('status', ['scheduled', 'ended']).or(`starts_at.gte.${since},recording_on_sale.eq.true`).order('starts_at')
       const now = Date.now()
       const rows = (data || []).map((s) => ({ ...s, past: new Date(s.starts_at).getTime() + s.duration_minutes * 60000 < now, closed: new Date(s.starts_at).getTime() - BOOKING_CUTOFF_HOURS * 3600000 < now }))
       if (cancelled) return
       setSeminars(rows)
       // gelitup.com/seminars?book=<seminar id> opens that seminar's booking panel (used by the kit page link).
       const want = new URLSearchParams(window.location.search).get('book')
-      const hit = want && rows.find((r) => r.id === want && !r.past && !r.closed && !r.sold_out)
-      if (hit) setBooking(hit)
+      const hit = want && rows.find((r) => r.id === want && ((!r.past && !r.closed && !r.sold_out) || r.recording_on_sale))
+      if (hit) setBooking({ ...hit, mode: (hit.past || hit.closed) && hit.recording_on_sale ? 'recording' : 'live' })
     })()
     return () => { cancelled = true }
   }, [])
@@ -341,7 +362,7 @@ function SeminarsHome({ session }) {
       <header className="text-center max-w-2xl mx-auto mb-10">
         <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: BRAND }}>GEL.IT.UP Education</p>
         <h1 className="text-3xl md:text-5xl font-bold mt-2">Live online seminars</h1>
-        <p className="mt-4 text-black/60">Learn live from GEL.IT.UP trainers, ask your questions in the live Q&amp;A, and rewatch the recording for 30 days.</p>
+        <p className="mt-4 text-black/60">Learn live from GEL.IT.UP trainers, ask your questions in the live Q&amp;A, and rewatch the recording for 30 days. Missed one? Many seminars are also available as a recording.</p>
       </header>
 
       {seminars === null && <p className="text-center text-black/40">Loading seminars…</p>}
@@ -489,7 +510,7 @@ function MySeminars({ session }) {
                 <span className={`inline-block text-xs font-bold px-2.5 py-1 rounded-full ${cls}`} style={s.phase === 'live' ? { background: BRAND } : undefined}>{label}</span>
                 <h2 className="font-bold mt-1">{s.title}</h2>
                 <p className="text-sm text-black/60">{formatWhen(s.starts_at)}</p>
-                {(s.phase === 'replay' || s.phase === 'replay_pending') && <p className="text-xs text-black/50 mt-1">Replay open until {formatWhen(s.replay_until, false)}</p>}
+                {(s.phase === 'replay' || s.phase === 'replay_pending') && <p className="text-xs text-black/50 mt-1">{s.access_type === 'recording' ? 'Recording' : 'Replay'} open until {formatWhen(s.replay_until, false)}</p>}
                 {s.phase === 'upcoming' && s.can_cancel && confirming !== s.id && (
                   <button type="button" onClick={() => setConfirming(s.id)} className="text-xs text-black/60 underline mt-2">Cancel my booking (free until {formatWhen(s.cancel_until, false)})</button>
                 )}
@@ -581,7 +602,14 @@ function Room({ session }) {
       {s.phase === 'replay' && (
         <div className="mt-6">
           <div className="relative aspect-video rounded-2xl overflow-hidden bg-black"><iframe title={`${s.title} replay`} src={s.replay_embed_url} className="absolute inset-0 h-full w-full" allow="autoplay; fullscreen; picture-in-picture" allowFullScreen /></div>
-          <p className="text-sm text-black/60 mt-3">Replay available until {formatWhen(s.replay_until, false)}.</p>
+          <p className="text-sm text-black/60 mt-3">{s.access_type === 'recording' ? 'Recording' : 'Replay'} available until {formatWhen(s.replay_until, false)}.</p>
+          {s.kit_url && (
+            <a href={s.kit_url} className="mt-6 flex items-center gap-4 rounded-2xl border p-5 hover:border-[#D43790] transition-colors">
+              <span className="text-3xl" aria-hidden="true">💅</span>
+              <span className="flex-1"><span className="block font-bold">Ready to try it yourself?</span><span className="block text-sm text-black/60">Get all the products used in this seminar in one kit — 10% off the products bought separately.</span></span>
+              <span className="shrink-0 font-semibold" style={{ color: BRAND }}>Shop the kit →</span>
+            </a>
+          )}
         </div>
       )}
       {s.phase === 'replay_pending' && <div className="mt-6 rounded-2xl border p-8 text-center text-black/70">Thank you for joining! The recording is being prepared and will appear here soon. You'll be able to watch it until {formatWhen(s.replay_until, false)}.</div>}
@@ -647,7 +675,7 @@ function PrivateRequest({ session }) {
 }
 
 // ── Admin ────────────────────────────────────────────────────────────────────
-const EMPTY = { title: '', trainer_name: '', description: '', starts_at: '', duration_minutes: 90, replay_days: 30, status: 'draft', kind: 'group', shopify_sku: '', shop_url: '', kit_url: '', image_url: '', sold_out: false, vimeo_event: '', replay_video: '' }
+const EMPTY = { title: '', trainer_name: '', description: '', starts_at: '', duration_minutes: 90, replay_days: 30, status: 'draft', kind: 'group', shopify_sku: '', shop_url: '', kit_url: '', image_url: '', sold_out: false, recording_sku: '', recording_shop_url: '', recording_days: 30, recording_on_sale: false, vimeo_event: '', replay_video: '' }
 
 const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); const p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}` }
 
@@ -705,9 +733,9 @@ function AdminPage() {
   const save = async (e) => {
     e.preventDefault(); setMsg('Saving…')
     const { vimeo_event, replay_video, id } = editing
-    const FIELDS = ['title', 'trainer_name', 'description', 'duration_minutes', 'replay_days', 'status', 'kind', 'shopify_sku', 'shop_url', 'kit_url', 'image_url', 'sold_out']
+    const FIELDS = ['title', 'trainer_name', 'description', 'duration_minutes', 'replay_days', 'status', 'kind', 'shopify_sku', 'shop_url', 'kit_url', 'image_url', 'sold_out', 'recording_sku', 'recording_shop_url', 'recording_days', 'recording_on_sale']
     const rest = Object.fromEntries(FIELDS.map((f) => [f, editing[f] === '' ? null : editing[f]]))
-    const row = { ...rest, starts_at: new Date(editing.starts_at).toISOString(), shopify_sku: rest.shopify_sku?.trim() || null, duration_minutes: Number(rest.duration_minutes), replay_days: Number(rest.replay_days), updated_at: new Date().toISOString() }
+    const row = { ...rest, starts_at: new Date(editing.starts_at).toISOString(), shopify_sku: rest.shopify_sku?.trim() || null, duration_minutes: Number(rest.duration_minutes), replay_days: Number(rest.replay_days), recording_days: Number(rest.recording_days) || 30, recording_sku: rest.recording_sku?.trim() || null, updated_at: new Date().toISOString() }
     const q = id ? supabase.from('seminars').update(row).eq('id', id).select().single() : supabase.from('seminars').insert(row).select().single()
     const { data, error } = await q
     if (error) { setMsg(`Could not save: ${error.message}`); return }
@@ -779,6 +807,13 @@ function AdminPage() {
           {F({ label: 'Seminar kit product page (optional, …/products/…)', k: 'kit_url', type: 'url' })}
           {F({ label: 'Booking image URL (1200 × 1500 px)', k: 'image_url', type: 'url' })}
           <label className="flex items-center gap-2 mt-6"><input type="checkbox" checked={Boolean(editing.sold_out)} onChange={(e) => setEditing((x) => ({ ...x, sold_out: e.target.checked }))} /><span className="text-sm font-semibold">Show SOLD OUT</span></label>
+          <div className="md:col-span-2 rounded-xl bg-black/[0.03] p-4 grid gap-3 md:grid-cols-2">
+            <p className="font-semibold text-sm md:col-span-2">Recording for people who could not attend</p>
+            {F({ label: 'Recording product page on shop.gelitup.com', k: 'recording_shop_url', type: 'url' })}
+            {F({ label: 'Recording SKU in Shopify', k: 'recording_sku', placeholder: 'e.g. SEM-OMBRE-REC' })}
+            {F({ label: 'Access days from purchase', k: 'recording_days', type: 'number', min: 1 })}
+            <label className="flex items-center gap-2 mt-6"><input type="checkbox" checked={Boolean(editing.recording_on_sale)} onChange={(e) => setEditing((x) => ({ ...x, recording_on_sale: e.target.checked }))} /><span className="text-sm font-semibold">Recording on sale (shows "Watch the recording" after the seminar)</span></label>
+          </div>
           <div className="md:col-span-2"><label className="block"><span className="text-sm font-medium">Description</span><textarea rows={4} value={editing.description || ''} onChange={(e) => setEditing((x) => ({ ...x, description: e.target.value }))} className={`${inputCls} mt-1`} /></label></div>
           <div className="md:col-span-2 rounded-xl bg-black/[0.03] p-4 grid gap-3">
             <p className="font-semibold text-sm">Stream links (only shown to signed-in attendees)</p>
@@ -904,17 +939,25 @@ function TermsPage({ session }) {
           <li>You need a stable internet connection and an up-to-date browser. We are not responsible for problems with your own device or connection; if the seminar cannot take place because of a problem on our side, we will reschedule or refund.</li>
         </ul>
 
-        <H>4. Certificates and professional use</H>
+        <H>4. Seminar recordings</H>
+        <ul className="list-disc pl-5 space-y-1">
+          <li>Where a seminar is offered as a recording, you can buy access to it after the live date. Access lasts {30} days from purchase, unless the booking page states another period.</li>
+          <li>A recording is <strong>digital content</strong>. When you buy it you expressly ask for access to start immediately, and you acknowledge that you lose your right of withdrawal once access has started. Recordings therefore cannot be cancelled or refunded once purchased. The {CANCEL_HOURS}-hour cancellation rule applies only to live seats.</li>
+          <li>Recording access codes are personal and non-transferable, work on one device at a time, and may not be shared. Downloading, recording or redistributing the video is not allowed.</li>
+          <li>If the recording cannot be played because of a problem on our side, we will fix it or refund you.</li>
+        </ul>
+
+        <H>5. Certificates and professional use</H>
         <ul className="list-disc pl-5 space-y-1">
           <li>Where a certificate of participation is offered, it is issued after the seminar to participants who attended or completed the course and paid in full.</li>
           <li>A certificate of participation confirms that you took part in the training. It is not a professional qualification. Whether it is accepted for professional insurance, licensing or other purposes is decided by your insurer and the rules in your country.</li>
           <li>Products and techniques shown are for professional use. Always follow the product instructions and the health and safety rules that apply in your country.</li>
         </ul>
 
-        <H>5. Personal data</H>
+        <H>6. Personal data</H>
         <p>We use your name, email address and booking details to provide the seminar, send your access code and handle cancellations. See our <Link to="/privacy-policy" className="underline" style={{ color: BRAND }}>privacy policy</Link>.</p>
 
-        <H>6. Questions and complaints</H>
+        <H>7. Questions and complaints</H>
         <p>Contact us at info@gelitup.com and we will reply as soon as possible. If we cannot resolve a complaint, consumers can contact the competent consumer protection or alternative dispute resolution body in their country. These terms are governed by the law of Bulgaria; this does not remove the protection of mandatory consumer law in your country of residence.</p>
       </article>
     </Shell>

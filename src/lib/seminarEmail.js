@@ -10,7 +10,8 @@ export function seminarSignInLink(email, code) {
   return `${SEMINAR_SITE}/seminars/login?email=${encodeURIComponent(email || '')}&code=${encodeURIComponent(code)}`
 }
 
-export function seminarCodeEmail({ name, email, codes, seminar }) {
+export function seminarCodeEmail({ name, email, codes, seminar, accessType = 'live' }) {
+  const rec = accessType === 'recording'
   const list = Array.isArray(codes) ? codes : [codes]
   const when = new Date(seminar.starts_at).toLocaleString('en-GB', {
     timeZone: 'Europe/Athens', weekday: 'long', day: 'numeric', month: 'long', year: 'numeric', hour: '2-digit', minute: '2-digit',
@@ -21,16 +22,17 @@ export function seminarCodeEmail({ name, email, codes, seminar }) {
       ${many ? `<span style="font-size:12px;letter-spacing:1px;color:#666;font-family:Arial">Seat ${i + 1}</span><br/>` : ''}<strong>${escapeHtml(c)}</strong>
     </p>`).join('')
   const html = `<div style="font-family:Arial,sans-serif;max-width:560px;margin:auto;color:#111">
-  <p style="color:${BRAND};font-weight:bold;letter-spacing:2px;font-size:12px">GEL.IT.UP LIVE SEMINAR</p>
+  <p style="color:${BRAND};font-weight:bold;letter-spacing:2px;font-size:12px">${rec ? 'GEL.IT.UP SEMINAR RECORDING' : 'GEL.IT.UP LIVE SEMINAR'}</p>
   <h1 style="font-size:22px;margin:4px 0 12px">${escapeHtml(seminar.title)}</h1>
   <p>Hi ${escapeHtml(name || 'there')},</p>
-  <p>${many ? `Your ${list.length} seats are booked. Each person needs their own code — please forward one code to each attendee.` : 'Your seat is booked. Here is your personal access code:'}</p>
+  <p>${rec ? (many ? `Your ${list.length} recording access codes are ready. Each person needs their own code.` : 'Your recording is ready. Here is your personal access code:') : (many ? `Your ${list.length} seats are booked. Each person needs their own code — please forward one code to each attendee.` : 'Your seat is booked. Here is your personal access code:')}</p>
   ${codeBlocks}
-  <p><strong>When:</strong> ${escapeHtml(when)} (Greece / Bulgaria time)</p>
+  ${rec ? `<p><strong>Access:</strong> ${Number(seminar.recording_days ?? 30)} days from today.</p>` : `<p><strong>When:</strong> ${escapeHtml(when)} (Greece / Bulgaria time)</p>`}
   <p style="text-align:center;margin:24px 0"><a href="${seminarSignInLink(many ? '' : email, list[0])}" style="background:${BRAND};color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:bold">Open my seminar</a></p>
-  <p style="font-size:13px;color:#555">Sign in at gelitup.com/seminars with your email address and code. It works on phone, tablet or computer — nothing to install. Each code is personal and works on one device at a time. After the seminar you can rewatch the recording for ${Number(seminar.replay_days ?? 30)} days.</p>
-  <p style="font-size:13px;color:#555"><strong>Cancellation:</strong> you can cancel free of charge, with a full refund of the seminar seat, up to 24 hours before the start — sign in at gelitup.com/seminars and choose "Cancel my booking". Within 24 hours of the start the seat cannot be refunded.</p>
+  <p style="font-size:13px;color:#555">Sign in at gelitup.com/seminars with your email address and code. It works on phone, tablet or computer — nothing to install. Each code is personal and works on one device at a time. ${rec ? 'The code is non-transferable and may not be shared.' : `After the seminar you can rewatch the recording for ${Number(seminar.replay_days ?? 30)} days.`}</p>
+  ${rec ? '<p style="font-size:13px;color:#555">As agreed at checkout, access to this digital content started immediately, so the recording cannot be cancelled or refunded.</p>' : ''}
+  <p style="font-size:13px;color:#555;${rec ? 'display:none' : ''}"><strong>Cancellation:</strong> you can cancel free of charge, with a full refund of the seminar seat, up to 24 hours before the start — sign in at gelitup.com/seminars and choose "Cancel my booking". Within 24 hours of the start the seat cannot be refunded.</p>
   <p style="font-size:13px;color:#555">Questions? Just reply to this email.</p>
 </div>`
-  return { subject: `Your access code — ${seminar.title}`, html }
+  return { subject: rec ? `Your recording access — ${seminar.title}` : `Your access code — ${seminar.title}`, html }
 }

@@ -62,7 +62,7 @@ export async function handler(event) {
     if (!data) continue // not a seminar SKU (e.g. the seminar kit or other products)
     issued.push(data.codes.length)
     if (data.fresh && EMAIL_WEBHOOK_URL) {
-      const { subject, html } = seminarCodeEmail({ name, email, codes: data.codes, seminar: data.seminar })
+      const { subject, html } = seminarCodeEmail({ name, email, codes: data.codes, seminar: data.seminar, accessType: data.access_type })
       try {
         await sendEmail(email, subject, html)
         await supabase.from('seminar_access_codes').update({ emailed_at: new Date().toISOString() }).in('code', data.codes)
