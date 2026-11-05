@@ -6851,6 +6851,24 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       _shipments: (row._shipments || []).map((s) => (s.id === shipment.id ? { ...s, items } : s)),
     })
   }
+  // Correct the tracking of a package already sent, and optionally email her
+  // the corrected tracking.
+  const editShipmentTracking = async (row, shipment) => {
+    const number = window.prompt(`Tracking number for ${row.full_name || 'her'}'s package of ${fmtDate(shipment.sent_at)}:`, shipment.tracking_number || '')
+    if (number === null) return
+    const url = window.prompt('Tracking link (URL):', shipment.tracking_url || '')
+    if (url === null) return
+    const tn = number.trim()
+    const tu = url.trim()
+    if (tn === String(shipment.tracking_number || '').trim() && tu === String(shipment.tracking_url || '').trim()) return
+    const { error: err } = await supabase.from('ambassador_shipments').update({ tracking_number: tn || null, tracking_url: tu || null }).eq('id', shipment.id)
+    if (err) { alert(`Could not save the tracking: ${err.message}`); return }
+    const updatedShipments = (row._shipments || []).map((x) => (x.id === shipment.id ? { ...x, tracking_number: tn || null, tracking_url: tu || null } : x))
+    patchRow(row.id, { _shipments: updatedShipments })
+    if (tn && tu && window.confirm(`Tracking saved.\n\nEmail ${row.full_name || 'her'} the corrected tracking now?`)) {
+      await resendShipmentEmail({ ...row, _shipments: updatedShipments }, getAmbassadorDashboardMeta(row).nextReminderAt, { trackingNumber: tn, trackingUrl: tu, skipTypedCheck: true })
+    }
+  }
   const removePlannedItem = async (row, idx) => {
     const lines = packNoteLines(row)
     if (idx < 0 || idx >= lines.length) return
@@ -7335,7 +7353,7 @@ const resendShipmentEmail = async (row, nextReminderAt, trackingOverride) => {
   let trackingNumber = lastNumber
   let trackingUrl = lastUrl
   // Corrected tracking typed in the boxes: resend with that, not the old one.
-  const typed = getShipmentDraft(row)
+  const typed = trackingOverride?.skipTypedCheck ? {} : getShipmentDraft(row)
   let correcting = false
   if (typed.tracking_number && typed.tracking_url && (typed.tracking_number !== lastNumber || typed.tracking_url !== lastUrl)) {
     correcting = window.confirm(`Use the tracking typed in the boxes for this resend?\n\nNew: ${typed.tracking_number}\nOld: ${lastNumber || '(none)'}\n\nOK = send the new tracking and correct her last package. Cancel = resend the old tracking.`)
@@ -7980,6 +7998,7 @@ const deleteApplication = async (row) => {
               loadProducts={loadShopProducts}
               savingId={saving}
               onEditContents={editShipmentContents}
+              onEditTracking={editShipmentTracking}
               onSetType={setAmbassadorType}
               onSetEducator={setAmbassadorEducator}
               busyShipmentId={busyShipmentId}
@@ -8554,6 +8573,20 @@ const deleteApplication = async (row) => {
                           {shipmentEntries[0].method ? ` · ${shipmentEntries[0].method}` : ''}
                           {shipmentEntries[0].trackingNumber && <>{' · Tracking: '}<a href={trackingLink(shipmentEntries[0].trackingNumber, shipmentEntries[0].trackingUrl)} target="_blank" rel="noreferrer" className="text-fuchsia-700 hover:underline">{shipmentEntries[0].trackingNumber}</a></>}
                         </p>
+                        {(() => {
+                          // The package itself, so it can be amended: contents and tracking.
+                          const lastPkg = (row._shipments || []).find((x) => !x.lost_at) || (row._shipments || [])[0]
+                          if (!lastPkg?.id) return null
+                          return (
+                            <>
+                              {Array.isArray(lastPkg.items) && lastPkg.items.length > 0 && <p className="mt-1 text-[11px] text-slate-700"><span className="font-semibold">Contents:</span> {lastPkg.items.join(', ')}</p>}
+                              <div className="mt-1.5 flex flex-wrap gap-2">
+                                <button type="button" onClick={() => editShipmentContents(row, lastPkg)} className="rounded border border-fuchsia-300 bg-white px-2 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50">✎ Edit contents (add / remove products)</button>
+                                <button type="button" onClick={() => editShipmentTracking(row, lastPkg)} className="rounded border border-sky-300 bg-white px-2 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50">✎ {lastPkg.tracking_number ? 'Edit tracking' : 'Add tracking'}</button>
+                              </div>
+                            </>
+                          )
+                        })()}
                       </div>
                     )}
                     <div className="rounded-lg border border-fuchsia-300 bg-fuchsia-50 px-2.5 py-1.5">
@@ -9126,7 +9159,7 @@ const deleteApplication = async (row) => {
                   return (
                     <li key={`${l.text}-${i}`} className={`rounded-lg border px-3 py-2 text-xs ${done ? 'border-emerald-200 bg-emerald-50/40' : 'border-amber-300 bg-amber-50'}`}>
                       <div className="flex items-start justify-between gap-2">
-                        <span className="font-semibold text-slate-900">{l.text}{l.added && <button type="button" title="Remove this line" onClick={() => removeLine(i)} className="ml-2 text-slate-400 hover:text-rose-600">✕</button>}</span>
+                        <span className="font-semibold text-slate-900">{l.text}{(l.added || pl.lines.length > 1) && <button type="button" title="Remove this line" onClick={() => removeLine(i)} className="ml-2 text-slate-400 hover:text-rose-600">✕</button>}</span>
                         <span className={done ? 'text-emerald-700' : 'text-amber-800'}>{done ? '✓' : want > 1 ? `choose ${want} (${l.picks.length}/${want})` : exact ? 'which one exactly?' : 'which product?'}</span>
                       </div>
                       {l.picks.length > 0 && (
