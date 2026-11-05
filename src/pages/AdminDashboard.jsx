@@ -7172,6 +7172,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     ...presetPackItems(row),
     ...packNoteEntries(row).map((entry) => entry.text),
     ...(currentDraft.shipment_details ? [currentDraft.shipment_details] : []),
+    // Typed in "Items for this package" but "Add item" not clicked: still count.
+    ...String(packAdditionDraft[row.id] || '').split(/[\n,]/).map((t) => t.trim()).filter(Boolean),
   ]
   // Every package must say what was in it, otherwise the history is useless.
   // Nothing planned yet: the packing list opens empty and the products are
@@ -7235,6 +7237,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     }
     // Packing list: name the exact products before the email goes out.
     const exactItems = await openPackingList(row, completedItems, { kind: recordOnly ? 'record' : 'send' })
+    if (exactItems) setPackAdditionDraft((prev) => ({ ...prev, [row.id]: '' }))
     if (!exactItems) { setSaving(null); setEmail(row.id, 'error', recordOnly ? 'Not saved: the packing list was not completed.' : 'Not sent: the packing list was not completed.'); return }
     completedItems = exactItems
     const currentShipmentItems = ''
