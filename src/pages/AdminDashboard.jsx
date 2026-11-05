@@ -53,6 +53,12 @@ const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
 const MAX_ATTACHMENTS_BYTES = 20 * 1024 * 1024
 const SHIPMENT_EMAIL_LOCK_STORAGE_KEY = 'gelitup.admin.shipmentEmailLock.v1'
 const SHIP_DRAFTS_STORAGE_KEY = 'gelitup.admin.shipmentDrafts.v1'
+// One look for every button on an ambassador's card: same size and font,
+// white with a grey border; the main action in brand pink; only Decline red.
+const BTN = 'inline-flex items-center gap-1 rounded-lg border border-slate-300 bg-white px-3 py-1.5 text-xs font-semibold text-slate-700 transition hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50'
+const BTN_PRIMARY = 'inline-flex items-center gap-1 rounded-lg border border-[#D43790] bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-[#BF3182] disabled:cursor-not-allowed disabled:opacity-50'
+const BTN_DANGER = 'inline-flex items-center gap-1 rounded-lg border border-rose-600 bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-rose-500 disabled:cursor-not-allowed disabled:opacity-50'
+const BADGE = 'inline-flex items-center gap-1 rounded-lg border border-slate-200 bg-slate-50 px-3 py-1.5 text-xs font-medium text-slate-500'
 // "2026-12-03" -> "3 December 2026", shown under date boxes: the browser's own
 // box may show 12/03/2026 (month first), which is easy to misread.
 const longDateLabel = (value) => {
@@ -6843,8 +6849,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       lines = entered.split(/[,\n]/).map((t) => t.trim()).filter(Boolean)
       if (!lines.length) return
     }
-    const items = await openPackingList(row, lines)
-    if (!items) return
+    const items = await openPackingList(row, lines, { kind: 'edit', shipmentId: shipment.id })
+    if (!items) { setEmail(row.id, 'error', 'Not saved: the packing list was not completed.'); return }
     const { error: err } = await supabase.from('ambassador_shipments').update({ items }).eq('id', shipment.id)
     if (err) { alert(`Could not save the contents: ${err.message}`); return }
     patchRow(row.id, {
@@ -7067,13 +7073,32 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   // the review emails use.
   const [packingList, setPackingList] = useState(null) // { row, lines: [{ text, picks, keep, query }] }
   const packingResolveRef = useRef(null)
-  const openPackingList = async (row, items) => {
+  // A packing list closed before it was finished is kept (in this browser) so
+  // "Continue the packing list" reopens it exactly where it was left.
+  // ctx: { kind: 'send' | 'record' | 'edit', shipmentId }
+  const PACKING_DRAFTS_KEY = 'gelitup.admin.packingDrafts.v1'
+  const readPackingDrafts = () => { try { return JSON.parse(localStorage.getItem(PACKING_DRAFTS_KEY) || '{}') || {} } catch (_) { return {} } }
+  const writePackingDraft = (rowId, draft) => {
+    try {
+      const all = readPackingDrafts()
+      if (draft) all[rowId] = draft; else delete all[rowId]
+      localStorage.setItem(PACKING_DRAFTS_KEY, JSON.stringify(all))
+    } catch (_) { /* storage blocked */ }
+  }
+  const [unfinishedPacking, setUnfinishedPacking] = useState(() => {
+    const all = readPackingDrafts()
+    return Object.fromEntries(Object.entries(all).map(([id, d]) => [id, d.ctx]))
+  }) // { [rowId]: ctx }
+  const openPackingList = async (row, items, ctx = { kind: 'send' }) => {
     const products = await loadShopProducts()
+    const saved = readPackingDrafts()[row.id]
+    const sameJob = saved && saved.ctx?.kind === ctx.kind && (saved.ctx?.shipmentId || null) === (ctx.shipmentId || null)
     return new Promise((resolve) => {
       packingResolveRef.current = resolve
       setPackingList({
         row,
-        lines: items.map((text) => {
+        ctx,
+        lines: sameJob && Array.isArray(saved.lines) && saved.lines.length ? saved.lines : items.map((text) => {
           const hits = matchItem(text, products)
           const n = packingLineCount(text, products)
           return { text, want: n, picks: hits.length ? (hits.length === 1 && n > 1 ? Array(n).fill(hits[0]) : hits) : [], keep: false, query: '', auto: hits.length > 0 }
@@ -7084,8 +7109,29 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   const closePackingList = (result) => {
     const resolve = packingResolveRef.current
     packingResolveRef.current = null
+    const pl = packingList
+    if (pl?.row?.id) {
+      if (result) {
+        writePackingDraft(pl.row.id, null)
+        setUnfinishedPacking((prev) => { const next = { ...prev }; delete next[pl.row.id]; return next })
+      } else {
+        writePackingDraft(pl.row.id, { ctx: pl.ctx, lines: pl.lines.map((l) => ({ ...l, query: '' })) })
+        setUnfinishedPacking((prev) => ({ ...prev, [pl.row.id]: pl.ctx }))
+      }
+    }
     setPackingList(null)
     if (resolve) resolve(result)
+  }
+  // Reopen an unfinished packing list where it was left.
+  const continuePackingList = (row) => {
+    const ctx = unfinishedPacking[row.id]
+    if (!ctx) return
+    if (ctx.kind === 'edit') {
+      const pkg = (row._shipments || []).find((x) => x.id === ctx.shipmentId)
+      if (pkg) editShipmentContents(row, pkg)
+      return
+    }
+    requestShipmentSave(row, ctx.kind === 'send')
   }
   const finishPackingList = () => {
     const lines = packingList?.lines || []
@@ -7188,7 +7234,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       return
     }
     // Packing list: name the exact products before the email goes out.
-    const exactItems = await openPackingList(row, completedItems)
+    const exactItems = await openPackingList(row, completedItems, { kind: recordOnly ? 'record' : 'send' })
     if (!exactItems) { setSaving(null); setEmail(row.id, 'error', recordOnly ? 'Not saved: the packing list was not completed.' : 'Not sent: the packing list was not completed.'); return }
     completedItems = exactItems
     const currentShipmentItems = ''
@@ -8235,7 +8281,7 @@ const deleteApplication = async (row) => {
                           type="button"
                           onClick={() => saveAmbassadorInfo(row)}
                           disabled={saving === row.id}
-                          className="rounded-lg bg-slate-900 px-2.5 py-1 text-[10px] font-semibold text-white hover:bg-slate-700 disabled:opacity-60"
+                          className={BTN}
                         >
                           Save details
                         </button>
@@ -8336,7 +8382,7 @@ const deleteApplication = async (row) => {
                       <button
                         onClick={() => openMessage(row)}
                         disabled={saving === row.id}
-                        className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 transition hover:bg-slate-100 disabled:opacity-60"
+                        className={BTN}
                       >
                         ✉ Message
                       </button>
@@ -8349,11 +8395,7 @@ const deleteApplication = async (row) => {
                             setSaving(null)
                           }}
                           disabled={saving === row.id || contractAlreadySent}
-                          className={`rounded-lg border px-3 py-1.5 text-xs font-semibold transition disabled:opacity-60 ${
-                            contractAlreadySent
-                              ? 'border-slate-200 bg-slate-100 text-slate-400'
-                              : 'border-fuchsia-300 text-fuchsia-700 hover:bg-fuchsia-50'
-                          }`}
+                          className={BTN}
                         >
                           {contractAlreadySent ? '📄 Guidelines sent' : '📄 Send guidelines'}
                         </button>
@@ -8363,13 +8405,13 @@ const deleteApplication = async (row) => {
                           type="button"
                           onClick={() => exportPackingListPdfForRow(row)}
                           disabled={packingListPdfBusy}
-                          className="rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-60"
+                          className={BTN}
                         >
                           {packingListPdfBusy ? 'Preparing packing sheet…' : '🖨 Print packing sheet'}
                         </button>
                       )}
                       {isApproved && row.package_processing_at && (
-                        <span className="rounded-full bg-blue-100 px-2.5 py-1 text-[11px] font-semibold text-blue-800" title="Packing sheet printed. Clears when the package is sent with Save & send.">
+                        <span className={BADGE} title="Packing sheet printed. Clears when the package is sent with Save & send.">
                           📦 Processing — sheet printed {fmtDate(row.package_processing_at)}{row.package_processing_by ? ` by ${row.package_processing_by}` : ''}
                         </span>
                       )}
@@ -8377,7 +8419,7 @@ const deleteApplication = async (row) => {
                         <button
                           type="button"
                           onClick={() => downloadAmbassadorPackageCsv(row)}
-                          className="rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-xs font-semibold text-emerald-700 hover:bg-emerald-50"
+                          className={BTN}
                         >
                           ↓ Download package history
                         </button>
@@ -8387,7 +8429,7 @@ const deleteApplication = async (row) => {
                           type="button"
                           onClick={() => updateAmbassadorCodeAndNotify(row)}
                           disabled={saving === row.id}
-                          className="rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-60"
+                          className={BTN}
                         >
                           ↻ Update code & notify
                         </button>
@@ -8397,7 +8439,7 @@ const deleteApplication = async (row) => {
                           type="button"
                           onClick={() => openPauseAmbassador(row)}
                           disabled={saving === row.id}
-                          className="rounded-lg border border-amber-400 bg-amber-50 px-3 py-1.5 text-xs font-semibold text-amber-800 hover:bg-amber-100 disabled:opacity-60"
+                          className={BTN}
                         >
                           ⏸ Pause ambassador
                         </button>
@@ -8407,18 +8449,18 @@ const deleteApplication = async (row) => {
                           type="button"
                           onClick={() => reactivateAmbassador(row)}
                           disabled={saving === row.id}
-                          className="rounded-lg border border-emerald-400 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-800 hover:bg-emerald-100 disabled:opacity-60"
+                          className={BTN}
                         >
                           ▶ Reactivate ambassador
                         </button>
                       )}
                       {isApproved && (factoryAckValue ? (
-                        <span className="rounded-lg border border-emerald-200 bg-emerald-50 px-3 py-1.5 text-xs font-semibold text-emerald-700">🏭 Factory acknowledged</span>
+                        <span className={BADGE}>🏭 Factory acknowledged</span>
                       ) : (
                         <button
                           onClick={() => acknowledgeFactory(row)}
                           disabled={saving === row.id}
-                          className="rounded-lg border border-amber-300 px-3 py-1.5 text-xs font-semibold text-amber-700 hover:bg-amber-50 disabled:opacity-60"
+                          className={BTN}
                         >
                           🏭 Mark factory acknowledged
                         </button>
@@ -8427,7 +8469,7 @@ const deleteApplication = async (row) => {
                         <button
                           onClick={() => approveRow(row)}
                           disabled={saving === row.id}
-                          className="rounded-lg bg-emerald-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-emerald-500 disabled:opacity-60"
+                          className={BTN_PRIMARY}
                         >
                           ✓ Approve
                         </button>
@@ -8436,7 +8478,7 @@ const deleteApplication = async (row) => {
                         <button
                           onClick={() => openDecline(row)}
                           disabled={saving === row.id}
-                          className="rounded-lg bg-rose-600 px-3 py-1.5 text-xs font-semibold text-white transition hover:bg-rose-500 disabled:opacity-60"
+                          className={BTN_DANGER}
                         >
                           ✕ Decline
                         </button>
@@ -8445,7 +8487,7 @@ const deleteApplication = async (row) => {
                         <button
                           onClick={() => deleteApplication(row)}
                           disabled={saving === row.id}
-                          className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-500 transition hover:bg-slate-100 disabled:opacity-60"
+                          className={BTN}
                         >
                           Delete
                         </button>
@@ -8455,6 +8497,13 @@ const deleteApplication = async (row) => {
                       <p className={`mt-2 text-[11px] ${es.state === 'error' ? 'text-rose-600' : es.state === 'sent' ? 'text-emerald-600' : 'text-slate-400'}`}>
                         {es.state === 'sending' ? 'Sending email…' : es.message}
                       </p>
+                    )}
+                    {unfinishedPacking[row.id] && !packingList && (
+                      <div className="mt-2 flex flex-wrap items-center gap-2 rounded-lg border border-amber-300 bg-amber-50 px-3 py-2 text-xs text-amber-900">
+                        <span className="font-semibold">📦 Packing list not finished{unfinishedPacking[row.id].kind === 'edit' ? ' (editing a sent package)' : ''} — your choices so far are kept.</span>
+                        <button type="button" onClick={() => continuePackingList(row)} className={BTN_PRIMARY}>▶ Continue the packing list</button>
+                        <button type="button" onClick={() => { if (window.confirm('Throw away this unfinished packing list?')) { writePackingDraft(row.id, null); setUnfinishedPacking((prev) => { const next = { ...prev }; delete next[row.id]; return next }) } }} className="text-[11px] font-semibold text-amber-800 hover:underline">Discard</button>
+                      </div>
                     )}
                   </div>
                 </div>
@@ -8516,12 +8565,12 @@ const deleteApplication = async (row) => {
                           placeholder="Add future reconsideration note..."
                           className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs"
                         />
-                        <button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Add note</button>
+                        <button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className={BTN}>Add note</button>
                       </div>
                     </div>
                   </div>
                 )}
-                {!isApproved && !isRejected && (<div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3"><p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Internal notes (private)</p>{noteEntries(row).length > 0 && (<div className="mb-1.5 max-h-32 space-y-1 overflow-y-auto">{noteEntries(row).map((entry, idx) => {const swatch = authorSwatch(entry.author);return (<div key={idx} className="flex items-start justify-between gap-2 rounded bg-white px-2 py-1 text-[11px] text-slate-600"><span className="min-w-0 whitespace-pre-line"><span className="mb-0.5 flex flex-wrap items-center gap-1.5"><span className="text-[10px] text-slate-400">{entry.stamp || '—'}</span><span className="rounded border px-1.5 py-0.5 text-[10px] font-semibold" style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}>{entry.author || 'legacy note (email not recorded)'}</span></span><span>{entry.text || entry.raw}</span></span><span className="flex shrink-0 gap-1.5"><button type="button" title="Edit" onClick={() => editNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button><button type="button" title="Delete" onClick={() => deleteNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button></span></div>)})}</div>)}<div className="flex gap-2"><input value={noteDraft[row.id] || ''} onChange={(e) => setNoteDraft(prev => ({ ...prev, [row.id]: e.target.value }))} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNote(row) } }} placeholder="Add a note…" className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs" /><button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60">Add note</button></div></div>)}
+                {!isApproved && !isRejected && (<div className="mt-3 rounded-lg border border-slate-200 bg-slate-50 p-3"><p className="mb-1 text-[10px] font-bold uppercase tracking-wide text-slate-400">Internal notes (private)</p>{noteEntries(row).length > 0 && (<div className="mb-1.5 max-h-32 space-y-1 overflow-y-auto">{noteEntries(row).map((entry, idx) => {const swatch = authorSwatch(entry.author);return (<div key={idx} className="flex items-start justify-between gap-2 rounded bg-white px-2 py-1 text-[11px] text-slate-600"><span className="min-w-0 whitespace-pre-line"><span className="mb-0.5 flex flex-wrap items-center gap-1.5"><span className="text-[10px] text-slate-400">{entry.stamp || '—'}</span><span className="rounded border px-1.5 py-0.5 text-[10px] font-semibold" style={{ backgroundColor: swatch.bg, color: swatch.text, borderColor: swatch.border }}>{entry.author || 'legacy note (email not recorded)'}</span></span><span>{entry.text || entry.raw}</span></span><span className="flex shrink-0 gap-1.5"><button type="button" title="Edit" onClick={() => editNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-slate-700 disabled:opacity-50">✎</button><button type="button" title="Delete" onClick={() => deleteNote(row, idx)} disabled={saving === row.id} className="text-slate-400 transition hover:text-rose-600 disabled:opacity-50">🗑</button></span></div>)})}</div>)}<div className="flex gap-2"><input value={noteDraft[row.id] || ''} onChange={(e) => setNoteDraft(prev => ({ ...prev, [row.id]: e.target.value }))} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addNote(row) } }} placeholder="Add a note…" className="flex-1 rounded-lg border border-slate-300 px-2.5 py-1.5 text-xs" /><button onClick={() => addNote(row)} disabled={saving === row.id || !(noteDraft[row.id] || '').trim()} className={BTN}>Add note</button></div></div>)}
 {/* Messages sent to the ambassador — shared record, visible to every admin (read-only) */}
                 {messageLines(row).length > 0 && (
                   <div className="mt-3 rounded-lg border border-sky-200 bg-sky-50/60 p-3">
@@ -8581,8 +8630,8 @@ const deleteApplication = async (row) => {
                             <>
                               {Array.isArray(lastPkg.items) && lastPkg.items.length > 0 && <p className="mt-1 text-[11px] text-slate-700"><span className="font-semibold">Contents:</span> {lastPkg.items.join(', ')}</p>}
                               <div className="mt-1.5 flex flex-wrap gap-2">
-                                <button type="button" onClick={() => editShipmentContents(row, lastPkg)} className="rounded border border-fuchsia-300 bg-white px-2 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50">✎ Edit contents (add / remove products)</button>
-                                <button type="button" onClick={() => editShipmentTracking(row, lastPkg)} className="rounded border border-sky-300 bg-white px-2 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50">✎ {lastPkg.tracking_number ? 'Edit tracking' : 'Add tracking'}</button>
+                                <button type="button" onClick={() => editShipmentContents(row, lastPkg)} className={BTN}>✎ Edit contents (add / remove products)</button>
+                                <button type="button" onClick={() => editShipmentTracking(row, lastPkg)} className={BTN}>✎ {lastPkg.tracking_number ? 'Edit tracking' : 'Add tracking'}</button>
                               </div>
                             </>
                           )
@@ -8678,8 +8727,8 @@ const deleteApplication = async (row) => {
                                         if (!pkg?.id) return null
                                         return (
                                           <div className="flex flex-wrap gap-2 pt-1">
-                                            <button type="button" onClick={() => editShipmentContents(row, pkg)} className="rounded border border-fuchsia-300 bg-white px-2 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50">✎ Edit contents (add / remove products)</button>
-                                            <button type="button" onClick={() => editShipmentTracking(row, pkg)} className="rounded border border-sky-300 bg-white px-2 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50">✎ {pkg.tracking_number ? 'Edit tracking' : 'Add tracking'}</button>
+                                            <button type="button" onClick={() => editShipmentContents(row, pkg)} className={BTN}>✎ Edit contents (add / remove products)</button>
+                                            <button type="button" onClick={() => editShipmentTracking(row, pkg)} className={BTN}>✎ {pkg.tracking_number ? 'Edit tracking' : 'Add tracking'}</button>
                                           </div>
                                         )
                                       })()}
@@ -8710,7 +8759,7 @@ const deleteApplication = async (row) => {
                                   type="button"
                                   onClick={() => addStarterPackToPlan(row)}
                                   disabled={saving === row.id}
-                                  className="mt-1.5 rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-60"
+                                  className={`mt-1.5 ${BTN}`}
                                 >
                                   Put these in the package, one product per line
                                 </button>
@@ -8786,7 +8835,7 @@ const deleteApplication = async (row) => {
                           type="button"
                           onClick={() => addPackNote(row)}
                           disabled={saving === row.id || !String(packAdditionDraft[row.id] || '').trim() || (Boolean(alreadySentLabel(row, packAdditionDraft[row.id])) && !packRepeatOk[row.id])}
-                          className="mt-1.5 rounded-lg border border-fuchsia-300 bg-white px-3 py-1.5 text-xs font-semibold text-fuchsia-700 hover:bg-fuchsia-100 disabled:opacity-60"
+                          className={`mt-1.5 ${BTN}`}
                         >
                           Add item
                         </button>
@@ -8806,7 +8855,7 @@ const deleteApplication = async (row) => {
                             type="button"
                             onClick={() => saveReminderDetails(row, sentAt, nextReminderAt)}
                             disabled={saving === row.id}
-                            className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-600 hover:bg-slate-100 disabled:opacity-60"
+                            className={BTN}
                           >
                             Save date
                           </button>
@@ -8850,13 +8899,13 @@ const deleteApplication = async (row) => {
                     </div>
                     )}
                     <div className="flex flex-wrap gap-2">
-                      <button onClick={() => requestShipmentSave(row, false)} disabled={saving === row.id || !trackingFlowReady} className="rounded-lg border border-slate-300 px-3 py-1.5 text-xs font-semibold text-slate-700 hover:bg-slate-50 disabled:opacity-60">Mark as sent (no email)</button>
-                      <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || !trackingFlowReady} className="rounded-lg bg-[#D43790] px-3 py-1.5 text-xs font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save &amp; send shipment email</button>
+                      <button onClick={() => requestShipmentSave(row, false)} disabled={saving === row.id || !trackingFlowReady} className={BTN}>Mark as sent (no email)</button>
+                      <button onClick={() => requestShipmentSave(row, true)} disabled={saving === row.id || !trackingFlowReady} className={BTN_PRIMARY}>Save &amp; send shipment email</button>
                       {shipmentEntries.length > 0 && (
                         <button
                           onClick={() => resendShipmentEmail(row, nextReminderAt, { trackingNumber: shipmentEntries[0].trackingNumber, trackingUrl: shipmentEntries[0].trackingUrl })}
                           disabled={saving === row.id}
-                          className="rounded-lg border border-sky-300 px-3 py-1.5 text-xs font-semibold text-sky-700 hover:bg-sky-50 disabled:opacity-60"
+                          className={BTN}
                         >
                           Resend last tracking email
                         </button>
@@ -8881,7 +8930,7 @@ const deleteApplication = async (row) => {
                             <button
                               type="button"
                               onClick={() => jumpToAmbassador(nextInQueue.row.id)}
-                              className="mt-2 rounded-lg border border-emerald-300 bg-white px-3 py-1.5 text-[11px] font-semibold text-emerald-700 hover:bg-emerald-100"
+                              className={`mt-2 ${BTN}`}
                             >
                               Next ambassador needing a package → {nextInQueue.row.full_name}
                             </button>
