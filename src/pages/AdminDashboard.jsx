@@ -8670,6 +8670,19 @@ const deleteApplication = async (row) => {
                                       <p><strong>Status:</strong> {entry.ambassadorType || 'Not recorded'}</p>
                                       <p><strong>Items:</strong> {entry.boxContents || '—'}</p>
                                       {entry.note && <p className="rounded bg-amber-50 px-1.5 py-1 text-amber-900"><strong>Note:</strong> {entry.note}</p>}
+                                      {(() => {
+                                        // The saved package behind this entry, so it can be amended.
+                                        const pkgs = [...(row._shipments || [])].sort((x, y) => new Date(y.sent_at || 0) - new Date(x.sent_at || 0))
+                                        const pkg = (entry.trackingNumber && pkgs.find((x) => String(x.tracking_number || '').trim() === String(entry.trackingNumber).trim()))
+                                          || (pkgs.length === shipmentEntries.length ? pkgs[idx] : null)
+                                        if (!pkg?.id) return null
+                                        return (
+                                          <div className="flex flex-wrap gap-2 pt-1">
+                                            <button type="button" onClick={() => editShipmentContents(row, pkg)} className="rounded border border-fuchsia-300 bg-white px-2 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50">✎ Edit contents (add / remove products)</button>
+                                            <button type="button" onClick={() => editShipmentTracking(row, pkg)} className="rounded border border-sky-300 bg-white px-2 py-1 text-[11px] font-semibold text-sky-700 hover:bg-sky-50">✎ {pkg.tracking_number ? 'Edit tracking' : 'Add tracking'}</button>
+                                          </div>
+                                        )
+                                      })()}
                                     </div>
                                   )}
                                 </div>
