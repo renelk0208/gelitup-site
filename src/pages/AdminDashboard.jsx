@@ -7071,7 +7071,7 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   }
   const finishPackingList = () => {
     const lines = packingList?.lines || []
-    if (lines.some((l) => !packingLineDone(l))) return
+    if (!lines.length || lines.some((l) => !packingLineDone(l))) return
     closePackingList(lines.flatMap((l) => (l.keep && !packingLineNeedsExactProducts(l.text) ? [l.text] : l.picks.map((p) => p.title))))
   }
   const saveShipment = async (row, alsoEmail, overrideReminderDate, recordOpts = null) => {
@@ -7110,16 +7110,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     ...(currentDraft.shipment_details ? [currentDraft.shipment_details] : []),
   ]
   // Every package must say what was in it, otherwise the history is useless.
-  // Nothing planned yet: ask what's in it here (the packing list then names the
-  // exact products), instead of stopping with nowhere to go.
-  if (isFollowUpPackage && completedItems.length === 0) {
-    const entered = window.prompt(`Nothing is listed for this package yet.\n\nWhat is in ${row.full_name || 'her'}'s package? Separate items with commas — e.g. 2447, 17 Bruised Ego, Blossom Flower Power 15ml.\nYou'll pick the exact shop products on the next screen.`, '')
-    completedItems = String(entered || '').split(/[,\n]/).map((t) => t.trim()).filter(Boolean)
-    if (!completedItems.length) {
-      setEmail(row.id, 'error', 'Not saved: no items entered for this package. Your tracking details are kept.')
-      return
-    }
-  }
+  // Nothing planned yet: the packing list opens empty and the products are
+  // added there (search the shop), instead of stopping with nowhere to go.
   const completedShippingMethod = getShippingMethod(row)
   const buildArchiveLine = (whenIso) => `[${fmtDate(whenIso || new Date().toISOString())}] [${getAdminDisplayLabel()}] 📦 Shipped${recordOnly ? ' (recorded, no email)' : ''} — ${[
     `Status: ${completedTypeLabel}`,
@@ -7150,13 +7142,13 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     const normalizedEmail = String(updatedRow?.email || '').trim().toLowerCase()
     let setPasswordLink = `${window.location.origin}/portal/login?mode=create-password&email=${encodeURIComponent(normalizedEmail)}`
     if (!recordOnly) {
-      if (!fullName) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador name is missing.'); return }
-      if (!discountCode) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: discount code is missing.'); return }
-      if (!normalizedEmail) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador email is missing.'); return }
+      if (!fullName) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador name is missing.'); alert('Not sent: her name is missing.'); return }
+      if (!discountCode) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: discount code is missing.'); alert('Not sent: her discount code is missing.'); return }
+      if (!normalizedEmail) { setSaving(null); setEmail(row.id, 'error', 'Shipment email blocked: ambassador email is missing.'); alert('Not sent: her email address is missing.'); return }
     }
     setEmail(row.id, 'sending', '')
     if (!recordOnly) {
-      try { await ensureAmbassadorPortalAccount(updatedRow) } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.'); return }
+      try { await ensureAmbassadorPortalAccount(updatedRow) } catch (e) { setSaving(null); setEmail(row.id, 'error', e.message || 'Could not provision ambassador portal account.'); alert(`Not sent: ${e.message || 'could not set up her portal login.'}\n\nYour tracking details are saved.`); return }
       try { setPasswordLink = await getAmbassadorSetupLink(updatedRow) } catch (_) { /* keep the plain link */ }
     }
     const defaultFollowUpDate = getDefaultFollowUpDateValue(updatedRow, recordSentIso || new Date().toISOString())
@@ -9113,6 +9105,10 @@ const deleteApplication = async (row) => {
         const pl = packingList
         const setLine = (i, patch) => setPackingList((cur) => ({ ...cur, lines: cur.lines.map((l, n) => (n === i ? { ...l, ...patch } : l)) }))
         const missing = pl.lines.filter((l) => !packingLineDone(l)).length
+        const addQuery = String(pl.addQuery || '')
+        const addResults = addQuery.trim() ? searchProducts(shopProducts || [], addQuery, 6) : []
+        const addLine = (p) => setPackingList((cur) => ({ ...cur, addQuery: '', lines: [...cur.lines, { text: p.title, want: 1, picks: String(p.handle || '').startsWith('typed:') ? [] : [p], keep: String(p.handle || '').startsWith('typed:'), query: '', added: true }] }))
+        const removeLine = (i) => setPackingList((cur) => ({ ...cur, lines: cur.lines.filter((_, n) => n !== i) }))
         return (
           <div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4">
             <div className="flex max-h-[90vh] w-full max-w-2xl flex-col rounded-2xl bg-white p-5 shadow-xl">
@@ -9130,7 +9126,7 @@ const deleteApplication = async (row) => {
                   return (
                     <li key={`${l.text}-${i}`} className={`rounded-lg border px-3 py-2 text-xs ${done ? 'border-emerald-200 bg-emerald-50/40' : 'border-amber-300 bg-amber-50'}`}>
                       <div className="flex items-start justify-between gap-2">
-                        <span className="font-semibold text-slate-900">{l.text}</span>
+                        <span className="font-semibold text-slate-900">{l.text}{l.added && <button type="button" title="Remove this line" onClick={() => removeLine(i)} className="ml-2 text-slate-400 hover:text-rose-600">✕</button>}</span>
                         <span className={done ? 'text-emerald-700' : 'text-amber-800'}>{done ? '✓' : want > 1 ? `choose ${want} (${l.picks.length}/${want})` : exact ? 'which one exactly?' : 'which product?'}</span>
                       </div>
                       {l.picks.length > 0 && (
@@ -9180,10 +9176,29 @@ const deleteApplication = async (row) => {
                   )
                 })}
               </ul>
+              <div className="mt-3 rounded-lg border border-fuchsia-200 bg-fuchsia-50/40 px-3 py-2 text-xs">
+                <p className="font-semibold text-slate-900">{pl.lines.length ? 'Add another product to this package' : 'Nothing is listed for this package yet — add each product in it'}</p>
+                <input type="search" value={addQuery} onChange={(e) => setPackingList((cur) => ({ ...cur, addQuery: e.target.value }))} placeholder="Search the shop, e.g. 2447, cat eye, blossom…" className="mt-1.5 w-full rounded border border-slate-300 bg-white px-2 py-1 text-xs" />
+                {addResults.length > 0 && (
+                  <ul className="mt-1 divide-y divide-slate-100 rounded border border-slate-200 bg-white">
+                    {addResults.map((p) => (
+                      <li key={p.handle}>
+                        <button type="button" onClick={() => addLine(p)} className="flex w-full items-center gap-2 px-2 py-1 text-left hover:bg-fuchsia-50">
+                          {p.image && <img src={p.image} alt="" className="h-5 w-5 rounded object-cover" />}{p.title}
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+                {addQuery.trim().length >= 2 && (
+                  <button type="button" onClick={() => addLine({ handle: `typed:${addQuery.trim()}`, title: addQuery.trim() })} className="mt-1 text-[11px] font-semibold text-fuchsia-700 hover:underline">+ Add "{addQuery.trim()}" as written (not a shop product)</button>
+                )}
+              </div>
               <div className="mt-4 flex items-center justify-end gap-2">
+                {pl.lines.length === 0 && <span className="mr-auto text-xs text-amber-800">Add at least one product</span>}
                 {missing > 0 && <span className="mr-auto text-xs text-amber-800">{missing} line{missing === 1 ? '' : 's'} still to complete</span>}
                 <button type="button" onClick={() => closePackingList(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-50">Cancel</button>
-                <button type="button" onClick={finishPackingList} disabled={missing > 0} className="rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-50">Packing list complete</button>
+                <button type="button" onClick={finishPackingList} disabled={missing > 0 || pl.lines.length === 0} className="rounded-lg bg-fuchsia-600 px-4 py-2 text-xs font-semibold text-white hover:bg-fuchsia-500 disabled:opacity-50">Packing list complete</button>
               </div>
             </div>
           </div>
