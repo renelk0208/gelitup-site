@@ -28,7 +28,7 @@ create table if not exists public.seminars (
   starts_at        timestamptz not null,
   duration_minutes integer not null default 90 check (duration_minutes between 15 and 600),
   seats            integer not null default 20 check (seats > 0),
-  replay_days      integer not null default 30 check (replay_days between 0 and 365),
+  replay_days      integer not null default 10 check (replay_days between 0 and 365),
   shopify_sku      text unique,            -- SKU of the seminar date in Shopify, links orders to this seminar
   shop_url         text,                   -- booking page on shop.gelitup.com
   kit_url          text,                   -- seminar kit page on shop.gelitup.com

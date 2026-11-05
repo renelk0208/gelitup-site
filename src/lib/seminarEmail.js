@@ -27,7 +27,7 @@ export function seminarCodeEmail({ name, email, codes, seminar, accessType = 'li
   <p>Hi ${escapeHtml(name || 'there')},</p>
   <p>${rec ? (many ? `Your ${list.length} recording access codes are ready. Each person needs their own code.` : 'Your recording is ready. Here is your personal access code:') : (many ? `Your ${list.length} seats are booked. Each person needs their own code — please forward one code to each attendee.` : 'Your seat is booked. Here is your personal access code:')}</p>
   ${codeBlocks}
-  ${rec ? `<p><strong>Access:</strong> ${Number(seminar.recording_days ?? 30)} days from today.</p>` : `<p><strong>When:</strong> ${escapeHtml(when)} (Greece / Bulgaria / Romania time)</p>`}
+  ${rec ? `<p><strong>Access:</strong> ${Number(seminar.recording_days ?? 10)} days from today.</p>` : `<p><strong>When:</strong> ${escapeHtml(when)} (Greece / Bulgaria / Romania time)</p>`}
   <p style="text-align:center;margin:24px 0"><a href="${seminarSignInLink(many ? '' : email, list[0])}" style="background:${BRAND};color:#fff;padding:14px 26px;border-radius:8px;text-decoration:none;font-weight:bold">Open my seminar</a></p>
   <p style="font-size:13px;color:#555">Sign in at gelitup.com/seminars with your email address and code. It works on phone, tablet or computer — nothing to install. Each code is personal and works on one device at a time. ${rec ? 'The code is non-transferable and may not be shared.' : `After the seminar you can rewatch the recording for ${Number(seminar.replay_days ?? 30)} days.`}</p>
   ${rec ? '<p style="font-size:13px;color:#555">As agreed at checkout, access to this digital content started immediately, so the recording cannot be cancelled or refunded.</p>' : ''}

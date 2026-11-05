@@ -9,7 +9,7 @@ import { seminarCodeEmail } from '../lib/seminarEmail'
 //   /seminars              upcoming seminars (clickable booking images, SOLD OUT)
 //   /seminars/login        attendee sign-in: email + access code (no account)
 //   /seminars/my           my seminars + add another code
-//   /seminars/room/:id     live stream + Q&A, then 30-day replay
+//   /seminars/room/:id     live stream + Q&A, then 10-day replay
 //   /seminars/private      request a private seminar (own date & time)
 //   /seminars/admin        GEL.IT.UP admins: seminars, stream links, codes, requests
 //
@@ -245,7 +245,7 @@ function SeminarCard({ s, onBook }) {
           {clickable && (
             <button type="button" onClick={book} className="rounded-xl px-3 py-3 text-left text-white transition hover:opacity-90" style={{ background: BRAND }}>
               <span className="block text-[11px] font-bold uppercase tracking-wider opacity-80">{recording ? 'Recording' : 'Online group'}</span>
-              <span className="block text-sm font-bold">{recording ? `Watch (${s.recording_days || 30} days) →` : 'Book your seat →'}</span>
+              <span className="block text-sm font-bold">{recording ? `Watch (${s.recording_days || 10} days) →` : 'Book your seat →'}</span>
             </button>
           )}
           {hasPrivate && (
@@ -280,7 +280,7 @@ const guessDistributorCountry = () => {
 
 function BookingPanel({ seminar, onClose }) {
   const isRec = seminar.mode === 'recording'
-  const recDays = seminar.recording_days || 30
+  const recDays = seminar.recording_days || 10
   const [data, setData] = useState(null)
   const [error, setError] = useState('')
   const [qty, setQty] = useState(1)
@@ -395,7 +395,7 @@ function BookingPanel({ seminar, onClose }) {
             <div className="mt-6 flex items-center justify-between border rounded-xl p-4">
               <div>{isRec
                 ? <><p className="font-semibold">Seminar recording</p><p className="text-sm text-black/60">Watch as often as you like for {recDays} days from purchase</p></>
-                : <><p className="font-semibold">Live seminar seat</p><p className="text-sm text-black/60">Includes live Q&amp;A and 30-day replay</p></>}</div>
+                : <><p className="font-semibold">Live seminar seat</p><p className="text-sm text-black/60">Includes live Q&amp;A and 10-day replay</p></>}</div>
               <div className="text-right"><p className="font-semibold">{money(data.seat.price)}</p>
                 <label className="text-xs text-black/60">{isRec ? 'Quantity' : 'Seats'}{' '}
                   <select value={qty} onChange={(e) => setQty(Number(e.target.value))} className="border rounded px-1 py-0.5 ml-1">
@@ -498,7 +498,7 @@ function BookingPanel({ seminar, onClose }) {
                 <li><strong>Payment</strong> is taken in full at checkout. Prices include VAT.</li>
                 <li><strong>Free cancellation</strong> with a full refund of the seat up to {CANCEL_HOURS} hours before the start, in My seminars. <strong>Within {CANCEL_HOURS} hours</strong> the seat cannot be cancelled or refunded, including if you do not attend.</li>
                 <li>Your access code is <strong>personal and non-transferable</strong> once used, works on one device at a time, and may not be shared. Recording or redistributing the seminar is not allowed.</li>
-                <li>Replay access for {30} days after the seminar. Participants must be 18 or older.</li>
+                <li>Replay access for {seminar.replay_days || 10} days after the seminar. Participants must be 18 or older.</li>
                 {kitOn && <li>The kit is a physical product: normal 14-day right of withdrawal and shop returns policy apply; it is not refunded automatically when a seat is cancelled.</li>}
               </ul>
               )}
@@ -534,7 +534,7 @@ function SeminarsHome({ session }) {
       if (!hasSupabaseConfig) { setSeminars([]); return }
       const since = new Date(Date.now() - 2 * 86400000).toISOString()
       const { data } = await supabase.from('seminars')
-        .select('id, title, description, trainer_name, starts_at, duration_minutes, sold_out, image_url, status, kind, recording_on_sale, recording_days, private_price, private_minutes')
+        .select('id, title, description, trainer_name, starts_at, duration_minutes, sold_out, image_url, status, kind, recording_on_sale, recording_days, replay_days, private_price, private_minutes')
         .eq('kind', 'group').in('status', ['scheduled', 'ended']).or(`starts_at.gte.${since},recording_on_sale.eq.true`).order('starts_at')
       const now = Date.now()
       const rows = (data || []).map((s) => ({ ...s, past: new Date(s.starts_at).getTime() + s.duration_minutes * 60000 < now, closed: new Date(s.starts_at).getTime() - BOOKING_CUTOFF_HOURS * 3600000 < now }))
@@ -554,7 +554,7 @@ function SeminarsHome({ session }) {
       <header className="text-center max-w-2xl mx-auto mb-10">
         <p className="text-xs font-semibold uppercase tracking-[0.2em]" style={{ color: BRAND }}>GEL.IT.UP Education</p>
         <h1 className="text-3xl md:text-5xl font-bold mt-2">Live online seminars</h1>
-        <p className="mt-4 text-black/60">Learn live from GEL.IT.UP trainers, ask your questions in the live Q&amp;A, and rewatch the recording for 30 days.{seminars?.some((x) => x.past && x.recording_on_sale) ? ' Missed one? Many seminars are also available as a recording.' : ''}</p>
+        <p className="mt-4 text-black/60">Learn live from GEL.IT.UP trainers, ask your questions in the live Q&amp;A, and rewatch the recording for 10 days.{seminars?.some((x) => x.past && x.recording_on_sale) ? ' Missed one? Many seminars are also available as a recording.' : ''}</p>
       </header>
 
       {seminars === null && <p className="text-center text-black/40">Loading seminars…</p>}
@@ -1422,7 +1422,7 @@ function TeamCalendar({ items, now, showOwner = false }) {
 }
 
 // ── Admin ────────────────────────────────────────────────────────────────────
-const EMPTY = { title: '', trainer_name: '', description: '', starts_at: '', duration_minutes: 90, replay_days: 30, status: 'draft', kind: 'group', shopify_sku: '', shop_url: '', kit_url: '', image_url: '', sold_out: false, recording_sku: '', recording_shop_url: '', recording_days: 30, recording_on_sale: false, vimeo_event: '', replay_video: '' }
+const EMPTY = { title: '', trainer_name: '', description: '', starts_at: '', duration_minutes: 90, replay_days: 10, status: 'draft', kind: 'group', shopify_sku: '', shop_url: '', kit_url: '', image_url: '', sold_out: false, recording_sku: '', recording_shop_url: '', recording_days: 10, recording_on_sale: false, vimeo_event: '', replay_video: '' }
 
 const toLocalInput = (iso) => { if (!iso) return ''; const d = new Date(iso); const p = (n) => String(n).padStart(2, '0'); return `${d.getFullYear()}-${p(d.getMonth() + 1)}-${p(d.getDate())}T${p(d.getHours())}:${p(d.getMinutes())}` }
 
@@ -1499,7 +1499,7 @@ function AdminPage() {
     const { vimeo_event, replay_video, id } = editing
     const FIELDS = ['title', 'trainer_name', 'description', 'duration_minutes', 'replay_days', 'status', 'kind', 'shopify_sku', 'shop_url', 'kit_url', 'image_url', 'sold_out', 'recording_sku', 'recording_shop_url', 'recording_days', 'recording_on_sale', 'private_price', 'private_minutes', 'private_variant_id', 'trainer_email']
     const rest = Object.fromEntries(FIELDS.map((f) => [f, editing[f] === '' ? null : editing[f]]))
-    const row = { ...rest, starts_at: new Date(editing.starts_at).toISOString(), shopify_sku: rest.shopify_sku?.trim() || null, duration_minutes: Number(rest.duration_minutes), replay_days: Number(rest.replay_days), recording_days: Number(rest.recording_days) || 30, recording_sku: rest.recording_sku?.trim() || null, updated_at: new Date().toISOString() }
+    const row = { ...rest, starts_at: new Date(editing.starts_at).toISOString(), shopify_sku: rest.shopify_sku?.trim() || null, duration_minutes: Number(rest.duration_minutes), replay_days: Number(rest.replay_days), recording_days: Number(rest.recording_days) || 10, recording_sku: rest.recording_sku?.trim() || null, updated_at: new Date().toISOString() }
     const q = id ? supabase.from('seminars').update(row).eq('id', id).select().single() : supabase.from('seminars').insert(row).select().single()
     const { data, error } = await q
     if (error) { setMsg(`Could not save: ${error.message}`); return }
@@ -1995,13 +1995,13 @@ function TermsPage({ session }) {
           <li>A code works on one device at a time. Sharing codes, links or the stream with others is not allowed.</li>
           <li>The live seminar and recording are our intellectual property. You may not record, copy, download, publish or redistribute them.</li>
           <li>If these rules are broken, we may suspend access without a refund.</li>
-          <li>The recording is available to participants for 30 days after the seminar. After that, access ends.</li>
+          <li>The recording is available to participants for 10 days after the seminar. After that, access ends.</li>
           <li>You need a stable internet connection and an up-to-date browser. We are not responsible for problems with your own device or connection; if the seminar cannot take place because of a problem on our side, we will reschedule or refund.</li>
         </ul>
 
         <H>4. Seminar recordings</H>
         <ul className="list-disc pl-5 space-y-1">
-          <li>Where a seminar is offered as a recording, you can buy access to it after the live date. Access lasts {30} days from purchase, unless the booking page states another period.</li>
+          <li>Where a seminar is offered as a recording, you can buy access to it after the live date. Access lasts 10 days from purchase, unless the booking page states another period.</li>
           <li>A recording is <strong>digital content</strong>. When you buy it you expressly ask for access to start immediately, and you acknowledge that you lose your right of withdrawal once access has started. Recordings therefore cannot be cancelled or refunded once purchased. The {CANCEL_HOURS}-hour cancellation rule applies only to live seats.</li>
           <li>Recording access codes are personal and non-transferable, work on one device at a time, and may not be shared. Downloading, recording or redistributing the video is not allowed.</li>
           <li>If the recording cannot be played because of a problem on our side, we will fix it or refund you.</li>
