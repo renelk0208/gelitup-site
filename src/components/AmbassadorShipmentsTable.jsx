@@ -1,9 +1,10 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
 import { carrierLabel, deliveryState, normalizeCountry, trackingLink } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import { whereAlreadySent } from '../lib/packageItems.js'
 import { isChooseSlot } from '../lib/ambassadorPacks.js'
 import PlannedItemSwap from './PlannedItemSwap.jsx'
+import { searchProducts } from '../lib/reviewProducts.js'
 
 // Shipments overview, grouped so every ambassador sits in exactly ONE section
 // with ONE status:
@@ -269,6 +270,17 @@ function Planner({ line, onAdd, onRemove, onSwap, loadProducts, busy }) {
   const sentLabel = (hits) => hits.map((h) => `#${h.number}${h.sent_at ? ` (${fmt(h.sent_at)})` : ''}`).join(', ')
   // Anything already sent is blocked unless "send again on purpose" is ticked.
   const [sendAgain, setSendAgain] = useState(false)
+  // Shop products, so typing a colour code or a name ("2447", "blossom")
+  // offers the exact product to add.
+  const [products, setProducts] = useState(null)
+  const wantProducts = text.trim().length >= 2
+  useEffect(() => {
+    if (!wantProducts || products || !loadProducts) return
+    let alive = true
+    Promise.resolve(loadProducts()).then((list) => { if (alive) setProducts(Array.isArray(list) ? list : []) })
+    return () => { alive = false }
+  }, [wantProducts, products, loadProducts])
+  const suggestions = wantProducts && products ? searchProducts(products, text, 6) : []
   const typedRepeat = text.trim() ? sentBefore(text) : []
   const blocked = typedRepeat.length > 0 && !sendAgain
   const add = async (values, { allowRepeat = false } = {}) => {
@@ -310,6 +322,24 @@ function Planner({ line, onAdd, onRemove, onSwap, loadProducts, busy }) {
         />
         <button type="submit" disabled={busy || !text.trim() || blocked} className="rounded border border-fuchsia-300 bg-white px-2 py-1 text-[11px] font-semibold text-fuchsia-700 hover:bg-fuchsia-50 disabled:opacity-50">Add</button>
       </form>
+      {wantProducts && loadProducts && !products && <p className="text-[10px] text-slate-400">Looking in the shop…</p>}
+      {suggestions.length > 0 && (
+        <ul className="divide-y divide-slate-100 rounded border border-slate-200 bg-white">
+          {suggestions.map((p) => {
+            const repeat = sentBefore(p.title).length > 0
+            return (
+              <li key={p.handle}>
+                <button type="button" disabled={busy || (repeat && !sendAgain)} onClick={() => add([p.title], { allowRepeat: sendAgain })} className="flex w-full items-center gap-2 px-2 py-1 text-left text-[11px] hover:bg-fuchsia-50 disabled:opacity-50">
+                  {p.image && <img src={p.image} alt="" className="h-5 w-5 rounded object-cover" />}
+                  <span className="flex-1">{p.title}</span>
+                  {repeat && <span className="text-[10px] text-amber-700">already sent</span>}
+                </button>
+              </li>
+            )
+          })}
+        </ul>
+      )}
+      {products && wantProducts && suggestions.length === 0 && <p className="text-[10px] text-slate-500">No shop product matches — "Add" puts it in as typed.</p>}
       {typedRepeat.length > 0 && (
         <div className="rounded border border-red-200 bg-red-50 px-2 py-1 text-[10px] text-red-800">
           <p className="font-semibold">Already sent in package {sentLabel(typedRepeat)} — can't be added.</p>

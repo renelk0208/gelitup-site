@@ -24,6 +24,9 @@ const ALIASES = {
 }
 
 const norm = (value) => String(value || '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, '')
+// Same, but shade codes written without their leading zero still match:
+// "Liquid Polygel #LPG2" = "Liquid Polygel #LPG02".
+const normCode = (value) => norm(value).replace(/([a-z])0+(?=\d)/g, '$1')
 
 // "1 x Purple Buffer" / "2x Blossom" -> "Purple Buffer"
 export function stripQuantity(item) {
@@ -49,7 +52,31 @@ export function matchItem(item, products) {
   const whole = norm(item)
   const exact = (products || []).find((p) => norm(p.title) === whole)
     || (products || []).find((p) => norm(p.title) === key)
-  return exact ? [exact] : []
+    || (products || []).find((p) => normCode(p.title) === normCode(item))
+    || (products || []).find((p) => normCode(p.title) === normCode(stripQuantity(item)))
+  if (exact) return [exact]
+  // The shop name has no size but the line does ("Liquid Polygel #LPG2 20g").
+  const noSize = stripQuantity(item).replace(/\s+\d+\s*(ml|gr?)\s*$/i, '')
+  if (noSize !== stripQuantity(item)) {
+    const sized = (products || []).filter((p) => normCode(p.title) === normCode(noSize))
+    if (sized.length === 1) return sized
+  }
+  // Just a colour code ("2447"): the one product whose name starts with it.
+  const code = String(item || '').trim().replace(/^#/, '')
+  if (/^\d{2,4}$/.test(code)) {
+    const byCode = (products || []).filter((p) => new RegExp(`^#?0*${Number(code)}\\b`).test(String(p.title || '').trim()))
+    if (byCode.length === 1) return byCode
+  }
+  return []
+}
+
+// How many products a packing line needs. A line that IS a shop product's
+// name — colours start with their number ("17 Bruised Ego", "64 Tuscany") —
+// is one product, not 17. Otherwise as suggestedCount ("3 x Blossom" -> 3).
+export function packingLineCount(item, products) {
+  const whole = normCode(item)
+  if (whole && (products || []).some((p) => normCode(p.title) === whole)) return 1
+  return suggestedCount(item)
 }
 
 // How many products a generic line asks for: "3 different Cat Eye shades" -> 3,
@@ -110,7 +137,11 @@ export function searchProducts(products, query, limit = 8) {
   const words = String(query || '').toLowerCase().split(/\s+/).map(norm).filter(Boolean)
   if (!words.length) return []
   return (products || [])
-    .filter((p) => { const t = norm(p.title); return words.every((w) => t.includes(w)) })
+    .filter((p) => {
+      const t = norm(p.title)
+      const tc = normCode(p.title)
+      return words.every((w) => t.includes(w) || tc.includes(normCode(w)))
+    })
     .sort((a, b) => a.title.length - b.title.length)
     .slice(0, limit)
 }

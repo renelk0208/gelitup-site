@@ -8,7 +8,7 @@ import { buildAmbassadorContractPdf, buildAmbassadorPackingListPdf, buildAmbassa
 import { detectCarrier, estimateDelivery, normalizeCountry, trackingLink } from '../lib/ambassadorShipping.js'
 import { instagramHandle, instagramUrl, tiktokHandle, tiktokUrl } from '../lib/socialLinks.js'
 import { whereAlreadySent } from '../lib/packageItems.js'
-import { matchItem, receivedItems, searchProducts, suggestedCount } from '../lib/reviewProducts.js'
+import { matchItem, packingLineCount, receivedItems, searchProducts, suggestedCount } from '../lib/reviewProducts.js'
 import { REVIEW_EMAIL_LANGUAGES, reviewEmailLang } from '../lib/reviewEmailText.js'
 import { buildAmbassadorReviewRequestEmail } from '../lib/reviewEmail.js'
 import { AMBASSADOR_FOLLOW_UP_PACKS_BY_TYPE } from '../lib/ambassadorFollowUpPacks.js'
@@ -52,6 +52,13 @@ const AMBASSADOR_LETTER_ATTACHMENT_URL = ambassadorLetterAttachmentUrl
 // never silently fails. Shared by every admin → ambassador compose modal.
 const MAX_ATTACHMENTS_BYTES = 20 * 1024 * 1024
 const SHIPMENT_EMAIL_LOCK_STORAGE_KEY = 'gelitup.admin.shipmentEmailLock.v1'
+const SHIP_DRAFTS_STORAGE_KEY = 'gelitup.admin.shipmentDrafts.v1'
+// "2026-12-03" -> "3 December 2026", shown under date boxes: the browser's own
+// box may show 12/03/2026 (month first), which is easy to misread.
+const longDateLabel = (value) => {
+  const d = new Date(`${String(value || '').slice(0, 10)}T12:00:00Z`)
+  return Number.isNaN(d.getTime()) ? '' : d.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' })
+}
 const ADMIN_TAB_STORAGE_KEY = 'gelitup.admin.activeTab.v1'
 const ADMIN_TAB_KEYS = new Set(['registrations', 'orders', 'search', 'admins', 'pricing', 'ambassadors', 'work-with-us', 'guestbook', 'draft-carts', 'studio-one', 'seminars'])
 const WORK_WITH_US_TABLE = import.meta.env.VITE_WORK_WITH_US_TABLE || 'work_with_us_applications'
@@ -5043,8 +5050,19 @@ function packingLineNeedsExactProducts(text) {
   const t = String(text || '').trim()
   return GENERIC_PACKING_LINE_RE.test(t)
 }
+// A picked product that shares no name word with its line ("Premium Builder
+// Gel Nude" -> "Sandwich Dual Forms Almond") is probably a mistake.
+const PICK_WORD_STOP = new Set(['gel', 'the', 'and', 'with', 'for', 'ml', 'gr', 'g', 'x', 'of', 'new', 'nail', 'nails', 'gelitup'])
+const pickWords = (v) => String(v || '').toLowerCase().normalize('NFKD').replace(/[^a-z0-9]+/g, ' ').split(' ')
+  .map((w) => w.replace(/^0+(?=\d)/, '')).filter((w) => w && !PICK_WORD_STOP.has(w) && !/^\d+(ml|gr?|g)$/.test(w))
+function pickLooksWrong(lineText, pickTitle) {
+  if (packingLineNeedsExactProducts(lineText)) return false
+  const line = new Set(pickWords(String(lineText || '').replace(/^\d+\s*x\s*/i, '')))
+  if (!line.size) return false
+  return !pickWords(pickTitle).some((w) => line.has(w))
+}
 function packingLineDone(line) {
-  const want = suggestedCount(line.text)
+  const want = line.want || suggestedCount(line.text)
   if (packingLineNeedsExactProducts(line.text)) return line.picks.length >= want
   return line.keep || line.picks.length >= want
 }
@@ -5108,7 +5126,19 @@ function AmbassadorApplicationsPanel({ focusAmbassadorId } = {}) {
   const [msgBody, setMsgBody] = useState('')
   const [msgFiles, setMsgFiles] = useState([]) // documents/images attached to the outgoing message
   const [ambassadorInfoDraft, setAmbassadorInfoDraft] = useState({})
-  const [ship, setShip] = useState({}) // { [id]: { shipment_details, tracking_number, tracking_url } }
+  // Tracking typed in but not sent yet is kept in this browser, so it isn't
+  // lost when a save is stopped or the page reloads. Cleared once sent.
+  const [ship, setShipState] = useState(() => {
+    try { return JSON.parse(localStorage.getItem(SHIP_DRAFTS_STORAGE_KEY) || '{}') || {} } catch (_) { return {} }
+  }) // { [id]: { shipment_details, tracking_number, tracking_url } }
+  const setShip = (updater) => setShipState((prev) => {
+    const next = typeof updater === 'function' ? updater(prev) : updater
+    try {
+      const keep = Object.fromEntries(Object.entries(next || {}).filter(([, d]) => d && (String(d.tracking_number || '').trim() || String(d.tracking_url || '').trim() || String(d.shipment_details || '').trim())))
+      localStorage.setItem(SHIP_DRAFTS_STORAGE_KEY, JSON.stringify(keep))
+    } catch (_) { /* storage blocked: still works for this visit */ }
+    return next
+  })
   const [noteDraft, setNoteDraft] = useState({}) // { [id]: 'new internal note being typed' }
   const [packAdditionDraft, setPackAdditionDraft] = useState({}) // { [id]: 'extra pack items to consider' }
   const [codePerformanceByCode, setCodePerformanceByCode] = useState({})
@@ -6051,11 +6081,19 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     setReviewModal({ row, picked: [], query: '', sending: false, preview: false, loading: true, lang: reviewEmailLang(row.language) })
     const products = await loadShopProducts()
     const asked = row.review_requests || {}
+    // Products she has already reviewed on the shop are left out.
+    let reviewed = new Set()
+    try {
+      const { data: sess } = await supabase.auth.getSession()
+      const res = await fetch(`/.netlify/functions/giveaway-request?view=reviews&applicationId=${encodeURIComponent(row.id)}`, { headers: { Authorization: `Bearer ${sess?.session?.access_token || ''}` } })
+      const json = await res.json().catch(() => null)
+      if (res.ok && Array.isArray(json?.reviewed)) reviewed = new Set(json.reviewed.map((p) => p.handle))
+    } catch (_) { /* Judge.me unavailable: fall back to "not asked before" */ }
     const picked = []
     for (const it of receivedItems(row._shipments, products)) {
-      for (const p of it.matches) if (!asked[p.handle] && !picked.some((x) => x.handle === p.handle)) picked.push(p)
+      for (const p of it.matches) if (!asked[p.handle] && !reviewed.has(p.handle) && !picked.some((x) => x.handle === p.handle)) picked.push(p)
     }
-    setReviewModal((m) => (m && m.row.id === row.id ? { ...m, picked, loading: false } : m))
+    setReviewModal((m) => (m && m.row.id === row.id ? { ...m, picked, loading: false, alreadyReviewed: reviewed.size } : m))
   }
   const sendReviewRequest = async () => {
     const m = reviewModal
@@ -6265,6 +6303,12 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
       const selectedPack = AMBASSADOR_PACKS_BY_TYPE[ambassadorType] || null
       const currentDraft = getShipmentDraft(row)
       const isFollowUp = getAmbassadorDashboardMeta(row).shipmentPreviouslySent
+      // An empty sheet can't be packed: warn before printing it.
+      if (isFollowUp && !packNoteEntries(row).length && !currentDraft.shipment_details
+        && !window.confirm(`Nothing is listed for ${row.full_name || 'this ambassador'}'s package yet, so the packing sheet will be empty.\n\nAdd the items first (Shipments → "What goes in this package"). Print an empty sheet anyway?`)) {
+        setPackingListPdfBusy(false)
+        return
+      }
       const shipments = Array.isArray(row?._shipments) ? row._shipments : []
       const resendNotes = [...new Set(packNoteEntries(row)
         .map((entry) => String(entry.author || ''))
@@ -7013,8 +7057,8 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
         row,
         lines: items.map((text) => {
           const hits = matchItem(text, products)
-          const n = suggestedCount(text)
-          return { text, picks: hits.length ? (hits.length === 1 && n > 1 ? Array(n).fill(hits[0]) : hits) : [], keep: false, query: '', auto: hits.length > 0 }
+          const n = packingLineCount(text, products)
+          return { text, want: n, picks: hits.length ? (hits.length === 1 && n > 1 ? Array(n).fill(hits[0]) : hits) : [], keep: false, query: '', auto: hits.length > 0 }
         }),
       })
     })
@@ -7066,9 +7110,15 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
     ...(currentDraft.shipment_details ? [currentDraft.shipment_details] : []),
   ]
   // Every package must say what was in it, otherwise the history is useless.
+  // Nothing planned yet: ask what's in it here (the packing list then names the
+  // exact products), instead of stopping with nowhere to go.
   if (isFollowUpPackage && completedItems.length === 0) {
-    alert('Add what is in this package first (under "Items for this package", or in the Shipments view), then save it.')
-    return
+    const entered = window.prompt(`Nothing is listed for this package yet.\n\nWhat is in ${row.full_name || 'her'}'s package? Separate items with commas — e.g. 2447, 17 Bruised Ego, Blossom Flower Power 15ml.\nYou'll pick the exact shop products on the next screen.`, '')
+    completedItems = String(entered || '').split(/[,\n]/).map((t) => t.trim()).filter(Boolean)
+    if (!completedItems.length) {
+      setEmail(row.id, 'error', 'Not saved: no items entered for this package. Your tracking details are kept.')
+      return
+    }
   }
   const completedShippingMethod = getShippingMethod(row)
   const buildArchiveLine = (whenIso) => `[${fmtDate(whenIso || new Date().toISOString())}] [${getAdminDisplayLabel()}] 📦 Shipped${recordOnly ? ' (recorded, no email)' : ''} — ${[
@@ -7288,8 +7338,17 @@ return (<>{before} by <span className="rounded border px-1 py-0.5 text-[10px] fo
   }
 } 
 const resendShipmentEmail = async (row, nextReminderAt, trackingOverride) => {
-  const trackingNumber = String(trackingOverride?.trackingNumber || row?.tracking_number || '').trim()
-  const trackingUrl = String(trackingOverride?.trackingUrl || row?.tracking_url || '').trim()
+  const lastNumber = String(trackingOverride?.trackingNumber || row?.tracking_number || '').trim()
+  const lastUrl = String(trackingOverride?.trackingUrl || row?.tracking_url || '').trim()
+  let trackingNumber = lastNumber
+  let trackingUrl = lastUrl
+  // Corrected tracking typed in the boxes: resend with that, not the old one.
+  const typed = getShipmentDraft(row)
+  let correcting = false
+  if (typed.tracking_number && typed.tracking_url && (typed.tracking_number !== lastNumber || typed.tracking_url !== lastUrl)) {
+    correcting = window.confirm(`Use the tracking typed in the boxes for this resend?\n\nNew: ${typed.tracking_number}\nOld: ${lastNumber || '(none)'}\n\nOK = send the new tracking and correct her last package. Cancel = resend the old tracking.`)
+    if (correcting) { trackingNumber = typed.tracking_number; trackingUrl = typed.tracking_url }
+  }
   if (!trackingNumber || !trackingUrl) {
     alert('No tracking number/URL found for the last shipped package — nothing to resend.')
     return
@@ -7315,7 +7374,7 @@ const resendShipmentEmail = async (row, nextReminderAt, trackingOverride) => {
   try { setPasswordLink = await getAmbassadorSetupLink(row) } catch (_) { /* keep the plain link */ }
   const reminderIso = nextReminderAt ? new Date(`${String(nextReminderAt).slice(0, 10)}T10:00:00Z`).toISOString() : null
   const draft = { tracking_number: trackingNumber, tracking_url: trackingUrl }
-  const resentShipment = (row?._shipments || []).find((s) => String(s.tracking_number || '').trim() === String(trackingNumber || '').trim())
+  const resentShipment = (row?._shipments || []).find((s) => String(s.tracking_number || '').trim() === String(lastNumber || '').trim())
     || (row?._shipments || [])[0]
   const { subject, html } = buildAmbassadorShipmentEmail(row, { ...draft, items: resentShipment?.items || [] }, setPasswordLink, reminderIso, resentShipment?.receipt_token || null)
   let attachments = []
@@ -7329,7 +7388,16 @@ const resendShipmentEmail = async (row, nextReminderAt, trackingOverride) => {
     const updatedComment = row.admin_comment ? `${row.admin_comment}\n${resendStamp}` : resendStamp
     await supabase.from(AMBASSADOR_TABLE).update({ admin_comment: updatedComment }).eq('id', row.id)
     patchRow(row.id, { admin_comment: updatedComment })
-    setEmail(row.id, 'sent', `Tracking email + welcome letter resent to ${normalizedEmail}`)
+    if (correcting && resentShipment?.id) {
+      const { error: fixErr } = await supabase.from('ambassador_shipments').update({ tracking_number: trackingNumber, tracking_url: trackingUrl }).eq('id', resentShipment.id)
+      if (!fixErr) {
+        patchRow(row.id, { _shipments: (row._shipments || []).map((s) => (s.id === resentShipment.id ? { ...s, tracking_number: trackingNumber, tracking_url: trackingUrl } : s)) })
+        setShip((prev) => ({ ...prev, [row.id]: { shipment_details: '', tracking_number: '', tracking_url: '' } }))
+      }
+      setEmail(row.id, fixErr ? 'error' : 'sent', fixErr ? `New tracking emailed to ${normalizedEmail}, but her package history could not be corrected: ${fixErr.message}` : `New tracking emailed to ${normalizedEmail} and saved on her last package`)
+    } else {
+      setEmail(row.id, 'sent', `Tracking email + welcome letter resent to ${normalizedEmail}`)
+    }
   } else {
     setEmail(row.id, 'error', res.error || 'Failed to resend tracking email.')
   }
@@ -8705,6 +8773,7 @@ const deleteApplication = async (row) => {
                             Save date
                           </button>
                         </div>
+                        {reminderDateVal(row, nextReminderAt) && <p className="mt-1 text-[11px] font-semibold text-slate-700">= {longDateLabel(reminderDateVal(row, nextReminderAt))}</p>}
                       </div>
                     )}
                     <div className="rounded-lg border border-slate-200 bg-white p-2.5">
@@ -8879,8 +8948,8 @@ const deleteApplication = async (row) => {
         </button>
       )}
 
-      {shipDatePrompt?.recordOnly && (<div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"><h3 className="text-base font-bold text-slate-900">When was this package sent?</h3><p className="mt-1 text-xs text-slate-500">It is saved in her package history with this date. No email goes to the ambassador. Her next package date will be 4 weeks after it.</p><input type="date" max={new Date().toISOString().slice(0, 10)} value={shipDatePrompt.sentDate || ''} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, sentDate: e.target.value }))} className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /><label className="mt-3 flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={Boolean(shipDatePrompt.received)} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, received: e.target.checked }))} />She has already received it</label><div className="mt-4 flex justify-end gap-2"><button onClick={() => setShipDatePrompt(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button><button onClick={() => { const row = rows.find((r) => r.id === shipDatePrompt.rowId); if (!row || !shipDatePrompt.sentDate) return; const opts = { recordOnly: true, sentDate: shipDatePrompt.sentDate, received: Boolean(shipDatePrompt.received) }; setShipDatePrompt(null); saveShipment(row, false, null, opts) }} disabled={!shipDatePrompt.sentDate} className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save package (no email)</button></div></div></div>)}
-      {shipDatePrompt && !shipDatePrompt.recordOnly && (<div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"><h3 className="text-base font-bold text-slate-900">When should the next package go out?</h3><p className="mt-1 text-xs text-slate-500">Pick the next ship date before saving these tracking details — this keeps follow-ups from being missed.</p><input type="date" value={shipDatePrompt.date || ''} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, date: e.target.value }))} className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" /><div className="mt-4 flex justify-end gap-2"><button onClick={() => setShipDatePrompt(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button><button onClick={() => { const row = rows.find((r) => r.id === shipDatePrompt.rowId); if (!row || !shipDatePrompt.date) return; setReminderDateDraft((prev) => ({ ...prev, [row.id]: shipDatePrompt.date })); const alsoEmail = shipDatePrompt.alsoEmail; const chosenDate = shipDatePrompt.date; setShipDatePrompt(null); saveShipment(row, alsoEmail, chosenDate) }} disabled={!shipDatePrompt.date} className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Confirm date &amp; save</button></div></div></div>)}
+      {shipDatePrompt?.recordOnly && (<div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"><h3 className="text-base font-bold text-slate-900">When was this package sent?</h3><p className="mt-1 text-xs text-slate-500">It is saved in her package history with this date. No email goes to the ambassador. Her next package date will be 4 weeks after it.</p><input type="date" max={new Date().toISOString().slice(0, 10)} value={shipDatePrompt.sentDate || ''} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, sentDate: e.target.value }))} className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />{shipDatePrompt.sentDate && <p className="mt-1 text-xs font-semibold text-slate-700">= {longDateLabel(shipDatePrompt.sentDate)}</p>}<label className="mt-3 flex items-center gap-2 text-sm text-slate-700"><input type="checkbox" checked={Boolean(shipDatePrompt.received)} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, received: e.target.checked }))} />She has already received it</label><div className="mt-4 flex justify-end gap-2"><button onClick={() => setShipDatePrompt(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button><button onClick={() => { const row = rows.find((r) => r.id === shipDatePrompt.rowId); if (!row || !shipDatePrompt.sentDate) return; const opts = { recordOnly: true, sentDate: shipDatePrompt.sentDate, received: Boolean(shipDatePrompt.received) }; setShipDatePrompt(null); saveShipment(row, false, null, opts) }} disabled={!shipDatePrompt.sentDate} className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Save package (no email)</button></div></div></div>)}
+      {shipDatePrompt && !shipDatePrompt.recordOnly && (<div className="fixed inset-0 z-[130] flex items-center justify-center bg-black/50 p-4"><div className="w-full max-w-sm rounded-2xl bg-white p-5 shadow-xl"><h3 className="text-base font-bold text-slate-900">When should the next package go out?</h3><p className="mt-1 text-xs text-slate-500">Pick the next ship date before saving these tracking details — this keeps follow-ups from being missed.</p><input type="date" value={shipDatePrompt.date || ''} onChange={(e) => setShipDatePrompt((prev) => ({ ...prev, date: e.target.value }))} className="mt-3 w-full rounded-lg border border-slate-300 px-3 py-2 text-sm" />{shipDatePrompt.date && <p className="mt-1 text-xs font-semibold text-slate-700">= {longDateLabel(shipDatePrompt.date)}</p>}<div className="mt-4 flex justify-end gap-2"><button onClick={() => setShipDatePrompt(null)} className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-600 hover:bg-slate-50">Cancel</button><button onClick={() => { const row = rows.find((r) => r.id === shipDatePrompt.rowId); if (!row || !shipDatePrompt.date) return; setReminderDateDraft((prev) => ({ ...prev, [row.id]: shipDatePrompt.date })); const alsoEmail = shipDatePrompt.alsoEmail; const chosenDate = shipDatePrompt.date; setShipDatePrompt(null); saveShipment(row, alsoEmail, chosenDate) }} disabled={!shipDatePrompt.date} className="rounded-lg bg-[#D43790] px-3 py-2 text-sm font-semibold text-white hover:bg-[#BF3182] disabled:opacity-60">Confirm date &amp; save</button></div></div></div>)}
 {msgRow && (
         <div className="fixed inset-0 z-[120] flex items-center justify-center bg-black/50 p-4" onClick={() => setMsgRow(null)}>
           <div className="w-full max-w-md rounded-2xl bg-white p-5 shadow-xl" onClick={(e) => e.stopPropagation()}>
@@ -9052,7 +9121,7 @@ const deleteApplication = async (row) => {
               {shopProductsError && <p className="mt-2 text-xs text-rose-600">{shopProductsError}</p>}
               <ul className="mt-3 flex-1 space-y-2 overflow-y-auto pr-1">
                 {pl.lines.map((l, i) => {
-                  const want = suggestedCount(l.text)
+                  const want = l.want || suggestedCount(l.text)
                   const exact = packingLineNeedsExactProducts(l.text)
                   const done = packingLineDone(l)
                   const keeping = l.keep && !exact
@@ -9074,6 +9143,9 @@ const deleteApplication = async (row) => {
                             </li>
                           ))}
                         </ul>
+                      )}
+                      {l.picks.some((p) => !String(p.handle || '').startsWith('typed:') && pickLooksWrong(l.text, p.title)) && (
+                        <p className="mt-1 rounded bg-rose-50 px-2 py-1 text-[11px] font-semibold text-rose-700">⚠ This doesn't look like "{l.text}". Check it — click ✕ and search the right product if it's wrong.</p>
                       )}
                       {!keeping && (
                         <>

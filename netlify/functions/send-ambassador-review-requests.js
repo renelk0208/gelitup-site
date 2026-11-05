@@ -1,6 +1,7 @@
 import { createClient } from '@supabase/supabase-js'
 import { receivedItems } from '../../src/lib/reviewProducts.js'
 import { buildAmbassadorReviewRequestEmail } from '../../src/lib/reviewEmail.js'
+import { buildStatus, loadShopProducts as loadShopProductsWithIds } from './giveaway-request.js'
 
 // Daily: asks ambassadors to review the products they received, one week after
 // the package arrived. One email per ambassador, listing every product that is
@@ -11,7 +12,9 @@ import { buildAmbassadorReviewRequestEmail } from '../../src/lib/reviewEmail.js'
 // Only products that match a shop product are included; generic lines such as
 // "3 different Cat Eye shades" are left for the admin to pick by hand
 // ("★ Ask for reviews" in Shipments). Products already asked about are never
-// asked again (ambassador_applications.review_requests).
+// asked again (ambassador_applications.review_requests), and products she has
+// already reviewed on the shop (checked live in Judge.me) are left out. If
+// Judge.me can't be checked, nobody is emailed that day.
 
 export const config = {
   schedule: '0 7 * * *', // every day 07:00 UTC (10:00 in Greece)
@@ -23,24 +26,9 @@ const SUPABASE_SERVICE_ROLE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || proce
 const WEBHOOK_KEY = process.env.SUPABASE_ANON_KEY || process.env.VITE_SUPABASE_ANON_KEY || SUPABASE_SERVICE_ROLE_KEY
 const AMBASSADOR_TABLE = process.env.VITE_AMBASSADOR_TABLE || 'ambassador_applications'
 const MAIN_SITE = 'https://gelitup.com'
-const SHOP = 'https://shop.gelitup.com'
 const DAY = 24 * 60 * 60 * 1000
 const AFTER_RECEIVED_DAYS = 7
 const AFTER_SENT_IF_UNCONFIRMED_DAYS = 21
-
-async function loadShopProducts() {
-  const out = []
-  for (let page = 1; page <= 20; page += 1) {
-    const res = await fetch(`${SHOP}/products.json?limit=250&page=${page}`, { headers: { Accept: 'application/json' } })
-    if (!res.ok) throw new Error(`shop feed ${res.status}`)
-    const list = (await res.json())?.products || []
-    for (const p of list) {
-      out.push({ handle: p.handle, title: String(p.title || '').replace(/\s*-\s*HTF\s*$/i, '').trim(), image: p.images?.[0]?.src || '' })
-    }
-    if (list.length < 250) break
-  }
-  return out
-}
 
 function readyForReview(shipment, now) {
   if (!shipment?.sent_at || shipment.lost_at || String(shipment.status || 'sent').toLowerCase() !== 'sent') return false
@@ -100,7 +88,7 @@ export async function handler(event) {
 
   let products
   try {
-    products = await loadShopProducts()
+    products = await loadShopProductsWithIds()
   } catch (err) {
     console.error('send-ambassador-review-requests: shop products failed', err.message)
     return { statusCode: 502, body: JSON.stringify({ error: 'shop products unavailable' }) }
@@ -119,6 +107,19 @@ export async function handler(event) {
       for (const p of it.matches) if (!asked[p.handle] && !picked.some((x) => x.handle === p.handle)) picked.push(p)
     }
     if (!picked.length) continue
+    // Leave out what she has already reviewed.
+    let reviewed
+    try {
+      const st = await buildStatus(supabase, row, { shopProducts: products })
+      reviewed = new Set((st.reviewed || []).map((p) => p.handle))
+    } catch (err) {
+      failed.push(`${row.full_name}: reviews not checked (${err.message}) — not emailed`)
+      continue
+    }
+    const toAsk = picked.filter((p) => !reviewed.has(p.handle))
+    if (!toAsk.length) continue
+    picked.length = 0
+    picked.push(...toAsk)
     try {
       const { subject, html } = buildAmbassadorReviewRequestEmail(row, picked)
       await sendEmail(email, subject, html)
